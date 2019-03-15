@@ -9,6 +9,10 @@
 #include <edge_call.h>
 #include "uaccess.h"
 
+#ifdef IO_SYSCALL_WRAPPING
+#include "io_wrap.h"
+#endif /* IO_SYSCALL_WRAPPING */
+
 extern void exit_enclave(uintptr_t arg0);
 
 /* These are set by entry.S during init */
@@ -18,7 +22,7 @@ uintptr_t shared_buffer_size;
 uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 				   void* data, size_t data_len,
 				   void* return_buffer, size_t return_len){
-  
+
   uintptr_t ret;
   /* For now we assume by convention that the start of the buffer is
    * the right place to put calls */
@@ -27,7 +31,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
   /* We encode the call id, copy the argument data into the shared
    * region, calculate the offsets to the argument data, and then
    * dispatch the ocall to host */
-  
+
   edge_call->call_id = call_id;
   uintptr_t buffer_data_start = edge_call_data_ptr();
 
@@ -67,7 +71,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
      validate these. The size in the edge_call return data is larger
      almost certainly.*/
   copy_to_user(return_buffer, (void*)return_ptr, return_len);
-  
+
   return 0;
 
  ocall_error:
@@ -76,7 +80,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 }
 
 uintptr_t handle_copy_from_shared(void* dst, uintptr_t offset, size_t size){
-  
+
   /* This is where we would handle cache side channels for a given
      platform */
 
@@ -107,26 +111,39 @@ void handle_syscall(struct encl_ctx_t* ctx)
   uintptr_t ret = 0;
 
   ctx->regs.sepc += 4;
-  
+
   //printf("[runtime] syscall: %ld\n", n);
   switch (n) {
-    case(RUNTIME_SYSCALL_EXIT):
-      SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
-      break;
-    case(RUNTIME_SYSCALL_OCALL):
-      ret = dispatch_edgecall_ocall(arg0, (void*)arg1, arg2, (void*)arg3, arg4);
-      break;
-    case(RUNTIME_SYSCALL_SHAREDCOPY):
-      ret = handle_copy_from_shared((void*)arg0, arg1, arg2);
-      break;
-    case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):
-      ret = SBI_CALL_3(SBI_SM_ATTEST_ENCLAVE, arg0, arg1, arg2);
-      break;
-    case(RUNTIME_SYSCALL_UNKNOWN):
-    default:
-      printf("[runtime] syscall %ld not implemented\n", (unsigned long) n);
-      ret = -1;
-      break;
+  case(RUNTIME_SYSCALL_EXIT):
+    SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
+    break;
+  case(RUNTIME_SYSCALL_OCALL):
+    ret = dispatch_edgecall_ocall(arg0, (void*)arg1, arg2, (void*)arg3, arg4);
+    break;
+  case(RUNTIME_SYSCALL_SHAREDCOPY):
+    ret = handle_copy_from_shared((void*)arg0, arg1, arg2);
+    break;
+  case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):
+    ret = SBI_CALL_3(SBI_SM_ATTEST_ENCLAVE, arg0, arg1, arg2);
+    break;
+
+#ifdef IO_SYSCALL_WRAPPING
+  case(SYS_read):
+    ret = io_syscall_read(arg0, arg1, arg2);
+    break;
+  case(SYS_write):
+    ret = io_syscall_write(arg0, arg1, arg2);
+    break;
+  case(SYS_openat):
+    ret = io_syscall_openat(arg0, arg1, arg2);
+    break;
+#endif /* IO_SYSCALL_WRAPPING */
+
+  case(RUNTIME_SYSCALL_UNKNOWN):
+  default:
+    printf("[runtime] syscall %ld not implemented\n", (unsigned long) n);
+    ret = -1;
+    break;
   }
 
   /* store the result in the stack */
