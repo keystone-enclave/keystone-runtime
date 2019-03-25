@@ -9,9 +9,17 @@
 #include <edge_call.h>
 #include "uaccess.h"
 
+#define LINUX_SYSCALL_WRAPPING
+
+#include "syscall_nums.h"
+
 #ifdef IO_SYSCALL_WRAPPING
 #include "io_wrap.h"
 #endif /* IO_SYSCALL_WRAPPING */
+
+#ifdef LINUX_SYSCALL_WRAPPING
+#include "linux_wrap.h"
+#endif /* LINUX_SYSCALL_WRAPPING */
 
 extern void exit_enclave(uintptr_t arg0);
 
@@ -127,6 +135,21 @@ void handle_syscall(struct encl_ctx_t* ctx)
     ret = SBI_CALL_3(SBI_SM_ATTEST_ENCLAVE, arg0, arg1, arg2);
     break;
 
+
+#ifdef LINUX_SYSCALL_WRAPPING
+  case(SYS_clock_gettime):
+    ret = linux_clock_gettime((__clockid_t)arg0, (struct timespec*)arg1);
+    break;
+
+  case(SYS_getrandom):
+    ret = linux_getrandom((void*)arg0, (size_t)arg1, (unsigned int)arg2);
+    break;
+
+  case(SYS_rt_sigprocmask):
+    ret = linux_rt_sigprocmask((int)arg0, (const sigset_t*)arg1, (sigset_t*)arg2);
+    break;
+#endif /* LINUX_SYSCALL_WRAPPING */
+
 #ifdef IO_SYSCALL_WRAPPING
   case(SYS_read):
     ret = io_syscall_read(arg0, arg1, arg2);
@@ -138,6 +161,7 @@ void handle_syscall(struct encl_ctx_t* ctx)
     ret = io_syscall_openat(arg0, arg1, arg2);
     break;
 #endif /* IO_SYSCALL_WRAPPING */
+
 
   case(RUNTIME_SYSCALL_UNKNOWN):
   default:
