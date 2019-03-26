@@ -10,6 +10,7 @@
 #include "uaccess.h"
 
 #define LINUX_SYSCALL_WRAPPING
+#define IO_SYSCALL_WRAPPING
 
 #include "syscall_nums.h"
 
@@ -120,7 +121,6 @@ void handle_syscall(struct encl_ctx_t* ctx)
 
   ctx->regs.sepc += 4;
 
-  //printf("[runtime] syscall: %ld\n", n);
   switch (n) {
   case(RUNTIME_SYSCALL_EXIT):
     SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
@@ -158,7 +158,7 @@ void handle_syscall(struct encl_ctx_t* ctx)
     ret = io_syscall_write(arg0, arg1, arg2);
     break;
   case(SYS_openat):
-    ret = io_syscall_openat(arg0, arg1, arg2);
+    ret = io_syscall_openat(arg0, arg1, arg2, arg3);
     break;
 #endif /* IO_SYSCALL_WRAPPING */
 
