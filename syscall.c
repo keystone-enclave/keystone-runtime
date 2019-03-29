@@ -8,6 +8,7 @@
 #include "string.h"
 #include <edge_call.h>
 #include "uaccess.h"
+#include "mm.h"
 
 #define LINUX_SYSCALL_WRAPPING
 #define IO_SYSCALL_WRAPPING
@@ -116,6 +117,7 @@ void handle_syscall(struct encl_ctx_t* ctx)
   uintptr_t arg2 = ctx->regs.a2;
   uintptr_t arg3 = ctx->regs.a3;
   uintptr_t arg4 = ctx->regs.a4;
+  uintptr_t arg5 = ctx->regs.a5;
 
   uintptr_t ret = 0;
 
@@ -148,6 +150,28 @@ void handle_syscall(struct encl_ctx_t* ctx)
   case(SYS_rt_sigprocmask):
     ret = linux_rt_sigprocmask((int)arg0, (const sigset_t*)arg1, (sigset_t*)arg2);
     break;
+
+  case(SYS_getpid):
+    ret = linux_getpid();
+    break;
+
+  case(SYS_uname):
+    ret = linux_RET_ZERO_wrap(n);
+    break;
+
+  case(SYS_rt_sigaction):
+    ret = linux_RET_ZERO_wrap(n);
+    break;
+
+  case(SYS_set_tid_address):
+    ret = linux_set_tid_address((int*) arg0);
+    break;
+
+  case(SYS_mmap):
+    ret = syscall_mmap((void*) arg0, (size_t)arg1, (int)arg2,
+                       (int)arg3, (int)arg4, (__off_t)arg5);
+    break;
+
 #endif /* LINUX_SYSCALL_WRAPPING */
 
 #ifdef IO_SYSCALL_WRAPPING
