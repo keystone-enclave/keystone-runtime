@@ -13,6 +13,7 @@
 #define LINUX_SYSCALL_WRAPPING
 #define IO_SYSCALL_WRAPPING
 
+
 #include "syscall_nums.h"
 
 #ifdef IO_SYSCALL_WRAPPING
@@ -28,6 +29,39 @@ extern void exit_enclave(uintptr_t arg0);
 /* These are set by entry.S during init */
 uintptr_t shared_buffer;
 uintptr_t shared_buffer_size;
+
+uintptr_t dispatch_edgecall_syscall(edge_syscall_t* syscall_data_ptr, size_t data_len){
+  int ret;
+
+  // Syscall data should already be at the edge_call_data section
+  /* For now we assume by convention that the start of the buffer is
+   * the right place to put calls */
+  struct edge_call_t* edge_call = (struct edge_call_t*)shared_buffer;
+
+  edge_call->call_id = EDGECALL_SYSCALL;
+
+
+  if(edge_call_setup_call(edge_call, (void*)syscall_data_ptr, data_len) != 0){
+    return -1;
+  }
+
+  ret = SBI_CALL_1(SBI_SM_STOP_ENCLAVE, 1);
+
+  if (ret != 0) {
+    return -1;
+  }
+
+  if(edge_call->return_data.call_status != CALL_STATUS_OK){
+    return -1;
+  }
+
+  uintptr_t return_ptr;
+  if(edge_call_ret_ptr(edge_call, &return_ptr) != 0){
+    return -1;
+  }
+
+  return *(uintptr_t*)return_ptr;
+}
 
 uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 				   void* data, size_t data_len,
@@ -172,24 +206,32 @@ void handle_syscall(struct encl_ctx_t* ctx)
                        (int)arg3, (int)arg4, (__off_t)arg5);
     break;
 
+  case(SYS_exit):
+  case(SYS_exit_group):
+    print_strace("[runtime] exit or exit_group (%lu)\r\n",n);
+    SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
+    break;
 #endif /* LINUX_SYSCALL_WRAPPING */
 
 #ifdef IO_SYSCALL_WRAPPING
   case(SYS_read):
-    ret = io_syscall_read(arg0, arg1, arg2);
+    ret = io_syscall_read((int)arg0, (void*)arg1, (size_t)arg2);
     break;
   case(SYS_write):
-    ret = io_syscall_write(arg0, arg1, arg2);
+    ret = io_syscall_write((int)arg0, (void*)arg1, (size_t)arg2);
+    break;
+  case(SYS_writev):
+    ret = io_syscall_writev((int)arg0, (const struct iovec*)arg1, (int)arg2);
     break;
   case(SYS_openat):
-    ret = io_syscall_openat(arg0, arg1, arg2, arg3);
+    ret = io_syscall_openat((int)arg0, (char*)arg1, (int)arg2, (mode_t)arg3);
     break;
 #endif /* IO_SYSCALL_WRAPPING */
 
 
   case(RUNTIME_SYSCALL_UNKNOWN):
   default:
-    printf("[runtime] syscall %ld not implemented\n", (unsigned long) n);
+    print_strace("[runtime] syscall %ld not implemented\n", (unsigned long) n);
     ret = -1;
     break;
   }

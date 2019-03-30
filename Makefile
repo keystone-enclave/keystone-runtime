@@ -11,7 +11,7 @@ SDK_INCLUDE_EDGE_DIR = $(SDK_LIB_DIR)/edge/include
 SDK_EDGE_LIB = $(SDK_LIB_DIR)/libkeystone-edge.a
 
 LDFLAGS += -L$(SDK_LIB_DIR)
-CFLAGS += -I$(SDK_INCLUDE_EDGE_DIR)
+CFLAGS += -I$(SDK_INCLUDE_EDGE_DIR) -I ./tmplib
 
 DISK_IMAGE = ../busybear-linux/busybear.bin
 MOUNT_DIR = ./tmp_busybear

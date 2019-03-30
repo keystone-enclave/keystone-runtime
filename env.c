@@ -1,5 +1,5 @@
 #include "elf.h"
-#include "uaccess.h"
+#include "tmplib/uaccess.h"
 
 /******
  *
