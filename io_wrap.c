@@ -31,7 +31,64 @@
     mmap
 */
 
+uintptr_t io_syscall_sync(){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
 
+  edge_syscall->syscall_num = SYS_sync;
+
+  size_t totalsize = (sizeof(edge_syscall_t));
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied sync (void)\r\n");
+  return ret;
+}
+
+uintptr_t io_syscall_fsync(int fd){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_fsync* args = (sargs_SYS_fsync*)edge_syscall->data;
+  edge_syscall->syscall_num = SYS_fsync;
+
+  args->fd = fd;
+
+  size_t totalsize = (sizeof(edge_syscall_t)+
+                      sizeof(sargs_SYS_fsync));
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied fsync (%li) = %li\r\n", fd, ret);
+  return ret;
+}
+
+uintptr_t io_syscall_lseek(int fd, off_t offset, int whence){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_lseek* args = (sargs_SYS_lseek*)edge_syscall->data;
+  edge_syscall->syscall_num = SYS_lseek;
+
+  args->fd = fd;
+  args->offset = offset;
+  args->whence = whence;
+
+  size_t totalsize = (sizeof(edge_syscall_t)+
+                      sizeof(sargs_SYS_lseek));
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied lseek (on fd:%li to %ul from %li) = %li\r\n", fd, offset, whence, ret);
+  return ret;
+}
+
+uintptr_t io_syscall_close(int fd){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_close* args = (sargs_SYS_close*)edge_syscall->data;
+  edge_syscall->syscall_num = SYS_close;
+
+  args->fd = fd;
+
+  size_t totalsize = (sizeof(edge_syscall_t)+
+                      sizeof(sargs_SYS_close));
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied close (%li) = %li\r\n", fd, ret);
+  return ret;
+}
 
 uintptr_t io_syscall_read(int fd, void* buf, size_t len){
   edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();

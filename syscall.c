@@ -230,6 +230,18 @@ void handle_syscall(struct encl_ctx_t* ctx)
   case(SYS_openat):
     ret = io_syscall_openat((int)arg0, (char*)arg1, (int)arg2, (mode_t)arg3);
     break;
+  case(SYS_lseek):
+    ret = io_syscall_lseek((int)arg0, (off_t)arg1, (int)arg2);
+    break;
+  case(SYS_sync):
+    ret = io_syscall_sync();
+    break;
+  case(SYS_fsync):
+    ret = io_syscall_fsync((int)arg0);
+    break;
+  case(SYS_close):
+    ret = io_syscall_close((int)arg0);
+    break;
 #endif /* IO_SYSCALL_WRAPPING */
 
 
