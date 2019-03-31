@@ -10,6 +10,7 @@
 #include "uaccess.h"
 #include "mm.h"
 
+
 #define LINUX_SYSCALL_WRAPPING
 #define IO_SYSCALL_WRAPPING
 
@@ -222,6 +223,9 @@ void handle_syscall(struct encl_ctx_t* ctx)
     break;
   case(SYS_writev):
     ret = io_syscall_writev((int)arg0, (const struct iovec*)arg1, (int)arg2);
+    break;
+  case(SYS_readv):
+    ret = io_syscall_readv((int)arg0, (const struct iovec*)arg1, (int)arg2);
     break;
   case(SYS_openat):
     ret = io_syscall_openat((int)arg0, (char*)arg1, (int)arg2, (mode_t)arg3);
