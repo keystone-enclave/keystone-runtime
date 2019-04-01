@@ -1,5 +1,6 @@
 CC = riscv64-unknown-linux-gnu-gcc
-CFLAGS = -Wall -Werror -fPIC
+OPTIONS_FLAGS ?=
+CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)
 SRCS = page_fault.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c fatal.c mm.c env.c
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt

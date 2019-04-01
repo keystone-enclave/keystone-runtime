@@ -6,13 +6,9 @@
 #include <stddef.h>
 #include "syscall.h"
 #include "string.h"
-#include <edge_call.h>
+#include "edge_call.h"
 #include "uaccess.h"
 #include "mm.h"
-
-
-#define LINUX_SYSCALL_WRAPPING
-#define IO_SYSCALL_WRAPPING
 
 
 #include "syscall_nums.h"
@@ -152,8 +148,11 @@ void handle_syscall(struct encl_ctx_t* ctx)
   uintptr_t arg2 = ctx->regs.a2;
   uintptr_t arg3 = ctx->regs.a3;
   uintptr_t arg4 = ctx->regs.a4;
-  uintptr_t arg5 = ctx->regs.a5;
 
+  // We only use arg5 in these for now, keep warnings happy.
+#ifdef IO_SYSCALL_WRAPPING
+  uintptr_t arg5 = ctx->regs.a5;
+#endif /* IO_SYSCALL_WRAPPING */
   uintptr_t ret = 0;
 
   ctx->regs.sepc += 4;
