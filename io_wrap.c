@@ -247,7 +247,7 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
 
   if(ret == 0){
     //TODO safety check!
-    copy_to_user(statbuf, &args->stats, ret);
+    copy_to_user(statbuf, &args->stats, sizeof(struct stat));
   }
 
   return ret;
