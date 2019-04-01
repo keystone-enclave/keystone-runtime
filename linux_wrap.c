@@ -4,6 +4,7 @@
 
 #define CLOCK_FREQ 1000000000
 
+//TODO we should check which clock this is
 uintptr_t linux_clock_gettime(__clockid_t clock, struct timespec *tp){
   print_strace("[runtime] clock_gettime not supported (clock %x, FAKING)\r\n", clock);
   /* We will just return cycle count for now */

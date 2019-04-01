@@ -8,25 +8,11 @@
 
 /* Syscalls iozone uses in -i0 mode
 *** Fake these
- *  clock_gettime
- *  getpid
- *   set_tid_address
  *   uname
-*** Proxy these
-    openat
-    close
-    fsync
-    newfstatat
-    sync
-    write
-    unlinkat
-    ftruncate
-*** Unclear if we need
-    execve
-    exit_group
-*** Hard
+*** odd
     rt_sigaction
     rt_sigprocmask
+*** hard
     brk
     mmap
 */
@@ -43,6 +29,21 @@ uintptr_t io_syscall_sync(){
   return ret;
 }
 
+uintptr_t io_syscall_ftruncate(int fd, off_t offset){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_ftruncate* args = (sargs_SYS_ftruncate*)edge_syscall->data;
+  edge_syscall->syscall_num = SYS_ftruncate;
+
+  args->fd = fd;
+  args->offset = offset;
+
+  size_t totalsize = (sizeof(edge_syscall_t)+
+                      sizeof(sargs_SYS_ftruncate));
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied ftruncate (%li) = %li\r\n", fd, ret);
+  return ret;
+}
 uintptr_t io_syscall_fsync(int fd){
   edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
   sargs_SYS_fsync* args = (sargs_SYS_fsync*)edge_syscall->data;
@@ -166,6 +167,29 @@ uintptr_t io_syscall_openat(int dirfd, char* path,
   return ret;
 }
 
+uintptr_t io_syscall_unlinkat(int dirfd, char* path,
+                              int flags){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_unlinkat* args = (sargs_SYS_unlinkat*)edge_syscall->data;
+
+  edge_syscall->syscall_num = SYS_unlinkat;
+  args->dirfd = dirfd;
+  args->flags = flags;
+  //TODO safety check!
+  size_t pathlen;
+  ALLOW_USER_ACCESS(pathlen = _strlen(path)+1);
+  copy_from_user(args->path, path, pathlen);
+
+  size_t totalsize = (sizeof(edge_syscall_t) +
+                      sizeof(sargs_SYS_unlinkat) +
+                      pathlen);
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching unlinkat(path: %s) = %li\r\n",args->path, ret);
+
+  return ret;
+}
+
 uintptr_t io_syscall_writev(int fd, const struct iovec *iov, int iovcnt){
   int i=0;
   uintptr_t ret = 0;
@@ -198,4 +222,34 @@ uintptr_t io_syscall_readv(int fd, const struct iovec *iov, int iovcnt){
     ret = total;
 
   return ret;
+}
+
+uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
+                                int flags){
+  edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
+  sargs_SYS_fstatat* args = (sargs_SYS_fstatat*)edge_syscall->data;
+
+  edge_syscall->syscall_num = SYS_fstatat;
+  args->dirfd = dirfd;
+  args->flags = flags;
+
+  //TODO safety check
+  size_t pathlen;
+  ALLOW_USER_ACCESS(pathlen = _strlen(pathname)+1);
+  copy_from_user(args->pathname, pathname, pathlen);
+
+  size_t totalsize = (sizeof(edge_syscall_t) +
+                      sizeof(sargs_SYS_fstatat) +
+                      pathlen);
+
+  uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  print_strace("[runtime] dispatching proxied fstatat (path %s) = %li\r\n",pathname, ret);
+
+  if(ret == 0){
+    //TODO safety check!
+    copy_to_user(statbuf, &args->stats, ret);
+  }
+
+  return ret;
+
 }
