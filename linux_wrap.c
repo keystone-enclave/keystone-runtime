@@ -73,7 +73,7 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   if(flags != (MAP_ANONYMOUS | MAP_PRIVATE) || fd != -1){
     // we don't support mmaping any other way yet
-    return (uintptr_t)((void*)-1);
+    return ret;
   }
 
   // Set flags
@@ -88,22 +88,31 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   // Find a continuous VA space that will fit the req. size
   int req_pages = vpn(PAGE_UP(length));
-  uintptr_t starting_vpn = vpn(EYRIE_ANON_REGION_START);
-  uintptr_t vpn_error;
-  // Start looking at EYRIE_ANON_REGION_START
-  for(; (starting_vpn + req_pages) <= EYRIE_ANON_REGION_END; starting_vpn = vpn_error){
-    vpn_error = try_alloc_pages_unused_only(starting_vpn, req_pages, pte_flags);
-    // Region was clear, we got our pages allocated
-    if(vpn_error == 0){
-      ret = starting_vpn << RISCV_PAGE_BITS;
-      break;
-    }
-    // Region was NOT clear, start looking at the page after the one that was taken
-    else
-      starting_vpn = vpn_error+1;
+
+  // Do we have enough available phys pages?
+  if( req_pages > spa_available()){
+    return ret;
   }
 
-  print_strace("[runtime] [mmap]: addr: %p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%lx\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
+  // Start looking at EYRIE_ANON_REGION_START for VA space
+  uintptr_t starting_vpn = vpn(EYRIE_ANON_REGION_START);
+  uintptr_t valid_pages;
+  while((starting_vpn + req_pages) <= EYRIE_ANON_REGION_END){
+    valid_pages = test_va_range(starting_vpn, req_pages);
+
+    if(req_pages == valid_pages){
+      // Set a successful value if we allocate
+      // TODO free partial allocation on failure
+      if(alloc_pages(starting_vpn, req_pages, pte_flags) == req_pages){
+        ret = starting_vpn << RISCV_PAGE_BITS;
+      }
+      break;
+    }
+    else
+      starting_vpn += valid_pages + 1;
+  }
+
+  print_strace("[runtime] [mmap]: addr: 0x%p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%p\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
 
   // If we get here everything went wrong
   return ret;
@@ -118,32 +127,36 @@ uintptr_t syscall_brk(void* addr){
   uintptr_t req_break = (uintptr_t)addr;
 
   uintptr_t current_break = get_program_break();
+  uintptr_t ret = current_break;
+  int req_page_count = 0;
 
-  if( req_break == 0 ){
-    // Return current break
-    return current_break;
+  // Return current break if null or current break
+  if( req_break == 0  || req_break <= current_break){
+    goto done;
   }
 
   // Otherwise try to allocate pages
-  // Sanity check
-  if( req_break <= current_break ){
-    return current_break;
-  }
 
-  // Can we allocate?
-  int req_page_count = (PAGE_UP(req_break) - current_break) / RISCV_PAGE_SIZE;
-  if( spa_available() < req_page_count)
-    return current_break;
+  // Can we allocate enough phys pages?
+  req_page_count = (PAGE_UP(req_break) - current_break) / RISCV_PAGE_SIZE;
+  if( spa_available() < req_page_count){
+    goto done;
+  }
 
   // Allocate pages
   // TODO free pages on failure
   if( alloc_pages(vpn(current_break),
                   req_page_count,
-                  PTE_W | PTE_R | PTE_D)
+                  PTE_W | PTE_R | PTE_D | PTE_U | PTE_A)
       != req_page_count){
-    return current_break;
+    goto done;
   }
 
-  return req_break;
+  // Success
+  ret = req_break;
+
+ done:
+  print_strace("[runtime] brk (0x%p) (req pages %i) = 0x%p\r\n",req_break, req_page_count, ret);
+  return ret;
 
 }

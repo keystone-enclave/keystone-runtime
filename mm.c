@@ -143,30 +143,22 @@ alloc_pages(uintptr_t vpn, size_t count, int flags)
   return i;
 }
 
-/* Allocate n pages starting at a given vpn, don't reuse already
- * allocated pages. Returns 0 on success or the vpn it encountered an
- * error at.
+/*
+ * Check if a range of VAs contains any allocated pages, starting with
+ * the given VA. Returns the number of sequential pages that meet the
+ * conditions.
  */
 size_t
-try_alloc_pages_unused_only(uintptr_t vpn, size_t count, int flags){
+test_va_range(uintptr_t vpn, size_t count){
 
   unsigned int i;
   /* Validate the region */
   for (i = 0; i < count; i++) {
-    pte_t* pte = __walk_internal(root_page_table, vpn << RISCV_PAGE_BITS, 0);
-    if(!pte || (*pte & PTE_V)){
-      return i;
+    pte_t* pte = __walk_internal(root_page_table, (vpn+i) << RISCV_PAGE_BITS, 0);
+    // If the page exists and is valid then we cannot use it
+    if(pte && (*pte & PTE_V)){
+      break;
     }
   }
-
-  // TODO we maybe should've taken a lock there
-
-
-  if(alloc_pages(vpn, count, flags) != count){
-    return i;
-    // TODO on failure free pages?
-  }
-
-  // Success
-  return 0;
+  return i;
 }

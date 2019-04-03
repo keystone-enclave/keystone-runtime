@@ -17,6 +17,8 @@
     mmap
 */
 
+#define MAX_STRACE_PRINT 20
+
 uintptr_t io_syscall_sync(){
   edge_syscall_t* edge_syscall = (edge_syscall_t*)edge_call_data_ptr();
 
@@ -72,7 +74,8 @@ uintptr_t io_syscall_lseek(int fd, off_t offset, int whence){
                       sizeof(sargs_SYS_lseek));
 
   uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-  print_strace("[runtime] proxied lseek (on fd:%i to %lu from %i) = %li\r\n", fd, offset, whence, ret);
+  print_strace("[runtime] proxied lseek (on fd:%i to %li from %i) = %li\r\n",
+               fd, offset, whence, ret);
   return ret;
 }
 
@@ -118,7 +121,6 @@ uintptr_t io_syscall_read(int fd, void* buf, size_t len){
   return ret;
 }
 
-//#define MAX_STRACE_PRINT 20
 
 uintptr_t io_syscall_write(int fd, void* buf, size_t len){
   /* print_strace("[write] len :%lu\r\n", len); */
@@ -177,7 +179,9 @@ uintptr_t io_syscall_openat(int dirfd, char* path,
                       pathlen);
 
   uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-  print_strace("[runtime] proxied openat(path: %s) = %li\r\n",args->path, ret);
+  // TODO path print here isn't necessarily correct
+  print_strace("[runtime] proxied openat(path: %.*s) = %li\r\n",
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->path, ret);
 
   return ret;
 }
@@ -203,7 +207,8 @@ uintptr_t io_syscall_unlinkat(int dirfd, char* path,
                       pathlen);
 
   uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-  print_strace("[runtime] proxied unlinkat(path: %s) = %li\r\n",args->path, ret);
+  print_strace("[runtime] proxied unlinkat(path: %.*s) = %li\r\n",
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->path, ret);
 
   return ret;
 }
@@ -264,7 +269,8 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
                       pathlen);
 
   uintptr_t ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-  print_strace("[runtime] proxied fstatat (path %s) = %li\r\n",pathname, ret);
+  print_strace("[runtime] proxied fstatat (path %.*s) = %li\r\n",
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->pathname, ret);
 
   if(ret == 0){
     copy_to_user(statbuf, &args->stats, sizeof(struct stat));

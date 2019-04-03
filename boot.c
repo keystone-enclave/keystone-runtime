@@ -223,8 +223,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   //TODO: This should be set by walking the userspace vm and finding
   //highest used addr. Instead we start partway through the anon space
-  set_program_break(EYRIE_ANON_REGION_START +
-                    ((EYRIE_ANON_REGION_END - EYRIE_ANON_REGION_START) / 2));
+  set_program_break(EYRIE_ANON_REGION_START + (1024 * 1024 * 1024));
 
 #endif // USE_FREEMEM
 
