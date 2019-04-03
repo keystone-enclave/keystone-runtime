@@ -197,6 +197,10 @@ void handle_syscall(struct encl_ctx_t* ctx)
     ret = linux_set_tid_address((int*) arg0);
     break;
 
+  case(SYS_brk):
+    ret = syscall_brk((void*) arg0);
+    break;
+
   case(SYS_mmap):
     ret = syscall_mmap((void*) arg0, (size_t)arg1, (int)arg2,
                        (int)arg3, (int)arg4, (__off_t)arg5);

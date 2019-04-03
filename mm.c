@@ -8,6 +8,17 @@
 static pte_t*
 __walk_create(pte_t* root, uintptr_t addr);
 
+/* Hacky storage of current u-mode break */
+static uintptr_t current_program_break;
+
+uintptr_t get_program_break(){
+  return current_program_break;
+}
+
+void set_program_break(uintptr_t new_break){
+  current_program_break = new_break;
+}
+
 static pte_t*
 __continue_walk_create(pte_t* root, uintptr_t addr, pte_t* pte)
 {
@@ -132,9 +143,30 @@ alloc_pages(uintptr_t vpn, size_t count, int flags)
   return i;
 }
 
-uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
-                 int fd, __off_t offset){
+/* Allocate n pages starting at a given vpn, don't reuse already
+ * allocated pages. Returns 0 on success or the vpn it encountered an
+ * error at.
+ */
+size_t
+try_alloc_pages_unused_only(uintptr_t vpn, size_t count, int flags){
 
-  print_strace("[runtime] [mmap]: addr: %p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu\r\n", addr, length, prot, flags, fd, offset);
-  return (uintptr_t)((void*)-1);
+  unsigned int i;
+  /* Validate the region */
+  for (i = 0; i < count; i++) {
+    pte_t* pte = __walk_internal(root_page_table, vpn << RISCV_PAGE_BITS, 0);
+    if(!pte || (*pte & PTE_V)){
+      return i;
+    }
+  }
+
+  // TODO we maybe should've taken a lock there
+
+
+  if(alloc_pages(vpn, count, flags) != count){
+    return i;
+    // TODO on failure free pages?
+  }
+
+  // Success
+  return 0;
 }
