@@ -50,19 +50,30 @@ uintptr_t linux_getpid(){
 }
 
 uintptr_t linux_getrandom(void *buf, size_t buflen, unsigned int flags){
-  print_strace("[runtime] [UNSAFE] getrandom not supported (size %lx), returning non-random values\r\n", buflen);
+#pragma message("getrandom syscall emulation is NOT SAFE, use for testing only")
   unsigned char v;
   size_t remaining = buflen;
 
   unsigned char* next_buf = (unsigned char*)buf;
   while(remaining > 0){
-    v = remaining%255;
+    unsigned long cycles;
+    asm volatile ("rdcycle %0" : "=r" (cycles));
+    v = cycles % 255;
     copy_to_user(next_buf,&v,sizeof(unsigned char));
     remaining--;
     next_buf++;
   }
 
+  print_strace("[runtime] [UNSAFE] getrandom not supported (size %lx), returning non-random values\r\n", buflen);
   return buflen;
+}
+
+uintptr_t syscall_munmap(void *addr, size_t length){
+  uintptr_t ret = (uintptr_t)((void*)-1);
+
+  free_pages(vpn((uintptr_t)addr), length/RISCV_PAGE_SIZE);
+  ret = 0;
+  return ret;
 }
 
 uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
@@ -73,7 +84,7 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   if(flags != (MAP_ANONYMOUS | MAP_PRIVATE) || fd != -1){
     // we don't support mmaping any other way yet
-    return ret;
+    goto done;
   }
 
   // Set flags
@@ -91,7 +102,7 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   // Do we have enough available phys pages?
   if( req_pages > spa_available()){
-    return ret;
+    goto done;
   }
 
   // Start looking at EYRIE_ANON_REGION_START for VA space
@@ -112,6 +123,7 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
       starting_vpn += valid_pages + 1;
   }
 
+ done:
   print_strace("[runtime] [mmap]: addr: 0x%p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%p\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
 
   // If we get here everything went wrong

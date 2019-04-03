@@ -206,6 +206,10 @@ void handle_syscall(struct encl_ctx_t* ctx)
                        (int)arg3, (int)arg4, (__off_t)arg5);
     break;
 
+  case(SYS_munmap):
+    ret = syscall_munmap((void*) arg0, (size_t)arg1);
+    break;
+
   case(SYS_exit):
   case(SYS_exit_group):
     print_strace("[runtime] exit or exit_group (%lu)\r\n",n);

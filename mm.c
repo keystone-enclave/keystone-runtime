@@ -129,6 +129,27 @@ alloc_page(uintptr_t vpn, int flags)
   return page;
 }
 
+void
+free_page(uintptr_t vpn){
+
+  pte_t* pte = __walk(root_page_table, vpn << RISCV_PAGE_BITS);
+
+  // No such PTE, or invalid
+  if(!pte || !(*pte & PTE_V))
+    return;
+
+  uintptr_t ppn = pte_ppn(*pte);
+  // Mark invalid
+  // TODO maybe do more here
+  *pte = (*pte & (~PTE_V));
+
+  // Return phys page
+  spa_put(__va(ppn << RISCV_PAGE_BITS));
+
+  return;
+
+}
+
 /* allocate n new pages from a given vpn
  * returns the number of pages allocated */
 size_t
@@ -141,6 +162,15 @@ alloc_pages(uintptr_t vpn, size_t count, int flags)
   }
 
   return i;
+}
+
+void
+free_pages(uintptr_t vpn, size_t count){
+  unsigned int i;
+  for (i = 0; i < count; i++) {
+    free_page(vpn + i);
+  }
+
 }
 
 /*
