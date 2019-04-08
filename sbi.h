@@ -46,9 +46,20 @@ static inline void sbi_set_timer(uint64_t stime_value){
 #endif
 }
 
+/* Enclave stop reasons requested */
+#define STOP_TIMER_INTERRUPT  0
+#define STOP_EDGE_CALL_HOST   1
+#define STOP_EXIT_ENCLAVE     2
+#define STOP_INCREASE_FREEMEM 3
+
 static inline void sbi_stop_enclave(uint64_t request)
 {
   SBI_CALL_1(SBI_SM_STOP_ENCLAVE, request);
+}
+
+static inline void sbi_increase_freemem(uint64_t size)
+{
+  SBI_CALL_2(SBI_SM_STOP_ENCLAVE, STOP_INCREASE_FREEMEM, size);
 }
 
 static inline void sbi_exit_enclave(uint64_t retval)

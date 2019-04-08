@@ -53,6 +53,7 @@ static inline uintptr_t kernel_va_to_pa(void* ptr)
   return (uintptr_t) ptr - kernel_offset;
 }
 
+size_t load_pa_size;
 uintptr_t load_pa_start;
 static inline uintptr_t __va(uintptr_t pa)
 {
@@ -102,15 +103,10 @@ pte_t kernel_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISC
 pte_t load_l2_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
 pte_t load_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
 
-/* freemem */
-uintptr_t freemem_va_start;
-size_t freemem_size;
-
 #endif // USE_FREEMEM
 
 /* shared buffer */
 uintptr_t shared_buffer;
 uintptr_t shared_buffer_size;
-
 
 #endif

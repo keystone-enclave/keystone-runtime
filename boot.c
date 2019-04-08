@@ -199,6 +199,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 {
   /* set initial values */
   load_pa_start = dram_base;
+  load_pa_size = dram_size;
   shared_buffer = utm_vaddr;
   shared_buffer_size = utm_size;
   runtime_va_start = (uintptr_t) &rt_base;
