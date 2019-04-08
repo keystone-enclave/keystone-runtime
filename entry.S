@@ -122,7 +122,10 @@ _start:
 .align 6
 encl_trap_handler:
   .global encl_trap_handler
+
   csrrw sp, sscratch, sp
+  /* If yes, go handle that */
+  beqz sp, internal_runtime_trap_handler
 
   addi sp, sp, -ENCL_CONTEXT_SIZE
 
@@ -187,6 +190,31 @@ return_to_encl:
   addi sp, sp, ENCL_CONTEXT_SIZE
 
   csrrw sp, sscratch, sp
+  sret
+
+internal_runtime_trap_handler:
+  csrrw sp, sscratch, sp
+  /* Spill registers to runtime stack */
+  addi sp, sp, -4*8
+  STORE a7, (sp)
+  STORE a0, 1*REGBYTES(sp)
+  csrr  a0, sepc
+  STORE a0, 2*REGBYTES(sp)
+  csrr  a0, sscratch
+  STORE  a0, 3*REGBYTES(sp)
+
+  /* ecall STOP_ENCLAVE with 0 as arg */
+  li a0, 0
+  li a7, 106
+  ecall
+  LOAD  a0, 2*REGBYTES(sp)
+  csrw  sepc, a0
+  LOAD  a0, 3*REGBYTES(sp)
+  csrw  sscratch, a0
+  LOAD a0, 1*REGBYTES(sp)
+  LOAD a7, (sp)
+  addi sp, sp, 4*8
+
   sret
 
 not_implemented:
