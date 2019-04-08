@@ -221,6 +221,25 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* initialize free memory */
   init_freemem();
 
+  /* TEST dynamic allocation */
+  int i;
+  int pages_to_get = freemem_size >> RISCV_PAGE_BITS;
+  // request exactly one more page
+  for (i = 0; i < pages_to_get; i ++)
+  {
+    spa_get();
+    //printf("got page: 0x%lx, [i:0x%lx], [limit:0x%lx]\n", spa_get(), i, freemem_size + RISCV_PAGE_SIZE);
+  }
+
+  //printf("got page: 0x%lx, [i:0x%lx], [limit:0x%lx]\n", spa_get(), i, freemem_size + RISCV_PAGE_SIZE);
+
+  // test finished. put them back
+  for (i=0; i < pages_to_get; i++)
+  {
+    spa_put(freemem_va_start + i*0x1000);
+  }
+
+  //printf("done\n");
 #endif // USE_FREEMEM
 
   /* initialize user stack */

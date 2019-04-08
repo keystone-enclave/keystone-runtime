@@ -25,13 +25,13 @@ void extend_physical_memory(uintptr_t pa, size_t size)
   //size_t extended = 0;
 
   /* See if the physical address does not overlap */
-  assert((pa + size) <= load_pa_start &&
-          pa >= (load_pa_start + load_pa_size));
+  //assert(!(pa + size > load_pa_start ||
+  //        pa < load_pa_start + load_pa_size));
 
   // TODO: need to also check with UTM
 
   // FIXME: we only allow extending the current EPM tail at this moment
-  assert( pa == (load_pa_start + load_pa_size));
+  assert(pa == (load_pa_start + load_pa_size));
 
   // extend the physical memory
   load_pa_size += size;
@@ -59,21 +59,19 @@ spa_get(void)
   uintptr_t free_page;
 
   if (LIST_EMPTY(spa_free_pages)) {
-    printf("eyrie simple page allocator runs out of free pages %s","\n");
+    //printf("eyrie simple page allocator runs out of free pages %s","\n");
 
     // FIXME: this code assumes that it NEVER fails
-    printf("requesting one more page... \n");
+    //printf("requesting one more page... \n");
     sbi_increase_freemem(DEFAULT_FREEMEM_REQUEST_SIZE);
-    extend_physical_memory(__pa(freemem_va_start + freemem_size),
-        DEFAULT_FREEMEM_REQUEST_SIZE);
-    printf("extended the freemem\n");
+    extend_physical_memory(load_pa_start + load_pa_size, DEFAULT_FREEMEM_REQUEST_SIZE);
+    // printf("extended the freemem\n");
     // FIXME return 0 if it fails,
     //return 0;
 
     // Otherwise, just move on
     assert(!LIST_EMPTY(spa_free_pages));
   }
-
   free_page = spa_free_pages.head;
   assert(free_page);
 

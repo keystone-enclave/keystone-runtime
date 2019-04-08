@@ -59,7 +59,7 @@ static inline void sbi_stop_enclave(uint64_t request)
 
 static inline void sbi_increase_freemem(uint64_t size)
 {
-  SBI_CALL_2(SBI_SM_STOP_ENCLAVE, STOP_INCREASE_FREEMEM, size);
+  SBI_CALL_1(SBI_SM_STOP_ENCLAVE, STOP_INCREASE_FREEMEM | (size << 16));
 }
 
 static inline void sbi_exit_enclave(uint64_t retval)
