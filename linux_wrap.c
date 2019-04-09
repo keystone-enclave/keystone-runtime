@@ -50,22 +50,11 @@ uintptr_t linux_getpid(){
 }
 
 uintptr_t linux_getrandom(void *buf, size_t buflen, unsigned int flags){
-#pragma message("getrandom syscall emulation is NOT SAFE, use for testing only")
-  unsigned char v;
-  size_t remaining = buflen;
 
-  unsigned char* next_buf = (unsigned char*)buf;
-  while(remaining > 0){
-    unsigned long cycles;
-    asm volatile ("rdcycle %0" : "=r" (cycles));
-    v = cycles % 255;
-    copy_to_user(next_buf,&v,sizeof(unsigned char));
-    remaining--;
-    next_buf++;
-  }
+  uintptr_t ret = SBI_CALL_2(SBI_SM_ENCLAVE_GETRANDOM, translate((uintptr_t)buf), buflen) == 0?buflen:-1;
 
-  print_strace("[runtime] [UNSAFE] getrandom not supported (size %lx), returning non-random values\r\n", buflen);
-  return buflen;
+  print_strace("[runtime] getrandom IGNORES FLAGS (size %lx), PLATFORM DEPENDENT IF SAFE = ret %lu\r\n", buflen, ret);
+  return ret;
 }
 
 uintptr_t syscall_munmap(void *addr, size_t length){
