@@ -154,7 +154,9 @@ uintptr_t syscall_brk(void* addr){
   }
 
   // Success
+  set_program_break(req_break);
   ret = req_break;
+
 
  done:
   print_strace("[runtime] brk (0x%p) (req pages %i) = 0x%p\r\n",req_break, req_page_count, ret);
