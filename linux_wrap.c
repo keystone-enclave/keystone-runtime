@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include "freemem.h"
 #include "mm.h"
+#include "rt_util.h"
 
 #define CLOCK_FREQ 1000000000
 
@@ -51,9 +52,7 @@ uintptr_t linux_getpid(){
 
 uintptr_t linux_getrandom(void *buf, size_t buflen, unsigned int flags){
 
-  uintptr_t buf_trans = translate((uintptr_t)buf);
-  uintptr_t ret = SBI_CALL_2(SBI_SM_ENCLAVE_GETRANDOM, buf_trans, buflen) == 0?buflen:-1;
-
+  uintptr_t ret = rt_util_getrandom(buf, buflen) == 0?buflen:-1;
   print_strace("[runtime] getrandom IGNORES FLAGS (size %lx), PLATFORM DEPENDENT IF SAFE = ret %lu\r\n", buflen, ret);
   return ret;
 }
