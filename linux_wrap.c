@@ -1,3 +1,4 @@
+#ifdef LINUX_SYSCALL_WRAPPING
 #include "uaccess.h"
 #include "linux_wrap.h"
 #include "syscall.h"
@@ -198,3 +199,4 @@ uintptr_t syscall_brk(void* addr){
   return ret;
 
 }
+#endif /* LINUX_SYSCALL_WRAPPING */
