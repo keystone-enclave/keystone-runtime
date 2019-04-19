@@ -5,7 +5,7 @@
 
 uintptr_t translate(uintptr_t va);
 
-#ifdef FREEMEM
+#ifdef USE_FREEMEM
 uintptr_t remap_physical_page(uintptr_t vpn, uintptr_t ppn, int flags);
 size_t remap_physical_pages(uintptr_t vpn, uintptr_t ppn, size_t count, int flags);
 
@@ -17,6 +17,6 @@ size_t test_va_range(uintptr_t vpn, size_t count);
 
 uintptr_t get_program_break();
 void set_program_break(uintptr_t new_break);
-#endif /* FREEMEM */
+#endif /* USE_FREEMEM */
 
 #endif /* _MM_H_ */

@@ -7,26 +7,9 @@
 #include "vm.h"
 
 
-/* get a mapped physical address for a VA */
-uintptr_t
-translate(uintptr_t va)
-{
-#ifdef FREEMEM
-  pte_t* pte = __walk(root_page_table, va);
-
-  if(*pte & PTE_V)
-    return (pte_ppn(*pte) << RISCV_PAGE_BITS) | (RISCV_PAGE_OFFSET(va));
-  else
-    return 0;
-#else
-  /* Otherwise, we are linearlly mapped, so just do the simple calculation */
-  return kernel_va_to_pa((void*)va);
-
-#endif /* FREEMEM */
-}
 
 
-#ifdef FREEMEM
+#ifdef USE_FREEMEM
 
 /* Page table utilities */
 static pte_t*
@@ -205,4 +188,17 @@ test_va_range(uintptr_t vpn, size_t count){
   }
   return i;
 }
-#endif /* FREEMEM */
+
+/* get a mapped physical address for a VA */
+uintptr_t
+translate(uintptr_t va)
+{
+  pte_t* pte = __walk(root_page_table, va);
+
+  if(*pte & PTE_V)
+    return (pte_ppn(*pte) << RISCV_PAGE_BITS) | (RISCV_PAGE_OFFSET(va));
+  else
+    return 0;
+}
+
+#endif /* USE_FREEMEM */
