@@ -12,16 +12,16 @@ OPTIONS_FLAGS=
 for plugin in $PLUGINS; do
   case $plugin in
     freemem)
-      OPTIONS_FLAGS += -DUSE_FREEMEM
+      OPTIONS_FLAGS+="-DUSE_FREEMEM "
       ;;
     untrusted_io_syscall)
-      OPTIONS_FLAGS += -DIO_SYSCALL_WRAPPING
+      OPTIONS_FLAGS+="-DIO_SYSCALL_WRAPPING "
       ;;
     linux_syscall)
-      OPTIONS_FLAGS += -DLINUX_SYSCALL_WRAPPING
+      OPTIONS_FLAGS+="-DLINUX_SYSCALL_WRAPPING "
       ;;
     env_setup)
-      OPTIONS_FLAGS += -DENV_SETUP
+      OPTIONS_FLAGS+="-DENV_SETUP "
       ;;
     *)
       echo "Unknown plugin '$plugin'. Skipping"
