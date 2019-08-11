@@ -14,6 +14,9 @@ for plugin in $PLUGINS; do
     freemem)
       OPTIONS_FLAGS+="-DUSE_FREEMEM "
       ;;
+    paging)
+      OPTIONS_FLAGS+="-DUSE_PAGING "
+      ;;
     untrusted_io_syscall)
       OPTIONS_FLAGS+="-DIO_SYSCALL_WRAPPING "
       ;;
