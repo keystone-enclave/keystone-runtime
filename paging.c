@@ -18,6 +18,7 @@ uintptr_t __alloc_backing_page()
 
   /* no backing page available */
   if (paging_next_backing_page_offset >= paging_backing_storage_size) {
+    warn("no backing page avaiable");
     return 0;
   }
 
@@ -29,6 +30,11 @@ uintptr_t __alloc_backing_page()
   return next_page;
 }
 
+unsigned int
+paging_remaining_pages()
+{
+  return (paging_backing_storage_size - paging_next_backing_page_offset)/RISCV_PAGE_SIZE;
+}
 void init_paging()
 {
   uintptr_t addr;
@@ -36,7 +42,7 @@ void init_paging()
   uintptr_t* trap_table = &rt_trap_table;
 
   /* query if there is backing store */
-  size = sbi_query_multimem();
+  size = MEGAPAGE_DOWN(sbi_query_multimem());
 
   if (!size) {
 		warn("no backing store found\n");
@@ -44,7 +50,7 @@ void init_paging()
   }
 
   /* query the backing store PA */
-  addr = sbi_query_multimem_addr();
+  addr = MEGAPAGE_UP(sbi_query_multimem_addr());
 
   if (!addr) {
 		warn("address is zero\n");
@@ -56,11 +62,15 @@ void init_paging()
   paging_backing_storage_addr = __paging_va(addr);
   paging_next_backing_page_offset = 0;
 
+  debug("BACK: 0x%lx-0x%lx (%u KB), va 0x%lx", addr, addr + size, size/1024, paging_backing_storage_addr);
+
   /* create VA mapping, we don't give execution perm */
+  map_with_reserved_page_table(addr, size, EYRIE_PAGING_START, paging_l2_page_table, paging_l3_page_table);
+  /*
   remap_physical_pages(vpn(EYRIE_PAGING_START),
                        ppn(addr), size >> RISCV_PAGE_BITS,
                        PTE_R | PTE_W | PTE_D | PTE_A);
-
+  */
   /* register page fault handler */
   trap_table[RISCV_EXCP_INST_PAGE_FAULT] = (uintptr_t) paging_handle_page_fault;
   trap_table[RISCV_EXCP_LOAD_PAGE_FAULT] = (uintptr_t) paging_handle_page_fault;
@@ -74,11 +84,12 @@ __traverse_page_table_and_pick_internal(
     int level,
     pte* tb,
     uintptr_t vaddr,
-    uintptr_t count)
+    uintptr_t *count)
 {
   pte* walk;
   int i=0;
-  uintptr_t next_count = count;
+
+  assert(count);
 
   for (walk=tb, i=0;
        walk < tb + (RISCV_PAGE_SIZE/sizeof(pte));
@@ -97,10 +108,10 @@ __traverse_page_table_and_pick_internal(
     {
       if ((entry & PTE_U) && (entry & PTE_V))
       {
-        next_count--;
+        *count = *count - 1;
       }
 
-      if (next_count == 0)
+      if (*count == 0)
         return virt_addr;
     }
     else
@@ -115,7 +126,7 @@ __traverse_page_table_and_pick_internal(
           level - 1,
           (pte*) __va(phys_addr),
           vpn(virt_addr),
-          next_count);
+          count);
       if (ret)
         return ret;
     }
@@ -127,8 +138,19 @@ __traverse_page_table_and_pick_internal(
 uintptr_t
 __traverse_page_table_and_pick(uintptr_t count)
 {
-  return __traverse_page_table_and_pick_internal(
-      RISCV_PT_LEVELS, root_page_table, 0, count);
+  uintptr_t next_count = count;
+  uintptr_t ret;
+  int try = 0;
+  int max_retry = 3;
+
+  while (next_count > 0 && try < max_retry)
+  {
+    ret = __traverse_page_table_and_pick_internal(
+      RISCV_PT_LEVELS, root_page_table, 0, &next_count);
+    try++;
+  }
+
+  return ret;
 }
 
 /* pick a virtual page to evict
@@ -138,29 +160,16 @@ __traverse_page_table_and_pick(uintptr_t count)
 uintptr_t __pick_page()
 {
   uintptr_t target = 0;
-  int max_retry = 3;
-  int try = 0;
 
-  while (try < max_retry)
-  {
-    uintptr_t rnd;
-    uintptr_t count, candidate_va;
-    uintptr_t frame_count = freemem_size >> RISCV_PAGE_BITS;
+  uintptr_t rnd;
+  uintptr_t count;
+  uintptr_t frame_count = freemem_size >> RISCV_PAGE_BITS;
 
-    assert(frame_count > 0);
+  assert(frame_count > 0);
 
-    rnd = sbi_random();
-    assert(rnd != 0);
-    count = (rnd % frame_count) + 1;
-    candidate_va = __traverse_page_table_and_pick(count);
-
-    if (candidate_va) {
-      target = candidate_va;
-      break;
-    }
-
-    try++;
-  }
+  rnd = sbi_random();
+  count = (rnd % frame_count) + 1;
+  target = __traverse_page_table_and_pick(count);
 
   return target;
 }
@@ -190,6 +199,8 @@ void __swap_epm_page(uintptr_t back_page, uintptr_t epm_page, uintptr_t swap_pag
   if (swap_page) {
     memcpy((void*)epm_page, buffer, RISCV_PAGE_SIZE);
   }
+  else
+  { memset((void*)epm_page, 0, RISCV_PAGE_SIZE); }
 
   return;
 }
@@ -233,6 +244,8 @@ uintptr_t paging_evict_and_free_one(uintptr_t swap_va)
   *target_pte = pte_create_invalid(ppn(__paging_pa(dest_va)),
       *target_pte & PTE_FLAG_MASK);
 
+  tlb_flush();
+
   return src_pa;
 }
 
@@ -275,6 +288,7 @@ void paging_handle_page_fault(struct encl_ctx* ctx)
   /* validate the entry */
   *entry = pte_create(ppn(frame), *entry & PTE_FLAG_MASK);
 
+  tlb_flush();
   return;
 exit:
   warn("fatal paging failure");

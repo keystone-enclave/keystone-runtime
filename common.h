@@ -23,19 +23,19 @@
 #define RISCV_EXCP_STORE_PAGE_FAULT 15
 
 #define assert(x) \
-  if(!(x)) { printf("assertion failed at %s:%d\n", __FILE__, __LINE__);\
+  if(!(x)) { printf("assertion failed at %s:%d\r\n", __FILE__, __LINE__);\
     sbi_exit_enclave(-1); \
   }
 
 #ifdef DEBUG
 #define debug(format, ...) \
-  printf ("[debug] " format "(%s:%d)", ## __VA_ARGS__, __FILE__, __LINE__)
+  printf ("[debug] " format " (%s:%d)\r\n", ## __VA_ARGS__, __FILE__, __LINE__)
 #else
-#define debug(x, format, ...) \
+#define debug(format, ...) \
   ;
 #endif
 
 #define warn(format, ...) \
-  printf ("[warn] " format "(%s:%d)", ## __VA_ARGS__, __FILE__, __LINE__)
+  printf ("[warn] " format " (%s:%d)\r\n", ## __VA_ARGS__, __FILE__, __LINE__)
 
 #endif

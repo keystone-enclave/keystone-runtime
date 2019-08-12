@@ -68,3 +68,8 @@ void rt_page_fault(struct encl_ctx* ctx)
   assert(false);
   return;
 }
+
+void tlb_flush(void)
+{
+  asm volatile ("sfence.vma\t\n");
+}

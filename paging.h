@@ -13,6 +13,7 @@
 #include "string.h"
 #include "rt_util.h"
 
+unsigned int paging_remaining_pages(void);
 void init_paging();
 void paging_handle_page_fault(struct encl_ctx* ctx);
 uintptr_t paging_evict_and_free_one(uintptr_t swap_va);

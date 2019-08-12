@@ -1,3 +1,4 @@
+#include "rt_util.h"
 #include "common.h"
 #include "syscall.h"
 #include "mm.h"
@@ -23,7 +24,7 @@ void set_program_break(uintptr_t new_break){
 static pte*
 __continue_walk_create(pte* root, uintptr_t addr, pte* pte)
 {
-  uintptr_t new_page = spa_get_no_fail();
+  uintptr_t new_page = spa_get();
   assert(new_page);
 
   unsigned long free_ppn = ppn(__pa(new_page));
@@ -77,6 +78,7 @@ remap_physical_page(uintptr_t vpn, uintptr_t ppn, int flags)
     return 0;
 
   *pte = pte_create(ppn, flags);
+  tlb_flush();
 
   return (vpn << RISCV_PAGE_BITS);
 }
@@ -119,6 +121,7 @@ alloc_page(uintptr_t vpn, int flags)
   assert(page);
 
   *pte = pte_create(ppn(__pa(page)), flags | PTE_V);
+  tlb_flush();
 
   return page;
 }
@@ -136,6 +139,7 @@ free_page(uintptr_t vpn){
   // Mark invalid
   // TODO maybe do more here
   *pte = (*pte & (~PTE_V));
+  tlb_flush();
 
   // Return phys page
   spa_put(__va(ppn << RISCV_PAGE_BITS));
@@ -246,6 +250,7 @@ __map_with_reserved_page_table(uintptr_t dram_base,
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
   }
+  tlb_flush();
 }
 
 void

@@ -19,16 +19,11 @@ static struct pg_list spa_free_pages;
 
 /* get a free page from the simple page allocator */
 uintptr_t
-__spa_get(bool no_fail)
+spa_get()
 {
   uintptr_t free_page;
 
   if (LIST_EMPTY(spa_free_pages)) {
-    if (no_fail) {
-      warn("eyrie simple page allocator runs out of free pages");
-      return 0;
-    }
-
     /* try evict a page */
 #ifdef USE_PAGING
     uintptr_t new_pa = paging_evict_and_free_one(0);
@@ -39,7 +34,7 @@ __spa_get(bool no_fail)
     else
 #endif
     {
-      warn("eyrie simple page allocator cannot evict and free pages");
+      warn("eyrie simple page allocator cannot evict and free pages: %lx", new_pa);
       return 0;
     }
   }
@@ -53,18 +48,6 @@ __spa_get(bool no_fail)
   spa_free_pages.count--;
 
   return free_page;
-}
-
-uintptr_t
-spa_get_no_fail(void)
-{
-  return __spa_get(true);
-}
-
-uintptr_t
-spa_get(void)
-{
-  return __spa_get(false);
 }
 
 /* put a page to the simple page allocator */
@@ -93,7 +76,11 @@ spa_put(uintptr_t page_addr)
 
 unsigned int
 spa_available(){
+#ifndef USE_PAGING
   return spa_free_pages.count;
+#else
+  return spa_free_pages.count + paging_remaining_pages();
+#endif
 }
 
 void

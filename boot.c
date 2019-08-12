@@ -112,16 +112,20 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t utm_vaddr,
            uintptr_t utm_size)
 {
-
   /* set initial values */
   load_pa_start = dram_base;
   shared_buffer = utm_vaddr;
   shared_buffer_size = utm_size;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
+
+  debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
+  debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);
   freemem_size = dram_base + dram_size - free_paddr;
+
+  debug("FREE: 0x%lx-0x%lx (%u KB), va 0x%lx", free_paddr, dram_base + dram_size, freemem_size/1024, freemem_va_start);
 
   /* remap kernel VA */
   remap_kernel_space(runtime_paddr, user_paddr - runtime_paddr);
@@ -160,6 +164,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* Enable the FPU */
   csr_write(sstatus, csr_read(sstatus) | 0x6000);
 
+  debug("eyrie boot finished. drop to the user land ...");
   /* booting all finished, droping to the user land */
   return;
 }
