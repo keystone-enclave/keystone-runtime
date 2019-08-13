@@ -71,5 +71,5 @@ void rt_page_fault(struct encl_ctx* ctx)
 
 void tlb_flush(void)
 {
-  asm volatile ("sfence.vma\t\n");
+  asm volatile ("fence.i\t\nsfence.vma\t\n");
 }

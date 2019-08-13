@@ -19,7 +19,7 @@ static struct pg_list spa_free_pages;
 
 /* get a free page from the simple page allocator */
 uintptr_t
-spa_get()
+__spa_get(bool zero)
 {
   uintptr_t free_page;
 
@@ -47,8 +47,16 @@ spa_get()
   spa_free_pages.head = next;
   spa_free_pages.count--;
 
+  assert(free_page > EYRIE_LOAD_START && free_page < (freemem_va_start + freemem_size));
+
+  if (zero)
+    memset((void*)free_page, 0, RISCV_PAGE_SIZE);
+
   return free_page;
 }
+
+uintptr_t spa_get() { return __spa_get(false); }
+uintptr_t spa_get_zero() { return __spa_get(true); }
 
 /* put a page to the simple page allocator */
 void

@@ -199,8 +199,6 @@ void __swap_epm_page(uintptr_t back_page, uintptr_t epm_page, uintptr_t swap_pag
   if (swap_page) {
     memcpy((void*)epm_page, buffer, RISCV_PAGE_SIZE);
   }
-  else
-  { memset((void*)epm_page, 0, RISCV_PAGE_SIZE); }
 
   return;
 }
@@ -288,7 +286,6 @@ void paging_handle_page_fault(struct encl_ctx* ctx)
   /* validate the entry */
   *entry = pte_create(ppn(frame), *entry & PTE_FLAG_MASK);
 
-  tlb_flush();
   return;
 exit:
   warn("fatal paging failure");
