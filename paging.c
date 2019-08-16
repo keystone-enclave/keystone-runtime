@@ -5,7 +5,6 @@
 #if defined(USE_FREEMEM) && defined(USE_PAGING)
 
 #include "paging.h"
-#include "aes-2.h"
 
 uintptr_t paging_backing_storage_addr;
 uintptr_t paging_backing_storage_size;
@@ -186,7 +185,6 @@ uintptr_t __pick_page()
   count = (rnd % paging_user_page_count) + 1;
   target = __traverse_page_table_and_pick(count);
 
-
   return target;
 }
 
@@ -196,44 +194,24 @@ uintptr_t __pick_page()
  */
 void __swap_epm_page(uintptr_t back_page, uintptr_t epm_page, uintptr_t swap_page, bool encrypt)
 {
-
-  /* FIXME: Hard-coded key and IV only for overhead simulation */
-  WORD key_schedule[60];
-  BYTE key[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-  BYTE iv[]  = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
   assert(epm_page >= EYRIE_LOAD_START);
   assert(epm_page < freemem_va_start + freemem_size);
   assert(back_page >= paging_backing_storage_addr);
   assert(back_page < paging_backing_storage_addr + paging_backing_storage_size);
 
-  uint8_t buffer[RISCV_PAGE_SIZE] = {0,};
+  /* not implemented */
+  assert(!encrypt);
 
-  /* bring in the stored page */
+  char buffer[RISCV_PAGE_SIZE] = {0,};
   if (swap_page) {
     assert(swap_page == back_page);
     memcpy(buffer, (void*)swap_page, RISCV_PAGE_SIZE);
   }
 
-  /* encrypt EPM, decrypt buffer */
-  if (encrypt) {
-    aes_key_setup(key, key_schedule, 128);
-    aes_encrypt_ctr((BYTE*)epm_page, RISCV_PAGE_SIZE,
-                    (BYTE*)back_page, key_schedule, 128, iv);
-    if (swap_page) {
-      aes_decrypt_ctr((BYTE*)buffer, RISCV_PAGE_SIZE,
-                    (BYTE*)epm_page, key_schedule, 128, iv);
-    }
-    /*
-    AES_init_ctx_iv(&ctx, key, iv);
-    AES_CTR_xcrypt_buffer(&ctx, (uint8_t*) buffer, RISCV_PAGE_SIZE);
-    AES_init_ctx_iv(&ctx, key, iv);
-    AES_CTR_xcrypt_buffer(&ctx, (uint8_t*) epm_page, RISCV_PAGE_SIZE);
-    */
-  } else {
-    memcpy((void*)back_page, (void*)epm_page, RISCV_PAGE_SIZE);
-    if (swap_page) {
-      memcpy((void*)epm_page, buffer, RISCV_PAGE_SIZE);
-    }
+  memcpy((void*)back_page, (void*)epm_page, RISCV_PAGE_SIZE);
+
+  if (swap_page) {
+    memcpy((void*)epm_page, buffer, RISCV_PAGE_SIZE);
   }
 
   return;
@@ -272,7 +250,7 @@ uintptr_t paging_evict_and_free_one(uintptr_t swap_va)
   assert(target_pte && (*target_pte & PTE_U));
 
   src_pa = pte_ppn(*target_pte) << RISCV_PAGE_BITS;
-  __swap_epm_page(dest_va, __va(src_pa), swap_va, true);
+  __swap_epm_page(dest_va, __va(src_pa), swap_va, false);
 
   /* invalidate target PTE */
   *target_pte = pte_create_invalid(ppn(__paging_pa(dest_va)),
