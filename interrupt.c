@@ -40,6 +40,7 @@ void handle_interrupts(struct encl_ctx* regs)
     case INTERRUPT_CAUSE_EXTERNAL:
     default:
       sbi_stop_enclave(0);
+      init_timer();
       return;
   }
 }

@@ -39,7 +39,7 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_
   }
 
   ret = SBI_CALL_1(SBI_SM_STOP_ENCLAVE, 1);
-
+  init_timer();
   if (ret != 0) {
     return -1;
   }
@@ -88,6 +88,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
   }
 
   ret = SBI_CALL_1(SBI_SM_STOP_ENCLAVE, 1);
+  init_timer();
 
   if (ret != 0) {
     goto ocall_error;
@@ -162,6 +163,7 @@ void handle_syscall(struct encl_ctx* ctx)
   switch (n) {
   case(RUNTIME_SYSCALL_EXIT):
     SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
+    init_timer();
     break;
   case(RUNTIME_SYSCALL_OCALL):
     ret = dispatch_edgecall_ocall(arg0, (void*)arg1, arg2, (void*)arg3, arg4);
@@ -176,6 +178,7 @@ void handle_syscall(struct encl_ctx* ctx)
     copy_from_user((void*)rt_copy_buffer_2, (void*)arg1, arg2);
 
     ret = SBI_CALL_3(SBI_SM_ATTEST_ENCLAVE, copy_buffer_1_pa, copy_buffer_2_pa, arg2);
+    init_timer();
 
     /* TODO we consistently don't have report size when we need it */
     copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, 2048);
@@ -229,6 +232,7 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_exit_group):
     print_strace("[runtime] exit or exit_group (%lu)\r\n",n);
     SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, arg0);
+    init_timer();
     break;
 #endif /* LINUX_SYSCALL_WRAPPING */
 
