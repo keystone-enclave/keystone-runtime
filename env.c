@@ -2,6 +2,7 @@
 #include "tmplib/uaccess.h"
 #include "rt_util.h"
 #include "string.h"
+#include "printf.h"
 /******
  *
  * This is for setting up a minimal ENV/AUX etc to let libc init
@@ -31,14 +32,10 @@
 // We return the new sp
 void* setup_start(void* _sp){
   // Staging for eventual stack data
-
-
-  void** sp = (void**)_sp;
-
-#ifdef ENV_SETUP
-
+  //printf("env=%d\n",__LINE__);
   void* staging[SIZE_OF_SETUP];
 
+  void** sp = (void**)_sp;
   sp = sp - SIZE_OF_SETUP;
 
   //setup argc
@@ -47,7 +44,7 @@ void* setup_start(void* _sp){
   //argv
   staging[1] = (void*)0; // NULL
   //TODO We need to support /at least/ argv[0]
-
+  //printf("env=%d\n",__LINE__);
   //envp[0] (terminate)
   staging[2] = (void*)0; // NULL
 
@@ -56,12 +53,15 @@ void* setup_start(void* _sp){
   void** at_random_ptr = 0;
   unsigned long* auxv = (unsigned long*)&(staging[3]);
 
+  //printf("env=%d\n",__LINE__);
+
   auxv[i++] = AT_HWCAP;
   auxv[i++] = 0x112d; // hardcoded from sample on non-enclave run
   auxv[i++] = AT_SYSINFO;
   auxv[i++] = 0x0;
   auxv[i++] = AT_PAGESZ;
   auxv[i++] = 0x1000;
+  //printf("env=%d\n",__LINE__);
   auxv[i++] = AT_EXECFN;
   auxv[i++] = 0; // NULL
   auxv[i++] = AT_SECURE;
@@ -85,8 +85,12 @@ void* setup_start(void* _sp){
   // should be that i == AUXV_COUNT*2
 
   // Ask for random values
-  size_t ret = rt_util_getrandom((void*)&auxv[i], 16);
-  if( ret != 16 )  rt_util_misc_fatal();
+  int ret = rt_util_getrandom((void*)&auxv[i], 16);
+  //printf("env=%d\n",__LINE__);
+  if( ret != 16 )//chagne to 0
+  rt_util_misc_fatal();
+
+  //printf("env=%d\n",__LINE__);
   //Assign the ptr
   *at_random_ptr = &sp[i+3];
   i+=2; // fixup i
@@ -94,11 +98,11 @@ void* setup_start(void* _sp){
   // We don't do PHDR or PHNUM etc right now, TLS might need it though
 
   // Copy staging to userstack
+  //printf("%d\n",__LINE__);
   copy_to_user(sp, staging, SIZE_OF_SETUP*sizeof(void*));
 
-#endif /* ENV_SETUP */
-
   // Fully setup, tell them to use this SP instead of the given one
+  //printf("env=%d\n",__LINE__);
   return sp;
 
 }

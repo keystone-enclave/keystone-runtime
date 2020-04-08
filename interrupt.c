@@ -8,8 +8,11 @@
 #include "interrupt.h"
 #include "printf.h"
 #include <asm/csr.h>
+#include "page_replacement.h"
+#include "rt_util.h"
+#include "vm.h"
 
-#define DEFAULT_CLOCK_DELAY 10000
+#define DEFAULT_CLOCK_DELAY 3500//200
 
 void init_timer(void)
 {
@@ -24,16 +27,22 @@ void handle_timer_interrupt()
   unsigned long next_cycle = get_cycles64() + DEFAULT_CLOCK_DELAY;
   sbi_set_timer(next_cycle);
   csr_set(sstatus, SR_SPIE);
+  csr_set(sie, SIE_STIE | SIE_SSIE);
+
+  //printf("[TIMER] inside timer\n" );
+  //clear_bits();
   return;
 }
 
-void handle_interrupts(struct encl_ctx* regs)
+void handle_interrupts(struct encl_ctx_t* regs)
 {
+  //is_rt=1;
   unsigned long cause = regs->scause;
-
+  //printf("[TIMER] inside handle_interrupts with cause %lu\n",cause );
   switch(cause) {
     case INTERRUPT_CAUSE_TIMER:
       handle_timer_interrupt();
+
       break;
     /* ignore other interrupts */
     case INTERRUPT_CAUSE_SOFTWARE:
@@ -42,4 +51,5 @@ void handle_interrupts(struct encl_ctx* regs)
       sbi_stop_enclave(0);
       return;
   }
+  is_rt=0;
 }

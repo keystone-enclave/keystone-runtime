@@ -223,7 +223,7 @@ rt_trap_table:
   .dword not_implemented_fatal //9
   .dword not_implemented_fatal //10
   .dword not_implemented_fatal //11
-  .dword not_implemented_fatal //12: fetch page fault - code always presents in memory
+  .dword rt_page_fault //12: fetch page fault - code always presents in memory
   .dword rt_page_fault //13: load page fault - stack/heap access
   .dword not_implemented_fatal //14
   .dword rt_page_fault //15: store page fault - stack/heap access

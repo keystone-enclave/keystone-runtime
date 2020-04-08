@@ -58,3 +58,68 @@ int memcmp(const void* s1, const void* s2, size_t n)
   }
   return 0;
 }
+
+
+
+
+int strlen(char *s)
+{
+  int count=0;
+
+  while(*s!=0)
+  {
+    count++;
+    s++;
+  }
+  return count;
+}
+
+
+int strcmp(char *s1, char *s2)
+{
+  int len= strlen(s1);
+  if(len!=strlen(s2))
+    return 1;
+
+  for(int i=0;i<len;i++)
+  {
+    if(s1[i]!=s2[i])
+      return 1;
+  }
+  return 0;
+}
+
+
+
+void strcat(char *s1, char *s2)
+{
+  int len= strlen(s1);
+  int len2= strlen(s2);
+
+
+
+
+
+  for(int i=0;i<len2;i++)
+  {
+    s1[len+i]=s2[i];
+  }
+
+}
+
+
+void strcpy(char *s1, char *s2)
+{
+  //int len= strlen(s1);
+  int len2= strlen(s2);
+
+
+
+
+
+  for(int i=0;i<len2;i++)
+  {
+    s1[i]=s2[i];
+  }
+
+}

@@ -2,7 +2,7 @@ OUTPUT_ARCH( "riscv" )
 
 SECTIONS
 {
-  . = 0xffffffffc0000000;
+  . = 0xfffffffff0000000;
   PROVIDE(rt_base = .);
   .text : {
     *(.text._start)
@@ -19,9 +19,15 @@ SECTIONS
   .bss : { *(.bss) }
   . = ALIGN(0x1000);
   .kernel_stack : {
-    . += 0x8000;
+    __kernel_stack_start = .;
+    . += 0xfff00;
     PROVIDE(kernel_stack_end = .);
   }
-
+  .malloc_zone :
+  {
+    __malloc_start_rt = .;
+    . = . +  8192;
+    __malloc_zone_stop = .;
+  }
   _end = .;
 }

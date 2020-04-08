@@ -1,4 +1,3 @@
-#ifdef LINUX_SYSCALL_WRAPPING
 #include "uaccess.h"
 #include "linux_wrap.h"
 #include "syscall.h"
@@ -54,7 +53,7 @@ uintptr_t linux_getpid(){
 
 uintptr_t linux_getrandom(void *buf, size_t buflen, unsigned int flags){
 
-  uintptr_t ret = rt_util_getrandom(buf, buflen);
+  uintptr_t ret = rt_util_getrandom(buf, buflen) == 0?buflen:-1;
   print_strace("[runtime] getrandom IGNORES FLAGS (size %lx), PLATFORM DEPENDENT IF SAFE = ret %lu\r\n", buflen, ret);
   return ret;
 }
@@ -199,4 +198,3 @@ uintptr_t syscall_brk(void* addr){
   return ret;
 
 }
-#endif /* LINUX_SYSCALL_WRAPPING */

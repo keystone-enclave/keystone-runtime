@@ -15,11 +15,22 @@
 #define RUNTIME_SYSCALL_SHAREDCOPY      1002
 #define RUNTIME_SYSCALL_ATTEST_ENCLAVE  1003
 #define RUNTIME_SYSCALL_EXIT            1101
+#define RUNTIME_SYSCALL_SBRK            2000
+#define RUNTIME_SYSCALL_RAND            3000
 
-void handle_syscall(struct encl_ctx* ctx);
+void handle_syscall(struct encl_ctx_t* ctx);
 void init_edge_internals(void);
-uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr,
+uintptr_t dispatch_edgecall_syscall(edge_syscall_t* syscall_data_ptr,
                                     size_t data_len);
+
+uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
+                                    				   void* data, size_t data_len,
+                                    				   void* return_buffer, size_t return_len,uintptr_t arg6);
+
+
+
+uintptr_t handle_copy_from_shared(void* dst, uintptr_t offset, size_t size);
+
 
 // Define this to enable printing of a large amount of syscall information
 //#define INTERNAL_STRACE 1
