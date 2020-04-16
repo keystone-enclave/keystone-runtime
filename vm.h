@@ -28,11 +28,11 @@
 #define MEGAPAGE_UP(n) ROUND_UP(n, RISCV_GET_LVL_PGSIZE_BITS(2))
 
 /* Starting address of the enclave memory */
-#define EYRIE_LOAD_START        0xffffffff00000000
-#define EYRIE_PAGING_START      0xffffffff40000000
-#define EYRIE_UNTRUSTED_START   0xffffffff80000000
-#define EYRIE_USER_STACK_START  0x0000000040000000
-#define EYRIE_ANON_REGION_START 0x0000002000000000 // Arbitrary VA to start looking for large mappings
+#define EYRIE_LOAD_START        0xf0000000
+#define EYRIE_PAGING_START      0x40000000
+#define EYRIE_UNTRUSTED_START   0x80000000
+#define EYRIE_USER_STACK_START  0x40000000
+#define EYRIE_ANON_REGION_START 0x20000000 // Arbitrary VA to start looking for large mappings
 #define EYRIE_ANON_REGION_END   EYRIE_LOAD_START
 #define EYRIE_USER_STACK_SIZE   0x20000
 #define EYRIE_USER_STACK_END    (EYRIE_USER_STACK_START - EYRIE_USER_STACK_SIZE)
