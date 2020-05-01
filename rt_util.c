@@ -410,6 +410,7 @@ void ocall_get_page_contents_from_utm_enc_pfh(edge_data_t* retdata,uintptr_t arg
 void ocall_store_page_contents_to_utm(edge_data_t* retdata,uintptr_t args){// ocall that will bring a page
   //char victim_page_contents[sizeof(pages)];
   //memcpy((void*)victim_page_contents , (void*)args,sizeof(pages));
+  printf("[dispatch ocall] pkgstr = retdata and args = vic_page\n");
   dispatch_edgecall_ocall(OCALL_STORE_CONTENT_TO_UTM, (void*)args, sizeof(pages), retdata, sizeof(edge_data_t),0);
   return;
 }
@@ -917,6 +918,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
     }
     else if(enable_oram==NO_ORAM)
     {
+      printf("[runtime] First fault No ORAM\n");
       rt_util_getrandom((void*) key_aes, AES_KEYLEN);
       rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
       rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
@@ -1122,6 +1124,31 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       //oram_init_time=cycles2-cycles1;
       //sbi_exit_enclave(-1);
     }
+    else if(enable_oram == WORAM)
+    {
+      printf("[runtime] First fault WORAM\n");
+      rt_util_getrandom((void*) key_aes, AES_KEYLEN);
+      rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
+      rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
+      rt_util_getrandom((void*) z_1, AES_KEYLEN);
+      rt_util_getrandom((void*) z_2, AES_KEYLEN);
+
+      buff_size=BACKUP_BUFFER_SIZE_OTHERS;
+      buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+      if(buff==NULL)
+      {
+        printf("[runtime] buff allocation failed\n" );
+        sbi_exit_enclave(-1);
+      }
+      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+      if(backup_shared_memory==NULL)
+      {
+        printf("[runtime] backup_shared_memory allocation failed\n" );
+        sbi_exit_enclave(-1);
+      }
+    }
     first_fault=0;
     asm volatile ("rdcycle %0" : "=r" (cycles2));
 
@@ -1279,6 +1306,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
   {
     if( (*status_find_address) & PTE_L  )// it is legal page but not present in memory
     {
+      printf("[runtime] Legal Page not present in memory\n");
       countpf++;
 
       uintptr_t source_page_VA=(*status_find_address)>>PTE_PPN_SHIFT;
@@ -1300,6 +1328,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       //if(THRESHOLD_PAGES+current_q_size>=free_pages_fr)
       //if(alloc>=free_pages_fr)
       {
+        printf("[runtime] No free page\n");
         uintptr_t victim = remove_victim_page();
         //uintptr_t victim_page_org=pop_item[0];
         uintptr_t victim_page_enc=pop_item[1];//UC THIS
@@ -1324,11 +1353,12 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
               printf("[runtime] addr = 0x%lx dirty\n",victim_page_enc );
              if(enable_oram==NO_ORAM)
              {
+               printf("[nooram] Entry point\n");
                pages_written++;
                edge_data_t pkgstr;
                vic_page.address=victim_page_enc;
                memcpy((void*)vic_page.data,(void*)victim_page_org,RISCV_PAGE_SIZE  );
-
+               printf("[nooram] victim page addr 0x%lx\n", vic_page.address);
                version_numbers[vpn(victim_page_enc)]++;//uncomment this
 
                vic_page.ver_num=version_numbers[vpn(victim_page_enc)];
@@ -1341,6 +1371,11 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
                {
                   calculate_hmac(&vic_page,vic_page.hmac,HASH_SIZE);
                }
+               printf("[nooram] making ocall from runtime with pkgstr and vic_page\n");
+               printf("[nooram] pkgstr contents -> offset = 0x%lx, data_va = %ld, size = %d\n", 
+                            pkgstr.offset, pkgstr.data_va, pkgstr.size);
+               printf("[nooram] vic_page contents -> address = 0x%lx, data = %ld, hmac = %d\n", 
+                            vic_page.address, vic_page.data, vic_page.hmac);
                ocall_store_page_contents_to_utm((void*)&pkgstr,(uintptr_t)&vic_page);
                handle_copy_from_shared((void*)&stored_victim_page_addr,pkgstr.offset,pkgstr.size);
                //knocked_page_addr[vpn(victim_page_enc)]=stored_victim_page_addr;
@@ -1438,6 +1473,35 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
                }
 
              }
+             if(enable_oram==WORAM)
+             {
+               printf("[nooram] Entry point WORAM\n");
+               pages_written++;
+               edge_data_t pkgstr;
+               vic_page.address=victim_page_enc;
+               memcpy((void*)vic_page.data,(void*)victim_page_org,RISCV_PAGE_SIZE  );
+               printf("[nooram] victim page addr 0x%lx\n", vic_page.address);
+               version_numbers[vpn(victim_page_enc)]++;//uncomment this
+
+               vic_page.ver_num=version_numbers[vpn(victim_page_enc)];
+               if(confidentiality)
+               {
+                 encrypt_page((uint8_t*)vic_page.data,RISCV_PAGE_SIZE,(uint8_t*)key_aes,(uint8_t*)iv_aes);
+                 encrypt_page((uint8_t*)&vic_page.ver_num,2*sizeof(uintptr_t),(uint8_t*)key_aes,(uint8_t*)iv_aes);
+               }
+               if(authentication)
+               {
+                  calculate_hmac(&vic_page,vic_page.hmac,HASH_SIZE);
+               }
+               printf("[nooram] making ocall from runtime with pkgstr and vic_page\n");
+               printf("[nooram] pkgstr contents -> offset = 0x%lx, data_va = %ld, size = %d\n", 
+                            pkgstr.offset, pkgstr.data_va, pkgstr.size);
+               printf("[nooram] vic_page contents -> address = 0x%lx, data = %ld, hmac = %d\n", 
+                            vic_page.address, vic_page.data, vic_page.hmac);
+               ocall_store_page_contents_to_utm((void*)&pkgstr,(uintptr_t)&vic_page);
+               handle_copy_from_shared((void*)&stored_victim_page_addr,pkgstr.offset,pkgstr.size);
+               //knocked_page_addr[vpn(victim_page_enc)]=stored_victim_page_addr;
+             }
 
              if(debug)
              {
@@ -1498,10 +1562,12 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       }
       if(enable_oram==NO_ORAM)
       {
+        printf("[runtime] Space exists in queue\n");
         if(extension==1)
         {
+          printf("[runtime] Extension is 1\n");
             memset((void*)new_alloc_page, 0, RISCV_PAGE_SIZE);
-          //printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
+          printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
 
           *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );//updating the page table entry with the address of the newly allcated page
 
@@ -1511,10 +1577,13 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
         }
         else
         {
+          printf("[runtime] Extension is NOT 1\n");
           pages_read++;
           edge_data_t pkgstr;
+          printf("[runtime] Calling ocall_get_page_contents_from_utm\n");
           ocall_get_page_contents_from_utm((void*)&pkgstr,(vpn(addr))<<RISCV_PAGE_BITS);
           //char brought_page[RISCV_PAGE_SIZE];
+          printf("[runtime] handle_copy_from_shared\n");
           handle_copy_from_shared((void*)&brought_page,pkgstr.offset,pkgstr.size);
           if(authentication)
           {
@@ -1661,6 +1730,61 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
           {
             sbi_exit_enclave(-1);
           }
+        }
+      }
+      else if(enable_oram==WORAM)
+      {
+        printf("[runtime] No need to remove victim\n");
+        if(extension==1)
+        {
+          printf("[runtime] Extension is 1\n");
+            memset((void*)new_alloc_page, 0, RISCV_PAGE_SIZE);
+          printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
+
+          *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );//updating the page table entry with the address of the newly allcated page
+
+          *status_find_address =(*status_find_address)|PTE_E|PTE_V; //DELETE AFTER TAKING TRACES
+          asm volatile ("fence.i\t\nsfence.vma\t\n");
+          prev_addr_status=status_find_address;
+        }
+        else
+        {
+          printf("[runtime] Extension is NOT 1\n");
+          pages_read++;
+          edge_data_t pkgstr;
+          printf("[runtime] Calling ocall_get_page_contents_from_utm\n");
+          ocall_get_page_contents_from_utm((void*)&pkgstr,(vpn(addr))<<RISCV_PAGE_BITS);
+          //char brought_page[RISCV_PAGE_SIZE];
+          printf("[runtime] handle_copy_from_shared\n");
+          handle_copy_from_shared((void*)&brought_page,pkgstr.offset,pkgstr.size);
+          if(authentication)
+          {
+            char calc_hmac[HASH_SIZE];
+            calculate_hmac(&brought_page,calc_hmac,HASH_SIZE);
+            if(!check_hashes((void*)calc_hmac ,HASH_SIZE, (void*)brought_page.hmac ,HASH_SIZE ))
+            {
+              printf("[runtime] Page corrupted. HMAC integrity check failed.  Fatal error for address 0x%lx\n",brought_page.address);
+              sbi_exit_enclave(-1);
+            }
+          }
+          if(confidentiality)
+          {
+            decrypt_page((uint8_t*)brought_page.data,RISCV_PAGE_SIZE,(uint8_t*)key_aes,(uint8_t*)iv_aes);
+            decrypt_page((uint8_t*)&brought_page.ver_num,2*sizeof(uintptr_t),(uint8_t*)key_aes,(uint8_t*)iv_aes);
+          }
+          if(authentication && version_numbers[vpn(addr)] !=  brought_page.ver_num)
+          {
+            printf("[runtime] Page corrupted(Possibly a replay attack).  Fatal error for address 0x%lx and brought_page.ver_num= 0x%lx and version_num[]=0x%lx\n",brought_page.address,brought_page.ver_num,version_numbers[vpn(addr)]);
+            sbi_exit_enclave(-1);
+          }
+          // now check version numbers
+          memcpy((void*)new_alloc_page,(void*)brought_page.data,RISCV_PAGE_SIZE);
+          *status_find_address = pte_create( ppn(__pa(new_alloc_page) ), PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L );//updating the page table entry with the address of the newly allcated page
+
+          *status_find_address =(*status_find_address)|PTE_V|PTE_E;
+          prev_addr_status=status_find_address;
+          asm volatile ("fence.i\t\nsfence.vma\t\n");
+
         }
       }
 
@@ -1840,9 +1964,9 @@ void rt_page_fault(struct encl_ctx_t* ctx)
 
 
 
-   //printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);
-  // printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
-  // printf("[runtime] queue size = %lu\r\n",get_queue_size());
+   printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);
+  printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
+  printf("[runtime] queue size = %lu\r\n",get_queue_size());
   if(debug)
   {
     printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);

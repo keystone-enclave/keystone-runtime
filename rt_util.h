@@ -47,6 +47,7 @@ uintptr_t rt_handle_sbrk_rt(size_t bytes);
 #define ENC_PFH 3
 #define RORAM 4
 #define NO_OF_COUNTERS 16
+#define WORAM 5
 
 int get_tree_index(int x);
 double log2(int x);
