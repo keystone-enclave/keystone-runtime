@@ -1,7 +1,7 @@
 CC = riscv64-unknown-linux-gnu-gcc
 OPTIONS_FLAGS ?= -DUSE_FREEMEM
 CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)
-SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c page_replacement.c chacha20_asm.c aess.c ssha3.c opam.c oram.c roram.c tiny-malloc.c index_q.c
+SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c page_replacement.c chacha20_asm.c aess.c ssha3.c opam.c oram.c roram.c tiny-malloc.c index_q.c woram.c
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt
 LINK = riscv64-unknown-linux-gnu-ld

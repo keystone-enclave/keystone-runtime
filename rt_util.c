@@ -21,6 +21,7 @@
 #include "index_q.h"
 #include "uaccess.h"
 #include "interrupt.h"
+#include "woram.h"
 uintptr_t prev_addr=0;
 uintptr_t *prev_addr_status=NULL;
 
@@ -730,11 +731,6 @@ void setup_keys_and_buffer()
   }
 }
 
-void testing()
-{
-  
-}
-
 void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_address)
 {
   printf("[runtime] Extension is 1. Hence just alloacte zero page\n");
@@ -1033,7 +1029,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
     {
       printf("[runtime] First fault WORAM. Allocating buffer stuff\n");
       setup_keys_and_buffer();
-      testing();
+      initialize_woram_array();
       
     }
     first_fault=0;
