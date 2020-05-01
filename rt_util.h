@@ -15,6 +15,9 @@ extern void chacha20(uint8_t *out, const uint8_t *in, size_t inlen, const uint8_
 void not_implemented_fatal(struct encl_ctx_t* ctx);
 void rt_util_misc_fatal();
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address);
+void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_address);
+void setup_keys_and_buffer();
+void tetsing();
 extern uint8_t z_1[16];
 extern uint8_t z_2[16];
 extern uint8_t Key_hmac[16];

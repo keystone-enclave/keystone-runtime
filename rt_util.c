@@ -694,70 +694,66 @@ void do_something_extra()
   unsigned long long chacha=(chacha_e-chacha_s)>>bits;
   unsigned long long copy=(copy_e-copy_s)>>bits;
   unsigned long long hmac=(hmac_e-hmac_s)>>bits;
-
-
-
   printf("AFTER %d times\n",times);
-
   printf("aes_enc = %lu\n",aes_enc );
   printf("aes_dec = %lu\n", aes_dec);
   printf("chacha = %lu\n",chacha );
   printf("copy = %lu\n", copy);
   printf("hmac = %lu\n",hmac );
-
-
-
-
-
-
-
-
   printf("PRINTED ALL STATS\n");
   sbi_exit_enclave(-1);
 
 }
 
+void setup_keys_and_buffer()
+{
+  rt_util_getrandom((void*) key_aes, AES_KEYLEN);
+  rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
+  rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
+  rt_util_getrandom((void*) z_1, AES_KEYLEN);
+  rt_util_getrandom((void*) z_2, AES_KEYLEN);
 
-//------------------------------------------------------------------------------
+  buff_size=BACKUP_BUFFER_SIZE_OTHERS;
+  buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+  if(buff==NULL)
+  {
+    printf("[runtime] buff allocation failed\n" );
+    sbi_exit_enclave(-1);
+  }
+  backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+  if(backup_shared_memory==NULL)
+  {
+    printf("[runtime] backup_shared_memory allocation failed\n" );
+    sbi_exit_enclave(-1);
+  }
+}
+
+void testing()
+{
+  
+}
+
+void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_address)
+{
+  printf("[runtime] Extension is 1. Hence just alloacte zero page\n");
+  memset((void*)new_alloc_page, 0, RISCV_PAGE_SIZE);
+  //updating the page table entry with the address of the newly allcated page
+  *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );
+  *status_find_address =(*status_find_address)|PTE_E|PTE_V; //DELETE AFTER TAKING TRACES
+  asm volatile ("fence.i\t\nsfence.vma\t\n");
+}
 
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
-  //printf("fp=%d\n",free_pages_fr );
-
-  //do_something_extra();
-
-
   if(first_fault)
   {
     unsigned long long cycles1,cycles2;
 
     asm volatile ("rdcycle %0" : "=r" (cycles1));
-
     strcpy(sss,"firstimeaccess");
-
-
     rt_util_getrandom((void*) key_chacha, 32);
-    /*firstimeaccess=(char*)malloc(MALLOC_SIZE);
-
-    if(firstimeaccess==NULL)
-    {
-      printf("[runtime] firstimeaccess allocation failed\n" );
-      sbi_exit_enclave(-1);
-    }
-    */
-
-    //malloc(MALLOC_SIZE);
-    /*
-    strcpy(sss,"knocked_page_addr");
-    knocked_page_addr=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-    if(knocked_page_addr==NULL)
-    {
-      printf("[runtime] knocked_page_addr allocation failed\n" );
-      sbi_exit_enclave(-1);
-    }
-    */
-
-
     strcpy(sss,"version_numbers");
 
     version_numbers=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
@@ -769,36 +765,12 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       sbi_exit_enclave(-1);
     }
 
-
-/*
-    buff=(char*)malloc(BACKUP_BUFFER_SIZE*sizeof(char));
-
-    if(buff==NULL)
-    {
-      printf("[runtime] buff allocation failed\n" );
-      sbi_exit_enclave(-1);
-    }
-    backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE*sizeof(char));
-
-    if(backup_shared_memory==NULL)
-    {
-      printf("[runtime] backup_shared_memory allocation failed\n" );
-      sbi_exit_enclave(-1);
-    }
-*/
-
-
-
     for(int i=0;i<NO_OF_COUNTERS;i++)
       counters[i].count=0;
     pages_read=0;
     pages_written=0;
     init_num_pages=(uintptr_t)get_queue_size();
     alloc=init_num_pages;
-
-    //q_front=q_rear=-1;
-
-    //enclave_options args_user;
 
     edge_data_t pkgstr;
     dispatch_edgecall_ocall(OCALL_GET_TESTING_PARAMS,NULL,0,&pkgstr,sizeof(edge_data_t),(uintptr_t)&args_user);
@@ -860,19 +832,12 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
         printf("[runtime] position map allocation failed\n" );
         sbi_exit_enclave(-1);
       }
-
-
-
       tree_po_md=(Bucket_md *)malloc(ORAM_TREE_SIZE*sizeof(Bucket_md));
       if(tree_po_md==NULL)
       {
         printf("[runtime] tree_po_md allocation failed\n" );
         sbi_exit_enclave(-1);
       }
-
-
-
-
 
       buff_size=BACKUP_BUFFER_SIZE_ORAM;
       buff=(char*)malloc(BACKUP_BUFFER_SIZE_ORAM*sizeof(char));
@@ -905,42 +870,13 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
         sbi_exit_enclave(-1);
       }
 
-
-
-
      initalize_oram();
-
-     //asm volatile ("rdcycle %0" : "=r" (cycles2));
-
-     //printf("[PATH_ORAM] time to initialize %lu\n",(cycles2-cycles1));
-     //oram_init_time=cycles2-cycles1;
 
     }
     else if(enable_oram==NO_ORAM)
     {
-      printf("[runtime] First fault No ORAM\n");
-      rt_util_getrandom((void*) key_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
-      rt_util_getrandom((void*) z_1, AES_KEYLEN);
-      rt_util_getrandom((void*) z_2, AES_KEYLEN);
-
-      buff_size=BACKUP_BUFFER_SIZE_OTHERS;
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
+      printf("[runtime] First fault No ORAM. Allocating Buffer stuff\n");
+      setup_keys_and_buffer();
     }
     else if(enable_oram==ENC_PFH)
     {
@@ -950,29 +886,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
         printf("[runtime] knocked_page_addr allocation failed\n" );
         sbi_exit_enclave(-1);
       }
-      rt_util_getrandom((void*) key_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
-      rt_util_getrandom((void*) z_1, AES_KEYLEN);
-      rt_util_getrandom((void*) z_2, AES_KEYLEN);
-
-      buff_size=BACKUP_BUFFER_SIZE_OTHERS;
-
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
+      setup_keys_and_buffer();
     }
     else if(enable_oram==OPAM)
     {
@@ -1096,8 +1010,6 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 
       }
 
-
-
       buff_size=BACKUP_BUFFER_SIZE_RORAM;
 
       buff=(char*)malloc(BACKUP_BUFFER_SIZE_RORAM*sizeof(char));
@@ -1114,145 +1026,20 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
         printf("[runtime] backup_shared_memory allocation failed\n" );
         sbi_exit_enclave(-1);
       }
-
-
-
       initialize_roram();
-      //asm volatile ("rdcycle %0" : "=r" (cycles2));
 
-      //printf("[RORAM] time to initialize %lu\n",(cycles2-cycles1));
-      //oram_init_time=cycles2-cycles1;
-      //sbi_exit_enclave(-1);
     }
     else if(enable_oram == WORAM)
     {
-      printf("[runtime] First fault WORAM\n");
-      rt_util_getrandom((void*) key_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) iv_aes, AES_KEYLEN);
-      rt_util_getrandom((void*) key_hmac, AES_KEYLEN);
-      rt_util_getrandom((void*) z_1, AES_KEYLEN);
-      rt_util_getrandom((void*) z_2, AES_KEYLEN);
-
-      buff_size=BACKUP_BUFFER_SIZE_OTHERS;
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
+      printf("[runtime] First fault WORAM. Allocating buffer stuff\n");
+      setup_keys_and_buffer();
+      testing();
+      
     }
     first_fault=0;
     asm volatile ("rdcycle %0" : "=r" (cycles2));
-
     oram_init_time=cycles2-cycles1;
-
-
   }
-
-
-//**************************************************
-
-  // commen this section
-/*
-
-  if(addr==0 || addr==0x8)
-  {
-    //printf("[runtime] address 0 encountered" );
-    if(addr==0x8)
-      printf("addr= 0x%lx\n",addr);
-    trace_buff[0]=trace_buff_cnt;
-    //printf("[runtime]TOTAL PAGE ACCESSES = %lu\n",total_trace_buff_cnt);
-
-    dispatch_edgecall_ocall(FULL_TRACE, trace_buff, trace_buff_cnt*sizeof(uintptr_t), 0, 0,0);
-    trace_buff_cnt=0;
-    sbi_exit_enclave(-1);
-
-  }
-  uintptr_t *rpt=get_root_page_table_addr();
-  if(status_find_address==0)
-  {
-        status_find_address=__walk(rpt,addr);
-  }
-  if((*status_find_address) & PTE_V) return;
-
-  *status_find_address=(*status_find_address) | PTE_V;
-  //printf("0x%lx present = %lu   really present = %lu \n",addr, (*status_find_address) & PTE_V,(*status_find_address) & PTE_E);
-  //printf("line %d\n",__LINE__);
-  if(prev_addr!=0)
-  {
-    prev_addr_status=__walk(rpt,prev_addr);prev_addr_status=prev_addr_status;
-     *prev_addr_status= *prev_addr_status & (~PTE_V);
-  }
-  uintptr_t pv= vpn(addr);
-  //printf("line %d\n",__LINE__);
-  prev_addr=addr;
-  //printf("line %d\n",__LINE__);
-  prev_addr_status=status_find_address;
-  //printf("line %d\n",__LINE__);
-  trace_buff_cnt++;
-  //printf("line %d\n",__LINE__);
-  total_trace_buff_cnt++;
-  //printf("line %d\n",__LINE__);
-  trace_buff[trace_buff_cnt]=pv;
-
-  trace_buff_cnt++;
-  total_trace_buff_cnt++;
-  trace_buff[trace_buff_cnt]=fault_mode;
-  //printf("line %d\n",__LINE__);
-  //printf("trace_buff_cnt = 0x%lx, ", total_trace_buff_cnt );
-  //printf("read %d \n",__LINE__);
-  if(trace_buff_cnt== FULL_TRACE_CHUNK-2)
-  //if(trace_buff_cnt== 1)
-
-  {
-    //printf("read %d \n",__LINE__);
-    //printf("line %d\n",__LINE__);
-    trace_buff[0]=trace_buff_cnt;
-    //printf("line %d\n",__LINE__);
-
-    //printf("0x%lx present = %lu   really present = %lu after mod \n",addr, (*status_find_address) & PTE_V,(*status_find_address) & PTE_L);
-    //printf("line %d\n",__LINE__);
-    dispatch_edgecall_ocall(FULL_TRACE, trace_buff, (trace_buff_cnt+1)*sizeof(uintptr_t), 0, 0,0);
-    //printf("line %d\n",__LINE__);
-    trace_buff_cnt=0;
-    //printf("line %d\n",__LINE__);
-  }
-
-
-//printf("line %d\n",__LINE__);
-  if(  (*status_find_address) & PTE_E)
-
-  {
-    //printf("line %d\n",__LINE__);
-    *status_find_address= (*status_find_address)|PTE_V|PTE_E;
-    return;
-  }
-
-  *status_find_address=(*status_find_address) & (~ PTE_V);
-
-  //printf("address 0x%lx validated but needs to be boright in ",addr);
-
-
-
-  //printf("0x%lx present = %lu   really present = %lu after mod \n",addr, (*status_find_address) & PTE_V,(*status_find_address) & PTE_E);
-
-
-*/
-//   **************************************************
-
-
-
-
-
-
 
   uintptr_t *root_page_table_addr=get_root_page_table_addr();
   if(status_find_address==0)
@@ -1297,7 +1084,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
     asm volatile ("fence.i\t\nsfence.vma\t\n");
     if(fcc==0)
     {
-      printf("[runtime] Everything is finessss for addr = 0x%lx\n",addr);
+      printf("[runtime] Valid bit is done for addr = 0x%lx\n",addr);
       fcc=1;
     }
     return;
@@ -1313,11 +1100,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       int enable_swap_out = 1;enable_swap_out=enable_swap_out;
       int threshold_number_of_pages=650000;threshold_number_of_pages=threshold_number_of_pages;// max number of user pages to be allocated at a time
       uintptr_t current_q_size=0;// stores number of user pages currently allocated
-      current_q_size=(uintptr_t)get_queue_size();current_q_size=current_q_size;
-
-
-
-
+      current_q_size=(uintptr_t)get_queue_size();
 
       //if(current_q_size>=threshold_number_of_pages &&  enable_swap_out)
       //if(spa_available()<6500 )// no more physical pages are available. so we need to swap out a page
@@ -1341,13 +1124,8 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
           victim_page_org=__va(  ( (*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);//UC THIS
           if( (    (*status_find_pte_victim) & PTE_D ) || enable_oram==OPAM || enable_oram==ENC_PFH  ||  (   (exc==1) && (enable_oram==PATH_ORAM || enable_oram==RORAM )  )   )
           {
-
-
             //printf("[runtime] P.A of 0x%lx is 0x%lx\n",victim_page_enc, ( (*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
             //printf("[runtime] P.A of 0x%lx is 0x%lx\n",addr, ( (*status_find_address)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
-
-
-
 
              if(debug)
               printf("[runtime] addr = 0x%lx dirty\n",victim_page_enc );
@@ -1494,11 +1272,11 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
                   calculate_hmac(&vic_page,vic_page.hmac,HASH_SIZE);
                }
                printf("[nooram] making ocall from runtime with pkgstr and vic_page\n");
-               printf("[nooram] pkgstr contents -> offset = 0x%lx, data_va = %ld, size = %d\n", 
-                            pkgstr.offset, pkgstr.data_va, pkgstr.size);
                printf("[nooram] vic_page contents -> address = 0x%lx, data = %ld, hmac = %d\n", 
                             vic_page.address, vic_page.data, vic_page.hmac);
                ocall_store_page_contents_to_utm((void*)&pkgstr,(uintptr_t)&vic_page);
+               printf("[nooram] pkgstr contents -> offset = 0x%lx, data_va = %ld, size = %d\n", 
+                            pkgstr.offset, pkgstr.data_va, pkgstr.size);
                handle_copy_from_shared((void*)&stored_victim_page_addr,pkgstr.offset,pkgstr.size);
                //knocked_page_addr[vpn(victim_page_enc)]=stored_victim_page_addr;
              }
@@ -1535,7 +1313,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       uintptr_t new_alloc_page = 0;
       new_alloc_page = spa_get();// get new page from the list of free pages
       alloc++;
-
+      printf("[runtime] New page from list of free pages acquired 0x%lx", new_alloc_page);
 
 
       //if((count_ext+init_num_pages)>=THRESHOLD_PAGES)
@@ -1565,15 +1343,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
         printf("[runtime] Space exists in queue\n");
         if(extension==1)
         {
-          printf("[runtime] Extension is 1\n");
-            memset((void*)new_alloc_page, 0, RISCV_PAGE_SIZE);
-          printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
-
-          *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );//updating the page table entry with the address of the newly allcated page
-
-          *status_find_address =(*status_find_address)|PTE_E|PTE_V; //DELETE AFTER TAKING TRACES
-          asm volatile ("fence.i\t\nsfence.vma\t\n");
-          prev_addr_status=status_find_address;
+          allocate_fresh_page(new_alloc_page, status_find_address);
         }
         else
         {
@@ -1612,7 +1382,6 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
           *status_find_address =(*status_find_address)|PTE_V|PTE_E;
           prev_addr_status=status_find_address;
           asm volatile ("fence.i\t\nsfence.vma\t\n");
-
 
 
         }
@@ -1734,17 +1503,10 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       }
       else if(enable_oram==WORAM)
       {
-        printf("[runtime] No need to remove victim\n");
         if(extension==1)
         {
-          printf("[runtime] Extension is 1\n");
-            memset((void*)new_alloc_page, 0, RISCV_PAGE_SIZE);
+          allocate_fresh_page(new_alloc_page, status_find_address);
           printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
-
-          *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );//updating the page table entry with the address of the newly allcated page
-
-          *status_find_address =(*status_find_address)|PTE_E|PTE_V; //DELETE AFTER TAKING TRACES
-          asm volatile ("fence.i\t\nsfence.vma\t\n");
           prev_addr_status=status_find_address;
         }
         else
@@ -1811,7 +1573,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
 
       return;
     }
-    else// actual page fault(seg fault)
+    else// actual page fault(seg fault) NOT LEGAL
     {
       //printf("[runtime] A real page fault on 0x%lx\n",addr);// uncomment
       if(debug)
