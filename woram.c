@@ -35,4 +35,25 @@ void initialize_position_map(void)
     //TODO - initialize position_map using malloc
 }
 
+void woram_write_access(pages victim_page)
+{
+    printf("[woram] write access\n");
+    pages *array_ptr = (pages*) woram_array;
+    uintptr_t page_va = victim_page.address;
+    // printf("[woram] array va 0x%zx\n", page_va);
+    unsigned long page_vpn = page_va >> RISCV_PAGE_BITS;
+    // printf("[woram] array index 0x%zx\n", page_vpn);
+    array_ptr[page_vpn] = victim_page;
+}
+
+void woram_read_access(uintptr_t page_va, pages* returned_page)
+{
+    printf("[woram] read access\n");
+    pages *array_ptr = (pages*) woram_array;
+    unsigned long page_vpn = page_va >> RISCV_PAGE_BITS;
+    printf("[woram] array index 0x%zx\n", page_vpn);
+    pages page_read = array_ptr[page_vpn];
+    memcpy(returned_page, &page_read, sizeof(pages));
+}
+
 
