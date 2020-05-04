@@ -1723,8 +1723,8 @@ void rt_page_fault(struct encl_ctx_t* ctx)
 
 
    printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);
-  printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
-  printf("[runtime] queue size = %lu\r\n",get_queue_size());
+  // printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
+  // printf("[runtime] queue size = %lu\r\n",get_queue_size());
   if(debug)
   {
     printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);

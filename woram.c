@@ -14,6 +14,7 @@ void initialize_woram_array()
     woram.write_access_counter = 0;
     sanity_check();
     display_position_map();
+    printf("[size] %zd %zd\n", WORAM_SIZE, woram.holding_area_size);
     // testing();
 }
 
@@ -62,24 +63,70 @@ void testing()
     printf("[testing] getpos of 0x7 = 0x%zx, 0x9 = 0x%zx\n", get_pos(0x7), get_pos(0x5));
 }
 
-void set_pos(uintptr_t addr_index, uintptr_t new_addr_index)
+void set_pos(uintptr_t addr, uintptr_t new_addr_index)
 {
+    uintptr_t addr_index = addr >> RISCV_PAGE_BITS;
      woram.position_map[addr_index] = new_addr_index;
 }
-uintptr_t get_pos(uintptr_t addr_index)
+uintptr_t get_pos(uintptr_t addr)
 {
-    return woram.position_map[addr_index];
+    return woram.position_map[addr];
+}
+
+// void woram_write_access(pages victim_page)
+// {
+//     printf("[woram] write access\n");
+//     pages *array_ptr = (pages*) woram.woram_array;
+//     uintptr_t page_va = victim_page.address;
+//     printf("[woram] array va 0x%zx\n", page_va);
+//     unsigned long page_vpn = page_va >> RISCV_PAGE_BITS;
+//     printf("[woram] array index 0x%zx\n", page_vpn);
+//     array_ptr[page_vpn] = victim_page;
+// }
+
+uintptr_t write_to_holding_area(pages data)
+{
+    unsigned long long i = woram.write_access_counter;
+    uintptr_t N = woram.holding_area_size;
+    uintptr_t holding_area_index = N + i%N; 
+    printf("Writing to holding area index 0x%zx\n", holding_area_index);
+    pages *array_ptr = (pages*) woram.woram_array;
+    array_ptr[holding_area_index] = data;
+    woram.write_access_counter++;
+    return holding_area_index;
+}
+
+void refresh_main_area()
+{
+    printf("[woram] refresh main area called\nCurrent condition\n");
+    display_position_map();
+    uintptr_t N = woram.holding_area_size;
+    pages *array_ptr = (pages*) woram.woram_array;
+    for(uintptr_t addr = 0; addr < N; addr++)
+    {
+      uintptr_t updated_position = get_pos(addr);
+      printf("[refresh] Updated position of 0x%lx is 0x%lx\n", addr, updated_position);
+      pages updated_page = array_ptr[updated_position];
+      //TODO - decrypt then encrypt again
+      array_ptr[addr] = updated_page;
+      set_pos(addr << RISCV_PAGE_BITS, addr);
+    }
 }
 
 void woram_write_access(pages victim_page)
 {
-    printf("[woram] write access\n");
-    pages *array_ptr = (pages*) woram.woram_array;
+    printf("[woram] write access Counter %zd\n", woram.write_access_counter);
     uintptr_t page_va = victim_page.address;
-    printf("[woram] array va 0x%zx\n", page_va);
-    unsigned long page_vpn = page_va >> RISCV_PAGE_BITS;
-    printf("[woram] array index 0x%zx\n", page_vpn);
-    array_ptr[page_vpn] = victim_page;
+    //TODO - validate page_va if req
+    uintptr_t position = write_to_holding_area(victim_page);
+    set_pos(page_va, position); //update position map
+    unsigned long long i = woram.write_access_counter;
+    uintptr_t N = woram.holding_area_size;
+    if ( i%N == 0)
+    {
+        refresh_main_area();
+        woram.write_access_counter = 0;
+    }
 }
 
 void woram_read_access(uintptr_t page_va, pages* returned_page)
@@ -112,6 +159,7 @@ void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t vict
     calculate_hmac_woram(&victim_page,victim_page.hmac,HASH_SIZE);
 
   woram_write_access(victim_page);
+  display_position_map();
 }
 
 void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, 
@@ -152,6 +200,7 @@ void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *st
   *status_find_address =(*status_find_address)|PTE_V|PTE_E; //remove this later
   asm volatile ("fence.i\t\nsfence.vma\t\n");
   free(returned_page);
+  display_position_map();
 
 }
 

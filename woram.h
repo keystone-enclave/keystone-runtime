@@ -5,7 +5,7 @@
 
 #define UTM_ARRAY_STARTING_OFFSET 1048*1048 //1MB
 #define POSITION_MAP_SIZE 1024
-#define WORAM_SIZE 20
+#define WORAM_SIZE 30
 
 struct woram {
     uintptr_t woram_array;
@@ -38,6 +38,8 @@ void woram_write_access(pages);
 void woram_read_access(uintptr_t, pages*);
 void set_pos(uintptr_t addr, uintptr_t new_addr);
 uintptr_t get_pos(uintptr_t addr);
+void refresh_main_area(void);
+uintptr_t write_to_holding_area(pages data);
 
 void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t victim_page_runtime_va, int, int);
 void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, int, int);
