@@ -36,6 +36,8 @@ void initialize_position_map(void);
 void sanity_check(void);
 void woram_write_access(pages);
 void woram_read_access(uintptr_t, pages*);
+void set_pos(uintptr_t addr, uintptr_t new_addr);
+uintptr_t get_pos(uintptr_t addr);
 
 void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t victim_page_runtime_va, int, int);
 void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, int, int);
@@ -46,5 +48,6 @@ void setup_key_utilities(uint8_t *key_chacha_, uint8_t *key_aes_, uint8_t *iv_ae
 
 //Debug Functions
 void display_position_map();
+void testing();
 
 #endif

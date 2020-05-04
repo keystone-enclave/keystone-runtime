@@ -14,6 +14,7 @@ void initialize_woram_array()
     woram.write_access_counter = 0;
     sanity_check();
     display_position_map();
+    // testing();
 }
 
 void initialize_position_map(void)
@@ -53,6 +54,23 @@ void sanity_check()
     }
 }
 
+void testing()
+{
+    set_pos(0x2, 0x3);
+    set_pos(0x9, 0x5);
+    display_position_map();
+    printf("[testing] getpos of 0x7 = 0x%zx, 0x9 = 0x%zx\n", get_pos(0x7), get_pos(0x5));
+}
+
+void set_pos(uintptr_t addr_index, uintptr_t new_addr_index)
+{
+     woram.position_map[addr_index] = new_addr_index;
+}
+uintptr_t get_pos(uintptr_t addr_index)
+{
+    return woram.position_map[addr_index];
+}
+
 void woram_write_access(pages victim_page)
 {
     printf("[woram] write access\n");
@@ -68,9 +86,11 @@ void woram_read_access(uintptr_t page_va, pages* returned_page)
 {
     printf("[woram] read access\n");
     pages *array_ptr = (pages*) woram.woram_array;
-    unsigned long page_vpn = page_va >> RISCV_PAGE_BITS;
+    uintptr_t page_vpn = page_va >> RISCV_PAGE_BITS;
     printf("[woram] array index 0x%zx\n", page_vpn);
-    pages page_read = array_ptr[page_vpn];
+    uintptr_t actual_index = get_pos(page_vpn);
+    printf("[woram] actual index 0x%zx\n", actual_index);
+    pages page_read = array_ptr[actual_index];
     memcpy(returned_page, &page_read, sizeof(pages));
 }
 
