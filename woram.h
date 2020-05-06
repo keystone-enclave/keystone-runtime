@@ -4,15 +4,15 @@
 #include "vm.h"
 
 #define UTM_ARRAY_STARTING_OFFSET 1048*1048 //1MB
-#define POSITION_MAP_SIZE 1024
-#define WORAM_SIZE 30
+#define WORAM_SIZE 3000 //2000
+#define SCALING_FACTOR 2/3.0  // main area : total oram SHOULD BE FLOAT
 
 struct woram {
     uintptr_t woram_array;
     uintptr_t woram_array_size;
     uintptr_t *position_map;
-    unsigned long long holding_area_size; //N
-    unsigned long long main_area_size; //M
+    unsigned long long main_area_size; //N
+    unsigned long long holding_area_size; //M
     unsigned long long write_access_counter;
 } woram;
 

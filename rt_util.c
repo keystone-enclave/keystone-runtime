@@ -1305,7 +1305,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
              }
              else if(enable_oram==WORAM)
              {
-               printf("[woram] Entry point WORAM for page replacement\n");
+              //  printf("[woram] Entry point WORAM for page replacement\n");
                store_victim_page_to_woram(victim_page_enc, victim_page_org, confidentiality, authentication);
                pages_written++;
              }
@@ -1342,7 +1342,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       uintptr_t new_alloc_page = 0;
       new_alloc_page = spa_get();// get new page from the list of free pages
       alloc++;
-      printf("[runtime] New page from list of free pages acquired 0x%lx\n", new_alloc_page);
+      // printf("[runtime] New page from list of free pages acquired 0x%lx\n", new_alloc_page);
 
 
       //if((count_ext+init_num_pages)>=THRESHOLD_PAGES)
@@ -1671,20 +1671,6 @@ uintptr_t rt_handle_sbrk_rt(size_t bytes)
 void rt_page_fault(struct encl_ctx_t* ctx)
 {
 
-  //printf("[RUNTIME] Testing MT\n" );
-/*
-  for(int i=0; i<100;i++)
-  {
-      unsigned long  rn= 0;
-      rt_util_getrandom(&rn, sizeof(long));
-      printf("%lu  \n",rn );
-
-  }
-  sbi_exit_enclave(-1);
-*/
-  //printf("just entered\n" );
-
-
 #ifdef FATAL_DEBUG
   unsigned long addr, cause, pc;
   pc = ctx->regs.sepc;
@@ -1697,7 +1683,7 @@ void rt_page_fault(struct encl_ctx_t* ctx)
     fault_mode=0;//read
   if(addr>0xfffffffffffff)
   {
-    printf("[runtime] bad adress fatal\n");
+    printf("[runtime] bad adress fatal 0x%zx\n", addr);
     //show_queue_contents();
 
     sbi_exit_enclave(-1);
