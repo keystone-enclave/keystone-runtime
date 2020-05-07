@@ -58,18 +58,16 @@ void sanity_check()
 
 void testing()
 {
-    uintptr_t N = woram.main_area_size;
-    uintptr_t M = woram.holding_area_size;
+    uintptr_t N = 20; //woram.main_area_size;
+    uintptr_t M = 10; //woram.holding_area_size;
     
-    for(int i = 0; i < M; i++)
+    for(int i = 0; i <30; i++)
     {
-      unsigned long long start = i*(N/M)%N;
-      unsigned long long end = (i+1)*(N/M)%N;
-      if (end == 0) end = N;
+      unsigned long long start = ((unsigned long long)(i*(N/(double)M)))%N;
+      unsigned long long end = ((unsigned long long)((i+1)*(N/(double)M)))%N;
+      if (end < start) end = N;
       printf("access = %zd, start = %zd, end = %zd\n", i, start, end);
     }
-    woram.main_area_size = 15;
-    woram.holding_area_size = 15;
 }
 
 void set_pos(uintptr_t addr, uintptr_t new_addr_index)
@@ -96,15 +94,16 @@ uintptr_t write_to_holding_area(pages data)
 
 void refresh_main_area()
 {
-    // printf("[woram] refresh main area called\nCurrent condition\n");
+    printf("[woram] refresh main area called\n");
     // display_position_map();
     uintptr_t N = woram.main_area_size;
     uintptr_t M = woram.holding_area_size;
     unsigned long long i = woram.write_access_counter;
     pages *array_ptr = (pages*) woram.woram_array;
-    unsigned long long start = i*(N/M)%N;
-    unsigned long long end = (i+1)*(N/M)%N;
-    if (end == 0) end = N;
+    unsigned long long start = ((unsigned long long)(i*(N/(double)M)))%N;
+    unsigned long long end = ((unsigned long long)((i+1)*(N/(double)M)))%N;
+    if (end < start) end = N;
+    printf("Write access %zd, refreshing addresses [%zd,%zd)", i, start, end);
     for(uintptr_t addr = start; addr < end; addr++)
     {
       uintptr_t updated_position = get_pos(addr);
