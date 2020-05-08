@@ -741,72 +741,10 @@ void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_addres
   //updating the page table entry with the address of the newly allcated page
   *status_find_address = pte_create( ppn(__pa((uintptr_t)new_alloc_page) ), PTE_D|PTE_A | PTE_V| PTE_R | PTE_X | PTE_W | PTE_U | PTE_L );
   *status_find_address =(*status_find_address)|PTE_E|PTE_V; //DELETE AFTER TAKING TRACES
+  if (enable_oram == WORAM)
+    *status_find_address = *status_find_address & ~PTE_D; //page not dirty
   asm volatile ("fence.i\t\nsfence.vma\t\n");
 }
-
-// void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t victim_page_runtime_va,
-//                     int confidentiality, int authentication)
-// {
-//   pages_written++;
-//   pages victim_page;
-//   victim_page.address = victim_page_enclave_va;
-//   memcpy((void*)victim_page.data,(void*)victim_page_runtime_va, RISCV_PAGE_SIZE);
-//   printf("[woram] victim page addr 0x%lx\n", victim_page.address);
-//   version_numbers[vpn(victim_page_enclave_va)]++; //not required
-//   vic_page.ver_num=version_numbers[vpn(victim_page_enclave_va)];
-//   if(confidentiality)
-//   {
-//     encrypt_page((uint8_t*)victim_page.data,RISCV_PAGE_SIZE,(uint8_t*)key_aes,(uint8_t*)iv_aes);
-//     encrypt_page((uint8_t*)&victim_page.ver_num,2*sizeof(uintptr_t),(uint8_t*)key_aes,(uint8_t*)iv_aes);
-//   }
-//   if(authentication)
-//     calculate_hmac(&vic_page,vic_page.hmac,HASH_SIZE);
-
-//   woram_write_access(victim_page);
-// }
-
-// void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address)
-// {
-//   // printf("[runtime] Getting page from woram\n");
-//   pages_read++;
-//   pages *returned_page = (pages*)malloc(sizeof(pages)); 
-//   woram_read_access(addr, returned_page);
-//   brought_page = *returned_page;
-//   if(authentication)
-//   {
-//     char calc_hmac[HASH_SIZE];
-//     calculate_hmac(&brought_page,calc_hmac,HASH_SIZE);
-//     if(!check_hashes((void*)calc_hmac ,HASH_SIZE, (void*)brought_page.hmac ,HASH_SIZE ))
-//     {
-//       printf("[runtime] Page corrupted. HMAC integrity check failed.  Fatal error for address 0x%lx\n",brought_page.address);
-//       sbi_exit_enclave(-1);
-//     }
-//   }
-//   if(confidentiality)
-//   {
-//     decrypt_page((uint8_t*)brought_page.data,RISCV_PAGE_SIZE,(uint8_t*)key_aes,(uint8_t*)iv_aes);
-//     decrypt_page((uint8_t*)&brought_page.ver_num,2*sizeof(uintptr_t),(uint8_t*)key_aes,(uint8_t*)iv_aes);
-//   }
-//   // now check version numbers
-//   if(authentication && version_numbers[vpn(addr)] !=  brought_page.ver_num)
-//   {
-//     printf("[runtime] Page corrupted(Possibly a replay attack).  Fatal error for address 0x%lx and brought_page.ver_num= 0x%lx and version_num[]=0x%lx\n",brought_page.address,brought_page.ver_num,version_numbers[vpn(addr)]);
-//     sbi_exit_enclave(-1);
-//   }
-  
-//   memcpy((void*)new_alloc_page,(void*)brought_page.data,RISCV_PAGE_SIZE);
-//   int flags = PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L;
-
-//   //updating the page table entry with the address of the newly allcated page
-//   *status_find_address = pte_create( ppn(__pa(new_alloc_page) ), flags); 
-
-//   *status_find_address =(*status_find_address)|PTE_V|PTE_E; //remove this later
-//   prev_addr_status=status_find_address;
-//   asm volatile ("fence.i\t\nsfence.vma\t\n");
-//   free(returned_page);
-
-// }
-          
 
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
@@ -1326,6 +1264,8 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
           free_page(vpn(victim_page_enc));
           alloc--;
           *status_find_pte_victim = (stored_victim_page_addr << PTE_PPN_SHIFT) | (PTE_D| PTE_A | PTE_R | PTE_X | PTE_W | PTE_U | PTE_L);
+          if ( enable_oram == WORAM)
+            *status_find_address = *status_find_address & ~PTE_D; //clear dirty bit
           //access_counter[vpn(victim_page_enc)]=0;
           asm volatile ("fence.i\t\nsfence.vma\t\n");
           //memset((void*)victim_page_org, 0, RISCV_PAGE_SIZE);
@@ -1540,7 +1480,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
         }
         else
         {
-          get_page_from_woram(addr, new_alloc_page, status_find_address, confidentiality, authentication);
+          get_page_from_woram(addr, new_alloc_page, status_find_address, fault_mode, confidentiality, authentication);
           prev_addr_status=status_find_address;
           pages_read++;
         }

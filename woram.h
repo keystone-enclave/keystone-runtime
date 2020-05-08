@@ -4,7 +4,7 @@
 #include "vm.h"
 
 #define UTM_ARRAY_STARTING_OFFSET 1048*1048 //1MB
-#define WORAM_SIZE 3000 //2000
+#define WORAM_SIZE 2000 //2000
 #define SCALING_FACTOR 2/3.0  // main area : total oram SHOULD BE FLOAT
 
 struct woram {
@@ -42,7 +42,8 @@ void refresh_main_area(void);
 uintptr_t write_to_holding_area(pages data);
 
 void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t victim_page_runtime_va, int, int);
-void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, int, int);
+void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, 
+                                                unsigned long access_mode, int, int);
 void calculate_hmac_woram(pages* p, char* hm, uintptr_t hm_len);
 
 void setup_key_utilities(uint8_t *key_chacha_, uint8_t *key_aes_, uint8_t *iv_aes_, uint8_t *Key_hmac_, 

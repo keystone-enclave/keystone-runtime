@@ -164,7 +164,7 @@ void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t vict
 }
 
 void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, 
-                int confidentiality, int authentication)
+                unsigned long access_mode, int confidentiality, int authentication)
 {
   // printf("[runtime] Getting page from woram\n");
   pages *returned_page = (pages*)malloc(sizeof(pages)); 
@@ -193,8 +193,9 @@ void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *st
   }
   
   memcpy((void*)new_alloc_page,(void*)brought_page.data,RISCV_PAGE_SIZE);
-  int flags = PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L;
-
+  int flags = PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L;
+  if (access_mode == 1) //write access
+    flags = flags | PTE_D;
   //updating the page table entry with the address of the newly allcated page
   *status_find_address = pte_create( ppn(__pa(new_alloc_page) ), flags); 
 
