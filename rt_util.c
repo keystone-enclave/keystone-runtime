@@ -22,7 +22,7 @@
 #include "uaccess.h"
 #include "interrupt.h"
 #include "woram.h"
-// #include "key_util.h"
+#include "victim_cache.h"
 
 uintptr_t prev_addr=0;
 uintptr_t *prev_addr_status=NULL;
@@ -58,6 +58,7 @@ uintptr_t copy_waste=0;
 
 
 int first_fault=1;//dont change
+int first_page_replacement = 1; //used for victim cache
 int enable_oram=1;
 int count_ext=0;
 int confidentiality=1;
@@ -746,306 +747,311 @@ void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_addres
   asm volatile ("fence.i\t\nsfence.vma\t\n");
 }
 
+void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
+{
+  unsigned long long cycles1,cycles2;
+
+  asm volatile ("rdcycle %0" : "=r" (cycles1));
+  strcpy(sss,"firstimeaccess");
+  rt_util_getrandom((void*) key_chacha, 32);
+  strcpy(sss,"version_numbers");
+
+  version_numbers=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+  trace_buff=(uintptr_t*)malloc(FULL_TRACE_CHUNK*sizeof(uintptr_t));
+
+  if(version_numbers==NULL)
+  {
+    printf("[runtime] version_numbers allocation failed\n" );
+    sbi_exit_enclave(-1);
+  }
+
+  for(int i=0;i<NO_OF_COUNTERS;i++)
+    counters[i].count=0;
+  pages_read=0;
+  pages_written=0;
+  init_num_pages=(uintptr_t)get_queue_size();
+  alloc=init_num_pages;
+
+  edge_data_t pkgstr;
+  dispatch_edgecall_ocall(OCALL_GET_TESTING_PARAMS,NULL,0,&pkgstr,sizeof(edge_data_t),(uintptr_t)&args_user);
+
+  enable_oram=args_user.page_fault_handler;
+  authentication=args_user.integrity_protection;
+  confidentiality=args_user.confidentiality;
+  free_pages_fr=args_user.num_free_pages;
+  tracing=args_user.page_addr_tracing;
+  debug=args_user.debug_mode;
+  exc=args_user.tree_exc;
+  fault_lim= args_user.fault_limit;
+  frame_size=free_pages_fr;
+  //display_test_params();
+  //printf("[RUNTIME] fault limit %d \n",fault_lim );
+  //sbi_exit_enclave(-1);
+
+  strcpy(counters[PAGES_READ].name,"PAGES_READ");
+  strcpy(counters[PAGES_WRITTEN].name,"PAGES_WRITTEN");
+  strcpy(counters[INIT_NUM_PAGES].name,"INIT_NUM_PAGES");
+  strcpy(counters[PAGE_FAULT_COUNT].name,"PAGE_FAULT_COUNT");
+  strcpy(counters[FREE_PAGES_FR].name,"FREE_PAGES_FR");
+  strcpy(counters[EXTENSIONS].name,"EXTENSIONS");
+  strcpy(counters[TOTAL_PAGES].name,"TOTAL_PAGES");
+  strcpy(counters[REAL_PAGES_READ].name,"REAL_PAGES_READ");
+  strcpy(counters[REAL_PAGES_WRITTEN].name,"REAL_PAGES_WRITTEN");
+  strcpy(counters[DUMMY_PAGES_READ].name,"DUMMY_PAGES_READ");
+  strcpy(counters[DUMMY_PAGES_WRITTEN].name,"DUMMY_PAGES_WRITTEN");
+  strcpy(counters[MAX_STASH_OCC].name,"MAX_STASH_OCC");
+  strcpy(counters[SUM_STASH_OCC].name,"SUM_STASH_OCC");
+  strcpy(counters[ORAM_ACC].name,"ORAM_ACC");
+  strcpy(counters[ORAM_INIT].name,"ORAM_INIT");
+
+  if(debug)
+    display_test_params();
+  uintptr_t left =free_pages_fr-init_num_pages; left=left;
+  //deplete_free_pages_for_testing(left);
+  if(debug)
+    printf("[runtime] free pages left %lu\n",spa_available() );
+  if(enable_oram==PATH_ORAM)
+  {
+    //unsigned long long cycles1,cycles2;
+
+    //asm volatile ("rdcycle %0" : "=r" (cycles1));
+
+    S=(Block*)malloc(ORAM_STASH_SIZE*sizeof(Block));
+    Sg=(Block*)malloc(ORAM_STASH_SIZE*sizeof(Block));
+
+    firstimeaccess=(char*)malloc(MALLOC_SIZE);
+    if(firstimeaccess==NULL)
+    {
+      printf("[runtime] firstimeaccess allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+    if(position==NULL)
+    {
+      printf("[runtime] position map allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    tree_po_md=(Bucket_md *)malloc(ORAM_TREE_SIZE*sizeof(Bucket_md));
+    if(tree_po_md==NULL)
+    {
+      printf("[runtime] tree_po_md allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    buff_size=BACKUP_BUFFER_SIZE_ORAM;
+    buff=(char*)malloc(BACKUP_BUFFER_SIZE_ORAM*sizeof(char));
+
+    if(buff==NULL)
+    {
+      printf("[runtime] buff allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_ORAM*sizeof(char));
+
+    if(backup_shared_memory==NULL)
+    {
+      printf("[runtime] backup_shared_memory allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    free_indices=(uintptr_t*)malloc(ORAM_STASH_SIZE*sizeof(uintptr_t));
+    if(free_indices==NULL)
+    {
+      printf("[runtime] free_indices allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+    stash_loc=(int*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+    if(stash_loc==NULL)
+    {
+      printf("[runtime] stash_loc allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    initalize_oram();
+
+  }
+  else if(enable_oram==NO_ORAM)
+  {
+    printf("[runtime] First fault No ORAM. Allocating Buffer stuff\n");
+    // printf("[keytest] 0x%zx 0x%zx\n", key_chacha[0], key_chacha[1]);
+    setup_keys_and_buffer();
+  }
+  else if(enable_oram==ENC_PFH)
+  {
+    p_ivs=(iv_page*)malloc(MALLOC_SIZE*sizeof(iv_page));
+    if(p_ivs==NULL)
+    {
+      printf("[runtime] knocked_page_addr allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    setup_keys_and_buffer();
+  }
+  else if(enable_oram==OPAM)
+  {
+    //unsigned long long cycles1,cycles2;
+    //asm volatile ("rdcycle %0" : "=r" (cycles1));
+
+    S_opam_md=(Block_Opam_md*)malloc(OPAM_STASH_SIZE*sizeof(Block_Opam_md));
+    firstimeaccess=(char*)malloc(MALLOC_SIZE);
+    if(firstimeaccess==NULL)
+    {
+      printf("[runtime] firstimeaccess allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+    if(position==NULL)
+    {
+      printf("[runtime] position map allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    buff_size=BACKUP_BUFFER_SIZE_OTHERS;
+
+    buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+    if(buff==NULL)
+    {
+      printf("[runtime] buff allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
+
+    if(backup_shared_memory==NULL)
+    {
+      printf("[runtime] backup_shared_memory allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+    initialize_opam();
+    //asm volatile ("rdcycle %0" : "=r" (cycles2));
+
+    //printf("[OPAM] time to initialize %lu\n",(cycles2-cycles1));
+    //oram_init_time=cycles2-cycles1;
+
+    //sbi_exit_enclave(-1);
+  }
+  else if(enable_oram==RORAM)
+  {
+    //unsigned long long cycles1,cycles2;
+
+    //asm volatile ("rdcycle %0" : "=r" (cycles1));
+    S_roram=(Block_roram*)malloc(STASH_SIZE_RORAM*sizeof(Block_roram));
+    if(S_roram==NULL)
+    {
+      printf("[runtime] S_roram allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+    S_roram_md=(Bucket_roram_md*)malloc(STASH_SIZE_RORAM*sizeof(Bucket_roram_md));
+    if(S_roram_md==NULL)
+    {
+      printf("[runtime] S_roram_md allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+    tree_roram_md=(Bucket_roram_md*)malloc(RORAM_TREE_SIZE*sizeof(Bucket_roram_md));
+    if(tree_roram_md==NULL)
+    {
+      printf("[runtime] tree_roram_md allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+// /tree_roram_tree_top
+    tree_roram_tree_top=(Bucket_roram*)malloc(RORAM_TREE_TOP_SIZE*sizeof(Bucket_roram));
+    if(tree_roram_tree_top==NULL)
+    {
+      printf("[runtime] tree_roram_tree_top allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+
+    firstimeaccess=(char*)malloc(MALLOC_SIZE);
+    if(firstimeaccess==NULL)
+    {
+      printf("[runtime] firstimeaccess allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+    if(position==NULL)
+    {
+      printf("[runtime] position map allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    free_indices=(uintptr_t*)malloc(STASH_SIZE_RORAM*sizeof(uintptr_t));
+    if(free_indices==NULL)
+    {
+      printf("[runtime] free_indices allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+
+
+    stash_loc=(int*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
+    if(stash_loc==NULL)
+    {
+      printf("[runtime] stash_loc allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+
+    block_map=(int*)malloc(MALLOC_SIZE*sizeof(int));
+    if(block_map==NULL)
+    {
+      printf("[runtime] block_map allocation failed\n" );
+      sbi_exit_enclave(-1);
+
+    }
+
+    buff_size=BACKUP_BUFFER_SIZE_RORAM;
+
+    buff=(char*)malloc(BACKUP_BUFFER_SIZE_RORAM*sizeof(char));
+
+    if(buff==NULL)
+    {
+      printf("[runtime] buff allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_RORAM*sizeof(char));
+
+    if(backup_shared_memory==NULL)
+    {
+      printf("[runtime] backup_shared_memory allocation failed\n" );
+      sbi_exit_enclave(-1);
+    }
+    initialize_roram();
+
+  }
+  else if(enable_oram == WORAM)
+  {
+    printf("[runtime] First fault WORAM. Allocating buffer stuff\n");
+    setup_keys_and_buffer();
+    initialize_woram_array();
+    setup_key_utilities(key_chacha,key_aes,iv_aes,Key_hmac,z_1,z_2,key,key_hmac,z1,z2);
+    
+  }
+
+  first_fault=0;
+  asm volatile ("rdcycle %0" : "=r" (cycles2));
+  oram_init_time=cycles2-cycles1;
+}
+
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
   if(first_fault)
   {
-    unsigned long long cycles1,cycles2;
-
-    asm volatile ("rdcycle %0" : "=r" (cycles1));
-    strcpy(sss,"firstimeaccess");
-    rt_util_getrandom((void*) key_chacha, 32);
-    strcpy(sss,"version_numbers");
-
-    version_numbers=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-    trace_buff=(uintptr_t*)malloc(FULL_TRACE_CHUNK*sizeof(uintptr_t));
-
-    if(version_numbers==NULL)
-    {
-      printf("[runtime] version_numbers allocation failed\n" );
-      sbi_exit_enclave(-1);
-    }
-
-    for(int i=0;i<NO_OF_COUNTERS;i++)
-      counters[i].count=0;
-    pages_read=0;
-    pages_written=0;
-    init_num_pages=(uintptr_t)get_queue_size();
-    alloc=init_num_pages;
-
-    edge_data_t pkgstr;
-    dispatch_edgecall_ocall(OCALL_GET_TESTING_PARAMS,NULL,0,&pkgstr,sizeof(edge_data_t),(uintptr_t)&args_user);
-
-    enable_oram=args_user.page_fault_handler;
-    authentication=args_user.integrity_protection;
-    confidentiality=args_user.confidentiality;
-    free_pages_fr=args_user.num_free_pages;
-    tracing=args_user.page_addr_tracing;
-    debug=args_user.debug_mode;
-    exc=args_user.tree_exc;
-    fault_lim= args_user.fault_limit;
-    frame_size=free_pages_fr;
-    //display_test_params();
-    //printf("[RUNTIME] fault limit %d \n",fault_lim );
-    //sbi_exit_enclave(-1);
-
-    strcpy(counters[PAGES_READ].name,"PAGES_READ");
-    strcpy(counters[PAGES_WRITTEN].name,"PAGES_WRITTEN");
-    strcpy(counters[INIT_NUM_PAGES].name,"INIT_NUM_PAGES");
-    strcpy(counters[PAGE_FAULT_COUNT].name,"PAGE_FAULT_COUNT");
-    strcpy(counters[FREE_PAGES_FR].name,"FREE_PAGES_FR");
-    strcpy(counters[EXTENSIONS].name,"EXTENSIONS");
-    strcpy(counters[TOTAL_PAGES].name,"TOTAL_PAGES");
-    strcpy(counters[REAL_PAGES_READ].name,"REAL_PAGES_READ");
-    strcpy(counters[REAL_PAGES_WRITTEN].name,"REAL_PAGES_WRITTEN");
-    strcpy(counters[DUMMY_PAGES_READ].name,"DUMMY_PAGES_READ");
-    strcpy(counters[DUMMY_PAGES_WRITTEN].name,"DUMMY_PAGES_WRITTEN");
-    strcpy(counters[MAX_STASH_OCC].name,"MAX_STASH_OCC");
-    strcpy(counters[SUM_STASH_OCC].name,"SUM_STASH_OCC");
-    strcpy(counters[ORAM_ACC].name,"ORAM_ACC");
-    strcpy(counters[ORAM_INIT].name,"ORAM_INIT");
-
-    if(debug)
-      display_test_params();
-    uintptr_t left =free_pages_fr-init_num_pages; left=left;
-    //deplete_free_pages_for_testing(left);
-    if(debug)
-      printf("[runtime] free pages left %lu\n",spa_available() );
-    if(enable_oram==PATH_ORAM)
-    {
-      //unsigned long long cycles1,cycles2;
-
-      //asm volatile ("rdcycle %0" : "=r" (cycles1));
-
-      S=(Block*)malloc(ORAM_STASH_SIZE*sizeof(Block));
-      Sg=(Block*)malloc(ORAM_STASH_SIZE*sizeof(Block));
-
-      firstimeaccess=(char*)malloc(MALLOC_SIZE);
-      if(firstimeaccess==NULL)
-      {
-        printf("[runtime] firstimeaccess allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-      if(position==NULL)
-      {
-        printf("[runtime] position map allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      tree_po_md=(Bucket_md *)malloc(ORAM_TREE_SIZE*sizeof(Bucket_md));
-      if(tree_po_md==NULL)
-      {
-        printf("[runtime] tree_po_md allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      buff_size=BACKUP_BUFFER_SIZE_ORAM;
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_ORAM*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_ORAM*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      free_indices=(uintptr_t*)malloc(ORAM_STASH_SIZE*sizeof(uintptr_t));
-      if(free_indices==NULL)
-      {
-        printf("[runtime] free_indices allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-      stash_loc=(int*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-      if(stash_loc==NULL)
-      {
-        printf("[runtime] stash_loc allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-     initalize_oram();
-
-    }
-    else if(enable_oram==NO_ORAM)
-    {
-      printf("[runtime] First fault No ORAM. Allocating Buffer stuff\n");
-      // printf("[keytest] 0x%zx 0x%zx\n", key_chacha[0], key_chacha[1]);
-      setup_keys_and_buffer();
-    }
-    else if(enable_oram==ENC_PFH)
-    {
-      p_ivs=(iv_page*)malloc(MALLOC_SIZE*sizeof(iv_page));
-      if(p_ivs==NULL)
-      {
-        printf("[runtime] knocked_page_addr allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      setup_keys_and_buffer();
-    }
-    else if(enable_oram==OPAM)
-    {
-      //unsigned long long cycles1,cycles2;
-      //asm volatile ("rdcycle %0" : "=r" (cycles1));
-
-      S_opam_md=(Block_Opam_md*)malloc(OPAM_STASH_SIZE*sizeof(Block_Opam_md));
-      firstimeaccess=(char*)malloc(MALLOC_SIZE);
-      if(firstimeaccess==NULL)
-      {
-        printf("[runtime] firstimeaccess allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-      if(position==NULL)
-      {
-        printf("[runtime] position map allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      buff_size=BACKUP_BUFFER_SIZE_OTHERS;
-
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_OTHERS*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-      initialize_opam();
-      //asm volatile ("rdcycle %0" : "=r" (cycles2));
-
-      //printf("[OPAM] time to initialize %lu\n",(cycles2-cycles1));
-      //oram_init_time=cycles2-cycles1;
-
-      //sbi_exit_enclave(-1);
-    }
-    else if(enable_oram==RORAM)
-    {
-      //unsigned long long cycles1,cycles2;
-
-      //asm volatile ("rdcycle %0" : "=r" (cycles1));
-      S_roram=(Block_roram*)malloc(STASH_SIZE_RORAM*sizeof(Block_roram));
-      if(S_roram==NULL)
-      {
-        printf("[runtime] S_roram allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-      S_roram_md=(Bucket_roram_md*)malloc(STASH_SIZE_RORAM*sizeof(Bucket_roram_md));
-      if(S_roram_md==NULL)
-      {
-        printf("[runtime] S_roram_md allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-      tree_roram_md=(Bucket_roram_md*)malloc(RORAM_TREE_SIZE*sizeof(Bucket_roram_md));
-      if(tree_roram_md==NULL)
-      {
-        printf("[runtime] tree_roram_md allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-// /tree_roram_tree_top
-      tree_roram_tree_top=(Bucket_roram*)malloc(RORAM_TREE_TOP_SIZE*sizeof(Bucket_roram));
-      if(tree_roram_tree_top==NULL)
-      {
-        printf("[runtime] tree_roram_tree_top allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-
-      firstimeaccess=(char*)malloc(MALLOC_SIZE);
-      if(firstimeaccess==NULL)
-      {
-        printf("[runtime] firstimeaccess allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      position=(uintptr_t*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-      if(position==NULL)
-      {
-        printf("[runtime] position map allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      free_indices=(uintptr_t*)malloc(STASH_SIZE_RORAM*sizeof(uintptr_t));
-      if(free_indices==NULL)
-      {
-        printf("[runtime] free_indices allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-
-
-      stash_loc=(int*)malloc(MALLOC_SIZE*sizeof(uintptr_t));
-      if(stash_loc==NULL)
-      {
-        printf("[runtime] stash_loc allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-
-      block_map=(int*)malloc(MALLOC_SIZE*sizeof(int));
-      if(block_map==NULL)
-      {
-        printf("[runtime] block_map allocation failed\n" );
-        sbi_exit_enclave(-1);
-
-      }
-
-      buff_size=BACKUP_BUFFER_SIZE_RORAM;
-
-      buff=(char*)malloc(BACKUP_BUFFER_SIZE_RORAM*sizeof(char));
-
-      if(buff==NULL)
-      {
-        printf("[runtime] buff allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      backup_shared_memory=(char*)malloc(BACKUP_BUFFER_SIZE_RORAM*sizeof(char));
-
-      if(backup_shared_memory==NULL)
-      {
-        printf("[runtime] backup_shared_memory allocation failed\n" );
-        sbi_exit_enclave(-1);
-      }
-      initialize_roram();
-
-    }
-    else if(enable_oram == WORAM)
-    {
-      printf("[runtime] First fault WORAM. Allocating buffer stuff\n");
-      setup_keys_and_buffer();
-      initialize_woram_array();
-      setup_key_utilities(key_chacha,key_aes,iv_aes,Key_hmac,z_1,z_2,key,key_hmac,z1,z2);
-      
-    }
-
-    first_fault=0;
-    asm volatile ("rdcycle %0" : "=r" (cycles2));
-    oram_init_time=cycles2-cycles1;
+    setup_page_fault_handler(addr, status_find_address);
   }
 
-  uintptr_t *root_page_table_addr=get_root_page_table_addr();
+  uintptr_t *root_page_table_addr = get_root_page_table_addr();
   if(status_find_address==0)
         status_find_address=__walk(root_page_table_addr,addr);
 
@@ -1054,7 +1060,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
     printf("[runtime] Unmapped address. Fatal error. Exiting.\n");
     sbi_exit_enclave(-1);
   }
-  if(  (((*status_find_address) & PTE_V)==0) && ((*status_find_address) & PTE_E)      )
+  if(  (((*status_find_address) & PTE_V)==0) && ((*status_find_address) & PTE_E)   )
   {
 
     if(prev_addr!=0)
@@ -1095,13 +1101,16 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       //if(current_q_size>=threshold_number_of_pages &&  enable_swap_out)
       //if(spa_available()<6500 )// no more physical pages are available. so we need to swap out a page
       uintptr_t allocated_pages_count= 130560+300 - spa_available()+6500-init_num_pages-6000;allocated_pages_count=allocated_pages_count;
+      printf("[runtime] curr q size %zd, init_num_pages %zd, free_pages %zd, cache %zd", current_q_size, init_num_pages, free_pages_fr, MAX_VICTIM_CACHE_PAGES);
 
-      //if(allocated_pages_count>free_pages_fr)
-      if(current_q_size+init_num_pages>=free_pages_fr)
-      //if(THRESHOLD_PAGES+current_q_size>=free_pages_fr)
-      //if(alloc>=free_pages_fr)
+      if(current_q_size + init_num_pages + MAX_VICTIM_CACHE_PAGES >=free_pages_fr)
       {
         printf("[runtime] No free page\n");
+        if(first_page_replacement == 1)
+        {
+          printf("[runtime] First page replacement\n");
+          first_page_replacement = 0;
+        }
         uintptr_t victim = remove_victim_page();
         //uintptr_t victim_page_org=pop_item[0];
         uintptr_t victim_page_enc=pop_item[1];//UC THIS
@@ -1243,9 +1252,10 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
              }
              else if(enable_oram==WORAM)
              {
-              //  printf("[woram] Entry point WORAM for page replacement\n");
-               store_victim_page_to_woram(victim_page_enc, victim_page_org, confidentiality, authentication);
-               pages_written++;
+                //  printf("[woram] Entry point WORAM for page replacement\n");
+                // TODO - introduce victim cache here
+                store_victim_page_to_woram(victim_page_enc, victim_page_org, confidentiality, authentication);
+                pages_written++;
              }
 
              if(debug)
