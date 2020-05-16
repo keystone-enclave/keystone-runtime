@@ -1110,6 +1110,7 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
         {
           printf("[runtime] First page replacement\n");
           first_page_replacement = 0;
+          initialize_victim_cache();
         }
         uintptr_t victim = remove_victim_page();
         //uintptr_t victim_page_org=pop_item[0];
