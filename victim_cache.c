@@ -49,11 +49,11 @@ QNode* create_new_node(uintptr_t addr)
 {
     QNode *new_node = (QNode*) malloc(sizeof(QNode));
     new_node->next = new_node->prev = 0;
-    new_node->pageNumber = addr;
+    new_node->pageNumber = addr >> RISCV_PAGE_BITS;
     return new_node;
 }
 
-void add_to_queue(uintptr_t addr, Queue *q)
+QNode* add_to_queue(uintptr_t addr, Queue *q)
 {
     QNode *new_node = create_new_node(addr >> RISCV_PAGE_BITS);
     // printf("[testing] adding addr 0x%zx 0x%zx\n", new_node->pageNumber);
@@ -65,6 +65,7 @@ void add_to_queue(uintptr_t addr, Queue *q)
         new_node->prev = q->rear;
         q->rear = new_node;
     }
+    return new_node;
 }
 
 uintptr_t remove_lru_from_queue(Queue *q) //remove from front of the Queue
@@ -125,18 +126,61 @@ void remove_node_from_queue(QNode *node_to_remove, Queue *q)
     }
 }
 
+int is_victim_cache_full()
+{
+    if(victim_cache.free_cache_pages == 0)
+        return 1;
+    return 0;
+}
+
+int is_victim_cache_empty()
+{
+    if(victim_cache.lru_queue->front == 0)
+        return 1;
+    return 0;
+}
+
 void move_page_to_cache_from_enclave(uintptr_t addr)
 {
-
+    //assume cache is not full
+    if(is_victim_cache_full())
+    {
+        printf("[ERROR] cache full. cant add page from enclave\n");
+        return;
+    }
+    Queue *q = victim_cache.lru_queue;
+    QNode *node_ptr = add_to_queue(addr, q);
+    update_hashmap(addr, node_ptr);
+    victim_cache.free_cache_pages--;
+    victim_cache.used_cache_pages++;
 }
 
 void move_page_to_enclave_from_cache(uintptr_t addr)
 {
-    
+    QNode *node_ptr = get_node_position(addr);
+    update_hashmap(addr, 0);
+    remove_node_from_queue(node_ptr, victim_cache.lru_queue);
+    victim_cache.free_cache_pages++;
+    victim_cache.used_cache_pages--;
 }
 
+uintptr_t get_lru_victim_from_cache()
+{
+    if(is_victim_cache_empty())
+    {
+        printf("ERROR - CACHE FULL. CANT GET LRU\n");
+        return 0;
+    }
+    return victim_cache.lru_queue->front->pageNumber << RISCV_PAGE_BITS; // >> or << ??
+}
 
-
+void remove_lru_page_from_cache()
+{
+    uintptr_t addr = remove_lru_from_queue(victim_cache.lru_queue);
+    update_hashmap(addr, 0);
+    victim_cache.free_cache_pages++;
+    victim_cache.used_cache_pages--;
+}
 
 void display_queue(Queue *q)
 {

@@ -34,7 +34,7 @@ QNode* create_new_node(uintptr_t addr);
 int is_queue_empty(Queue *q);
 void update_hashmap(uintptr_t addr, QNode *position);
 QNode* get_node_position(uintptr_t addr);
-void add_to_queue(uintptr_t ele, Queue *q); //add element to rear end of queue
+QNode* add_to_queue(uintptr_t ele, Queue *q); //add element to rear end of queue
 uintptr_t remove_lru_from_queue(Queue *q);
 uintptr_t remove_mru_from_queue(Queue *q);
 void remove_node_from_queue(QNode *node_to_remove, Queue *q);
@@ -43,18 +43,11 @@ void testing_cache();
 //cache functions
 void move_page_to_cache_from_enclave(uintptr_t addr);
 void move_page_to_enclave_from_cache(uintptr_t addr);
-
-
-// void add_to_hashmap(uintptr_t addr)
-
-// int is_queue_empty(Queue* queue);
-int is_victim_cache_empty();
+uintptr_t get_lru_victim_from_cache();
+void remove_lru_page_from_cache();
 int is_victim_cache_full();
-
-void initialize_victim_cache(void);
-int is_cache_hit(uintptr_t addr); //returns true if cache has addr
-void store_page_to_cache(uintptr_t addr); //evicted page is placed in victim cache
-void remove_page_from_cache(uintptr_t addr); //removes page from cache
+int is_victim_cache_empty();
+void initialize_victim_cache();
 
 
 //debug functions
