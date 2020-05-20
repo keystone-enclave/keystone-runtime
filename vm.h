@@ -9,8 +9,8 @@
 #define MASK(n) (BIT(n)-1ul)
 #define IS_ALIGNED(n, b) (!((n) & MASK(b)))
 
-#define RISCV_PT_INDEX_BITS 9
-#define RISCV_PT_LEVELS 3
+#define RISCV_PT_INDEX_BITS 10
+#define RISCV_PT_LEVELS 2
 #define RISCV_PAGE_BITS 12
 #define RISCV_PAGE_SIZE (1<<RISCV_PAGE_BITS)
 #define RISCV_PAGE_OFFSET(addr) (addr % RISCV_PAGE_SIZE)

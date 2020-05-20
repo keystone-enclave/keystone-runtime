@@ -2,7 +2,7 @@ OUTPUT_ARCH( "riscv" )
 
 SECTIONS
 {
-  . = 0xffffffffc0000000;
+  . = 0xc0000000;
   PROVIDE(rt_base = .);
   .text : {
     *(.text._start)
