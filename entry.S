@@ -220,7 +220,7 @@ rt_trap_table:
   .global rt_trap_table
   .align 6
    #if __riscv_xlen == 64
-   .dword not_implemented_fatal //0
+  .dword not_implemented_fatal //0
   .dword not_implemented_fatal //1
   .dword not_implemented_fatal //2
   .dword not_implemented_fatal //3
