@@ -1,9 +1,10 @@
-CC = riscv32-unknown-linux-gnu-gcc
+CROSS_COMPILE ?= riscv32-unknown-linux-gnu-
+CC = $(CROSS_COMPILE)gcc
 CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)
 SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c paging.c
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt
-LINK = riscv32-unknown-linux-gnu-ld
+LINK = $(CROSS_COMPILE)ld
 LDFLAGS = -static -nostdlib
 
 SDK_LIB_DIR = $(KEYSTONE_SDK_DIR)/lib
@@ -38,7 +39,7 @@ copy: $(RUNTIME) $(DISK_IMAGE)
 	rm -rf $(MOUNT_DIR)
 
 $(RUNTIME): $(ASM_OBJS) $(OBJS) $(SDK_EDGE_LIB) $(TMPLIB)
-	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds /home/alexthomas/keystone/riscv32gc/lib/gcc/riscv32-unknown-elf/8.3.0/libgcc.a
+	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds $(RISCV)/lib/gcc/riscv32-unknown-elf/8.3.0/libgcc.a
 
 $(ASM_OBJS): $(ASM_SRCS)
 	$(CC) $(CFLAGS) -c $<

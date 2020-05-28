@@ -1,6 +1,13 @@
 #include <asm/csr.h>
+
+#if __riscv_xlen == 64
+#define STORE sd
+#define LOAD ld
+#elif __riscv_xlen == 32
 #define STORE sw
 #define LOAD lw
+#endif 
+
 #define LWU lwu
 #define LOG_REGBYTES  2
 #define REGBYTES (1<<LOG_REGBYTES)
@@ -211,6 +218,25 @@ not_implemented:
 rt_trap_table:
   .global rt_trap_table
   .align 6
+   #if __riscv_xlen == 64
+   .dword not_implemented_fatal //0
+  .dword not_implemented_fatal //1
+  .dword not_implemented_fatal //2
+  .dword not_implemented_fatal //3
+  .dword not_implemented_fatal //4
+  .dword not_implemented_fatal //5
+  .dword not_implemented_fatal //6
+  .dword not_implemented_fatal //7
+  .dword handle_syscall //8
+  .dword not_implemented_fatal //9
+  .dword not_implemented_fatal //10
+  .dword not_implemented_fatal //11
+  .dword not_implemented_fatal //12: fetch page fault - code always presents in memory
+  .dword rt_page_fault //13: load page fault - stack/heap access
+  .dword not_implemented_fatal //14
+  .dword rt_page_fault //15: store page fault - stack/heap access
+
+   #elif __riscv_xlen == 32
   .word not_implemented_fatal //0
   .word not_implemented_fatal //1
   .word not_implemented_fatal //2
@@ -227,3 +253,4 @@ rt_trap_table:
   .word rt_page_fault //13: load page fault - stack/heap access
   .word not_implemented_fatal //14
   .word rt_page_fault //15: store page fault - stack/heap access
+  #endif 
