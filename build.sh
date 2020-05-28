@@ -14,7 +14,6 @@ PLUGINS[env_setup]="-DENV_SETUP "
 PLUGINS[strace_debug]="-DINTERNAL_STRACE "
 PLUGINS[paging]="-DUSE_PAGING -DUSE_FREEMEM "
 PLUGINS[debug]="-DDEBUG "
-
 #PLUGINS[dynamic_resizing]="-DDYN_ALLOCATION "
 
 OPTIONS_FLAGS=

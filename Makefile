@@ -1,6 +1,6 @@
-CC_H = riscv$(BITS)-unknown-linux-gnu-
-CC = $(CC_H)gcc
-OBJCOPY = $(CC_H)objcopy
+CROSS_COMPILE = riscv$(BITS)-unknown-linux-gnu-
+CC = $(CROSS_COMPILE)gcc
+OBJCOPY = $(CROSS_COMPILE)objcopy
 
 
 ifndef KEYSTONE_SDK_DIR
@@ -11,8 +11,8 @@ CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)
 SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c paging.c
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt
-LINK = $(CC_H)ld
-LDFLAGS = -static -nostdlib
+LINK = $(CROSS_COMPILE)ld
+LDFLAGS = -static -nostdlib $(shell $(CC) --print-file-name=libgcc.a)
 
 SDK_LIB_DIR = $(KEYSTONE_SDK_DIR)/lib
 SDK_INCLUDE_EDGE_DIR = $(SDK_LIB_DIR)/edge/include
@@ -46,7 +46,7 @@ copy: $(RUNTIME) $(DISK_IMAGE)
 	rm -rf $(MOUNT_DIR)
 
 $(RUNTIME): $(ASM_OBJS) $(OBJS) $(SDK_EDGE_LIB) $(TMPLIB)
-	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds $(RISCV)/lib/gcc/riscv$(BITS)-unknown-elf/8.3.0/libgcc.a
+	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds $(LDFLAGS)
 	$(OBJCOPY) --add-section .options_log=.options_log --set-section-flags .options_log=noload,readonly $(RUNTIME) 
 
 $(ASM_OBJS): $(ASM_SRCS)
