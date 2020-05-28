@@ -1,14 +1,17 @@
+CC_H = riscv$(BITS)-unknown-linux-gnu-
+CC = $(CC_H)gcc
+OBJCOPY = $(CC_H)objcopy
+
+
 ifndef KEYSTONE_SDK_DIR
   $(error KEYSTONE_SDK_DIR is undefined)
 endif
 
-CC = riscv64-unknown-linux-gnu-gcc
-OBJCOPY = riscv64-unknown-linux-gnu-objcopy
 CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)
 SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c paging.c
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt
-LINK = riscv64-unknown-linux-gnu-ld
+LINK = $(CC_H)ld
 LDFLAGS = -static -nostdlib
 
 SDK_LIB_DIR = $(KEYSTONE_SDK_DIR)/lib
@@ -43,8 +46,8 @@ copy: $(RUNTIME) $(DISK_IMAGE)
 	rm -rf $(MOUNT_DIR)
 
 $(RUNTIME): $(ASM_OBJS) $(OBJS) $(SDK_EDGE_LIB) $(TMPLIB)
-	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds
-	$(OBJCOPY) --add-section .options_log=.options_log --set-section-flags .options_log=noload,readonly $(RUNTIME)
+	$(LINK) $(LINKFLAGS) -o $@ $^ -T runtime.lds $(RISCV)/lib/gcc/riscv$(BITS)-unknown-elf/8.3.0/libgcc.a
+	$(OBJCOPY) --add-section .options_log=.options_log --set-section-flags .options_log=noload,readonly $(RUNTIME) 
 
 $(ASM_OBJS): $(ASM_SRCS)
 	$(CC) $(CFLAGS) -c $<
