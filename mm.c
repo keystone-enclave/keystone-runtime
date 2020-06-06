@@ -197,14 +197,16 @@ __map_with_reserved_page_table_32(uintptr_t dram_base,
   uintptr_t offset = 0;
   uintptr_t leaf_level = 2;
   pte* leaf_pt = l2_pt;
+  unsigned long dram_max =  RISCV_GET_LVL_PGSIZE(leaf_level - 1);
 
   /* use megapage if l2_pt is null */
   if (!l2_pt) {
     leaf_level = 1;
     leaf_pt = root_page_table;
+    dram_max = -1UL; 
   }
 
-  assert(dram_size <= RISCV_GET_LVL_PGSIZE(leaf_level - 1) - 2);
+  assert(dram_size <= dram_max);
   assert(IS_ALIGNED(dram_base, RISCV_GET_LVL_PGSIZE_BITS(leaf_level)));
   assert(IS_ALIGNED(ptr, RISCV_GET_LVL_PGSIZE_BITS(leaf_level - 1)));
 
