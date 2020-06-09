@@ -63,6 +63,7 @@ int enable_oram=1;
 int count_ext=0;
 int confidentiality=1;
 int authentication =1;
+int v_cache=0;
 int tracing =0;
 int debug =0;
 int exc=0;
@@ -779,6 +780,7 @@ void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
   authentication=args_user.integrity_protection;
   confidentiality=args_user.confidentiality;
   free_pages_fr=args_user.num_free_pages;
+  v_cache=args_user.victim_cache;
   tracing=args_user.page_addr_tracing;
   debug=args_user.debug_mode;
   exc=args_user.tree_exc;
@@ -1036,7 +1038,7 @@ void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
     setup_keys_and_buffer();
     initialize_woram_array();
     setup_key_utilities(key_chacha,key_aes,iv_aes,Key_hmac,z_1,z_2,key,key_hmac,z1,z2);
-    
+    printf("[runtime] victim cache on/off %zd", v_cache);
   }
 
   first_fault=0;

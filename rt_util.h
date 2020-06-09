@@ -71,6 +71,7 @@ typedef struct enclave_options_t {
   uint8_t integrity_protection;
   uint8_t confidentiality;
   int num_free_pages;
+  uint8_t victim_cache;
   uint8_t page_addr_tracing;
   uint8_t debug_mode;
   uint8_t tree_exc;

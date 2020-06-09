@@ -55,8 +55,8 @@ QNode* create_new_node(uintptr_t addr)
 
 QNode* add_to_queue(uintptr_t addr, Queue *q)
 {
-    QNode *new_node = create_new_node(addr >> RISCV_PAGE_BITS);
-    // printf("[testing] adding addr 0x%zx 0x%zx\n", new_node->pageNumber);
+    QNode *new_node = create_new_node(addr);
+    printf("[testing] adding addr 0x%zx 0x%zx\n", addr, new_node->pageNumber);
     if(is_queue_empty(q))
         q->front = q->rear = new_node;
     else 
@@ -197,29 +197,33 @@ void testing_cache()
 {
     printf("[cache] Entered Testing\n");
     Queue *q = victim_cache.lru_queue;
-    add_to_queue(0x1000, q);
-    add_to_queue(0x2000, q);
-    uintptr_t addr = remove_lru_from_queue(q);
-    printf("[testing] removed 0x%zx\n", addr);
+    move_page_to_cache_from_enclave(0x1000);
+    move_page_to_cache_from_enclave(0x2000);
+    move_page_to_cache_from_enclave(0x3000);
+    move_page_to_cache_from_enclave(0x4000);
+    move_page_to_cache_from_enclave(0x5000);
+    move_page_to_cache_from_enclave(0x6000);
     display_queue(q);
-    add_to_queue(0x3000, q);
-    add_to_queue(0x4000, q);
-    add_to_queue(0x5000, q);
+    remove_lru_page_from_cache();
+    printf("[testing] removed lru \n");
     display_queue(q);
-    addr = remove_mru_from_queue(q);
-    printf("[testing] removed mru 0x%zx\n", addr);
+    move_page_to_enclave_from_cache(0x3000);
+    printf("[testing] moved page 0x3000 \n");
     display_queue(q);
-    addr = remove_lru_from_queue(q);
-    printf("[testing] removed lru 0x%zx\n", addr);
+    move_page_to_enclave_from_cache(0x2000);
+    printf("[testing] moved page 0x2000 \n");
     display_queue(q);
-    addr = remove_lru_from_queue(q);
-    printf("[testing] removed lru 0x%zx\n", addr);
-    display_queue(q);
-    addr = remove_mru_from_queue(q);
-    printf("[testing] removed mru 0x%zx\n", addr);
+    move_page_to_enclave_from_cache(0x5000);
+    printf("[testing] moved page 0x5000 \n");
     display_queue(q);
 
-
+    // addr = remove_mru_from_queue(q);
+    // printf("[testing] removed mru 0x%zx\n", addr);
+    // display_queue(q);
+    // uintptr_t node_addr = get_node_position(0x3000);
+    // remove_node_from_queue(node_addr,q);
+    // printf("[testing] removed 0x3000 from addr 0x%zx\n", node_addr);
+    // display_queue(q);
 }
 
 
