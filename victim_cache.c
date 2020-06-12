@@ -3,12 +3,12 @@
 
 void initialize_victim_cache()
 {
-    printf("[cache] Entered initialization\n");
+    printf("[cache] Entered initialization of victim cache\n");
     victim_cache.used_cache_pages = 0;
     victim_cache.free_cache_pages = MAX_VICTIM_CACHE_PAGES;
     initialize_hashmap();
     initialize_queue();
-    testing_cache();
+    // testing_cache();
 }
 
 void initialize_queue()
@@ -35,13 +35,16 @@ int is_queue_empty(Queue *q)
 
 void update_hashmap(uintptr_t addr, QNode *position)
 {
+    printf("[vcache] Updating hashmap of 0x%zx to 0x%zx\n", addr, position);
     unsigned int index = addr >> RISCV_PAGE_BITS;
     victim_cache.hashmap[index] = position;
+
 }
 
 QNode* get_node_position(uintptr_t addr)
 {
     unsigned int index = addr >> RISCV_PAGE_BITS;
+    printf("[vcache] Getting node pos of 0x%zx at index 0x%zx\n", addr, index);
     return victim_cache.hashmap[index];
 }
 
@@ -56,7 +59,7 @@ QNode* create_new_node(uintptr_t addr)
 QNode* add_to_queue(uintptr_t addr, Queue *q)
 {
     QNode *new_node = create_new_node(addr);
-    printf("[testing] adding addr 0x%zx 0x%zx\n", addr, new_node->pageNumber);
+    printf("[testing] adding addr to queue 0x%zx 0x%zx\n", addr, new_node->pageNumber);
     if(is_queue_empty(q))
         q->front = q->rear = new_node;
     else 
@@ -140,9 +143,16 @@ int is_victim_cache_empty()
     return 0;
 }
 
+int is_in_victim_cache(uintptr_t addr)
+{
+    QNode* ptr = get_node_position(addr);
+    return (ptr != 0);
+}
+
 void move_page_to_cache_from_enclave(uintptr_t addr)
 {
     //assume cache is not full
+    printf("[vcache] Moving 0x%zx to cache\n", addr);
     if(is_victim_cache_full())
     {
         printf("[ERROR] cache full. cant add page from enclave\n");
@@ -151,15 +161,20 @@ void move_page_to_cache_from_enclave(uintptr_t addr)
     Queue *q = victim_cache.lru_queue;
     QNode *node_ptr = add_to_queue(addr, q);
     update_hashmap(addr, node_ptr);
+    display_hashmap();
+    display_queue(q);
     victim_cache.free_cache_pages--;
     victim_cache.used_cache_pages++;
 }
 
 void move_page_to_enclave_from_cache(uintptr_t addr)
 {
+    printf("[vcache] Move page 0x%zx to enclave\n", addr);
     QNode *node_ptr = get_node_position(addr);
     update_hashmap(addr, 0);
+    display_hashmap();
     remove_node_from_queue(node_ptr, victim_cache.lru_queue);
+    display_queue(victim_cache.lru_queue);
     victim_cache.free_cache_pages++;
     victim_cache.used_cache_pages--;
 }
@@ -178,6 +193,8 @@ void remove_lru_page_from_cache()
 {
     uintptr_t addr = remove_lru_from_queue(victim_cache.lru_queue);
     update_hashmap(addr, 0);
+    display_hashmap();
+    display_queue(victim_cache.lru_queue);
     victim_cache.free_cache_pages++;
     victim_cache.used_cache_pages--;
 }
@@ -191,6 +208,14 @@ void display_queue(Queue *q)
         node = node->next;
     }
     printf("\n");
+}
+
+void display_hashmap()
+{
+    int size = 15;
+    unsigned long i = 0;
+    for(i=0; i<size; i++)
+        printf("%d -> 0x%zx\n", i, victim_cache.hashmap[i]);
 }
 
 void testing_cache()

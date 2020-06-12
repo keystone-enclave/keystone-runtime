@@ -48,11 +48,12 @@ void remove_lru_page_from_cache();
 int is_victim_cache_full();
 int is_victim_cache_empty();
 void initialize_victim_cache();
+int is_in_victim_cache(uintptr_t addr);
 
 
 //debug functions
 void display_queue(Queue *q);
-
+void display_hashmap();
 
 
 
