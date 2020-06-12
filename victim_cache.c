@@ -199,6 +199,23 @@ void remove_lru_page_from_cache()
     victim_cache.used_cache_pages--;
 }
 
+void move_lru_to_mru_in_cache()
+{
+    printf("Moving page 0x%zx to end of queue\n");
+    Queue *q = victim_cache.lru_queue; //cant be empty
+    QNode *lru_node = q->front;
+    //remove lru from front
+    q->front = q->front->next;
+    q->front->prev = 0;
+
+    //move it to rear
+    q->rear->next = lru_node;
+    lru_node->prev = q->rear;
+    lru_node->next = 0;
+    q->rear = lru_node;
+    display_queue(q);
+}
+
 void display_queue(Queue *q)
 {
     QNode *node = q->front;

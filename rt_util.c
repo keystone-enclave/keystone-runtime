@@ -721,25 +721,35 @@ uintptr_t get_runtime_addr(uintptr_t victim_page_enc)
 }
 
 //NOTE - JUST WRITES TO WORAM RIGHT NOW
-void write_to_victim_cache_handle_full(uintptr_t addr) 
+//REQUIREMENT - Victim Cache size should be atleast 1
+void write_to_victim_cache_handle_full(uintptr_t addr, uintptr_t req_addr) 
 {
+  printf("addr 0x%zx req_addr 0x%zx\n", addr, req_addr);
   // Step 1 - Get LRU Page from cache
   uintptr_t page_out = get_lru_victim_from_cache();
+  if(page_out >> RISCV_PAGE_BITS == req_addr >> RISCV_PAGE_BITS)
+  {
+    printf("Access lru page 0x%zx to prevent its replacement\n", req_addr);
+    move_lru_to_mru_in_cache();
+    page_out = get_lru_victim_from_cache();
+  }
   uintptr_t page_out_va = get_runtime_addr(page_out);
-  printf("Lru page enclave addr 0x%zx runtime va 0x%zx", page_out, page_out_va);
+  printf("Lru page enclave addr 0x%zx runtime va 0x%zx\n", page_out, page_out_va);
 
   /* 
     WRITE TO OTHER ORAM TYPES CAN BE HANDLED HERE IN STEP 2
      BY PASSING A FLAG TO THIS FUNCTION
   */
   // Step 2 - Write the page contents to ORAM
-  printf("Moved 0x%zx to oram", page_out);
   store_victim_page_to_woram(page_out, page_out_va, confidentiality, authentication);
   pages_written++;
+  printf("Moved 0x%zx to oram\n", page_out);
 
+  printf("Removing lru from the cache\n");
   // Step 3 - Remove the page from cache
   remove_lru_page_from_cache();
 
+  printf("Freed page 0x%zx\n", page_out);
   // Step 4 - Free the page (Cache has 1 free page now)
   free_page(vpn(page_out));
 
@@ -1239,7 +1249,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
                    printf("[runtime] Cache full? %d\n", is_full);
                    if(is_full)
                    {
-                     write_to_victim_cache_handle_full(victim_page_enc); 
+                     write_to_victim_cache_handle_full(victim_page_enc, addr); 
                      
                    }
                    else 

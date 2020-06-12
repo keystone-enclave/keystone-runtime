@@ -49,7 +49,7 @@ int is_victim_cache_full();
 int is_victim_cache_empty();
 void initialize_victim_cache();
 int is_in_victim_cache(uintptr_t addr);
-
+void move_lru_to_mru_in_cache();
 
 //debug functions
 void display_queue(Queue *q);
