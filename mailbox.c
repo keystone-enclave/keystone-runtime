@@ -1,3 +1,5 @@
+#include "mailbox.h" 
+
 //Initializes mailbox
 int init_mailbox(struct mailbox *mailbox){
    return 1; 

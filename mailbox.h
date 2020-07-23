@@ -1,6 +1,8 @@
 #ifndef __MAILBOX_H__
 #define __MAILBOX_H__
 
+#include <stdint.h>
+#include <stddef.h>
 #define MAILBOX_SIZE 256
 struct mailbox
 {
@@ -8,14 +10,14 @@ struct mailbox
   size_t size; 
   uint8_t enabled; 
   int lock; 
-  byte data[MAILBOX_SIZE]; 
+  uint8_t data[MAILBOX_SIZE]; 
 }; 
 
 struct mailbox_header
 {
   size_t send_eid;
   size_t size; 
-  byte data[0]; 
+  uint8_t data[0]; 
 }; 
 
 //Initializes mailbox
@@ -38,6 +40,6 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size);
 /* 
   Acquires the enclave mailbox. 
 */
-int acquire_mailbox_lock()
+int acquire_mailbox_lock();
 
 #endif
