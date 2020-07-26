@@ -3,19 +3,21 @@
 
 #include "vm.h"
 
-#define UTM_ARRAY_STARTING_OFFSET 1048*1048 //1MB
-#define WORAM_SIZE 2000 //2000
-#define SCALING_FACTOR 2/3.0  // main area : total oram SHOULD BE FLOAT
+#define UTM_ARRAY_STARTING_OFFSET 1048*1048 //Leave the first 1MB for ocall operations
+#define WORAM_SIZE 3000  
+#define SCALING_FACTOR 2/3.0  // main area : total oram ratio SHOULD BE FLOAT
 
 struct woram {
     uintptr_t woram_array;
     uintptr_t woram_array_size;
-    uintptr_t *position_map;
-    unsigned long long main_area_size; //N
-    unsigned long long holding_area_size; //M
+    uintptr_t *position_map;                    // [ VPage -> Address ]
+    unsigned long long main_area_size;          // N
+    unsigned long long holding_area_size;       // M
     unsigned long long write_access_counter;
 } woram;
 
+
+/* To encrypt/decrypt and authenticate */
 struct key_utilities
 {
     uint8_t *key_chacha;
@@ -34,6 +36,7 @@ struct key_utilities keys;
 void initialize_woram_array(void);
 void initialize_position_map(void);
 void sanity_check(void);
+void validate_access(uintptr_t index);
 void woram_write_access(pages);
 void woram_read_access(uintptr_t, pages*);
 void set_pos(uintptr_t addr, uintptr_t new_addr);

@@ -1121,14 +1121,15 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
       //if(current_q_size>=threshold_number_of_pages &&  enable_swap_out)
       //if(spa_available()<6500 )// no more physical pages are available. so we need to swap out a page
       uintptr_t allocated_pages_count= 130560+300 - spa_available()+6500-init_num_pages-6000;allocated_pages_count=allocated_pages_count;
-      printf("[runtime] curr q size %zd, init_num_pages %zd, free_pages %zd, cache %zd\n", current_q_size, init_num_pages, free_pages_fr, MAX_VICTIM_CACHE_PAGES);
-
-      if(current_q_size + init_num_pages + MAX_VICTIM_CACHE_PAGES >=free_pages_fr)
+      // printf("[runtime] curr q size %zd, init_num_pages %zd, free_pages %zd, cache %zd\n", current_q_size, init_num_pages, free_pages_fr, MAX_VICTIM_CACHE_PAGES);
+      unsigned long int victim_cache_assigned_pages = 0;
+      if(v_cache) victim_cache_assigned_pages =  MAX_VICTIM_CACHE_PAGES;
+      if(current_q_size + init_num_pages + victim_cache_assigned_pages >=free_pages_fr)
       {
-        printf("[runtime] No free page\n");
+        // printf("[runtime] No free page\n");
         if(first_page_replacement == 1)
         {
-          printf("[runtime] First page replacement\n");
+          // printf("[runtime] First page replacement\n");
           first_page_replacement = 0;
           if(v_cache)
             initialize_victim_cache();
@@ -1146,8 +1147,8 @@ void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
           int victim_page_dirty = 1;
           if( (    (*status_find_pte_victim) & PTE_D ) || enable_oram==OPAM || enable_oram==ENC_PFH  ||  (   (exc==1) && (enable_oram==PATH_ORAM || enable_oram==RORAM )  )   )
           {
-            printf("[runtime] P.A of 0x%lx is 0x%lx\n",victim_page_enc, ( (*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
-            printf("[runtime] P.A of 0x%lx is 0x%lx\n",addr, ( (*status_find_address)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+            // printf("[runtime] P.A of 0x%lx is 0x%lx\n",victim_page_enc, ( (*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+            // printf("[runtime] P.A of 0x%lx is 0x%lx\n",addr, ( (*status_find_address)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
 
              if(debug)
               printf("[runtime] addr = 0x%lx dirty\n",victim_page_enc );
@@ -1242,43 +1243,45 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
              }
              else if(enable_oram==WORAM)
              {
+                /* -----------------------------------------------------------------------------------
+                                          ONLY FOR WORAM
+                --------------------------------------------------------------------------------------
+                If Victim Cache is enabled,
+                  a) Check if it is full
+                  b) If full, 
+                      1. Get LRU page from cache and move it to woram to free space in cache
+                      2. Move the replaced(victim) page to victim cache
+                  c) If not full, move the replaced page(victim) to victim cache
+                  d) Invalidate the replaced(victim) page's pte entry
 
-                if(v_cache)
+                If Victim Cache is disabled, store the replaced(victim) to woram
+
+                --------------------------------------------------------------------------------------
+                */
+                if(v_cache) // If Victim Cache is enabled
                 {
                    int is_full = is_victim_cache_full();
                    printf("[runtime] Cache full? %d\n", is_full);
                    if(is_full)
-                   {
                      write_to_victim_cache_handle_full(victim_page_enc, addr); 
-                     
-                   }
                    else 
-                   {
                      move_page_to_cache_from_enclave(victim_page_enc);   
-
-                   }
                   printf("[runtime] Invalidating replaced page 0x%zx -> 0x%zx", victim_page_enc, *status_find_pte_victim);
-                  *status_find_pte_victim = *status_find_pte_victim & ~PTE_V; 
+                  *status_find_pte_victim = *status_find_pte_victim & ~PTE_V; //invalidate page
                   printf("[runtime] After invalidation replaced page 0x%zx -> 0x%zx", victim_page_enc, *status_find_pte_victim);
 
                 }
-                else 
+                else // If Victim Cache is disabled
                 {
                   store_victim_page_to_woram(victim_page_enc, victim_page_org, confidentiality, authentication);
                   pages_written++;
                 }
                 
              }
-
-             if(debug)
-             {
-               printf("[runtime] swapped out 0x%lx\n", victim_page_enc);
-             }
           }
-          else
+          else // Victim Page isn't Dirty
           {
-            printf("[runtime] Victim Page is not dirty so didn't knock it out 0x%lx(0x%lx)\n",victim_page_enc,victim_page_org);
-            victim_page_dirty = 0;
+            victim_page_dirty = 0; //mark it as not dirty
             // we invalidate the victim page's entry in case of WORAM 
             if(debug)
             {
@@ -1286,14 +1289,25 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
               printf("[runtime] didn't knock addr 0x%lx(0x%lx)\n", victim_page_enc,victim_page_org);
             }
           }
+
           if ( enable_oram == WORAM && (!v_cache || !victim_page_dirty))
           {
-            //all counters and free pages have been accounted for in other scenarios
+            /* -----------------------------------------------------------------------------------
+                                          ONLY FOR WORAM
+            --------------------------------------------------------------------------------------
+              Free replaced page if
+                a) Either Victim Cache is disabled OR 
+                b) Victim cache is enabled but page to be replaced is not dirty
+              Else the replaced page resides in the victim cache inside the enclave
+              and hence shouldn't be freed. It's PTE entry has already been invalidated.
+            --------------------------------------------------------------------------------------
+            */
+
             free_page(vpn(victim_page_enc));
             alloc--;
 
           }
-          if( enable_oram != WORAM) //original code
+          if( enable_oram != WORAM) //original code for other page fault handlers
           {
             free_page(vpn(victim_page_enc));
             alloc--;
@@ -1311,6 +1325,18 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
         }
       }
 
+      /* -----------------------------------------------------------------------------------------
+                                          ONLY FOR WORAM
+      --------------------------------------------------------------------------------------------
+      If Victim Cache is enabled and this is not the first page replacement that is occuring then 
+        a) check if required page 'addr' is in the victim cache or not.
+        b) If present (Cache Hit)
+            1. Move Page from cache to enclave and update PTE entry
+            2. Add the page to page replacement queue
+            3. RETURN
+        c) If not present (Cache Miss), do nothing at this point.
+      ---------------------------------------------------------------------------------------------
+      */
       if(v_cache && !first_page_replacement) //first page replacement has occured
       {
         int cache_hit = is_in_victim_cache(addr);
@@ -1331,6 +1357,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
         }
       } 
 
+      /* Allocate new page for addr */
       uintptr_t new_alloc_page = 0;
       new_alloc_page = spa_get();// get new page from the list of free pages
       alloc++;
@@ -1361,20 +1388,15 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       }
       if(enable_oram==NO_ORAM)
       {
-        // printf("[runtime] Space exists in queue\n");
         if(extension==1)
         {
           allocate_fresh_page(new_alloc_page, status_find_address);
         }
         else
         {
-          // printf("[runtime] Extension is NOT 1\n");
           pages_read++;
           edge_data_t pkgstr;
-          // printf("[runtime] Calling ocall_get_page_contents_from_utm\n");
           ocall_get_page_contents_from_utm((void*)&pkgstr,(vpn(addr))<<RISCV_PAGE_BITS);
-          //char brought_page[RISCV_PAGE_SIZE];
-          // printf("[runtime] handle_copy_from_shared\n");
           handle_copy_from_shared((void*)&brought_page,pkgstr.offset,pkgstr.size);
           if(authentication)
           {
@@ -1524,16 +1546,25 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
       }
       else if(enable_oram==WORAM)
       {
-        if(extension==1)
+        /* --------------------------------------------------------------------------------------
+                                          ONLY FOR WORAM
+        -----------------------------------------------------------------------------------------
+
+        a) If Extension = 1, this means that an extended(malloced) address is being accessed for
+           the first time. Allocate a fresh zeroed out page for it. 
+        b) If Extention = 0, Get the page from woram. 
+           (The Code reaches this point only when there was a cache miss for the page)
+        -----------------------------------------------------------------------------------------
+        */
+        if(extension==1) 
         {
           allocate_fresh_page(new_alloc_page, status_find_address);
-          // printf("[RUNTIME] pa of 0x%lx is 0x%lx\n",addr,__pa(new_alloc_page) );
-          prev_addr_status=status_find_address;
+          prev_addr_status=status_find_address; //This can be removed, possibly used by nirjhar somewhere
         }
         else
         {
           get_page_from_woram(addr, new_alloc_page, status_find_address, fault_mode, confidentiality, authentication);
-          prev_addr_status=status_find_address;
+          prev_addr_status=status_find_address; //This can be removed, possibly used by nirjhar somewhere
           pages_read++;
         }
       }
@@ -1704,33 +1735,6 @@ void rt_page_fault(struct encl_ctx_t* ctx)
    printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx)\n ", pc, addr, cause);
   // printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
   // printf("[runtime] queue size = %lu\r\n",get_queue_size());
-  if(debug)
-  {
-    printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx) ", pc, addr, cause);
-    printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
-    printf("[runtime] queue size = %lu\r\n",get_queue_size());
-
-    /*
-    printf("[RUNTIME] BEFORE MALLOC WORKING\nRUNTIME STARTING ADDRESS IS 0x%lx and ending is 0x%lx",runtime_va_start ,get_program_break_rt());
-    uintptr_t ms=1<<(24+1);
-    char *s= malloc(ms);
-    printf("[RUNTIME] malloc returned 0x%lx\n",(uintptr_t)s );
-    if(s==NULL)
-    {
-      printf("[RUNTIME] not possible to allcoate");
-      sbi_exit_enclave(-1);
-
-    }
-    for(uintptr_t i=0;i<ms;i++)
-    {
-      s[i]=i;
-    }
-    printf("[RUNTIME] AFTER MALLOC WORKING\nRUNTIME STARTING ADDRESS IS 0x%lx and ending is 0x%lx",runtime_va_start ,get_program_break_rt());
-    sbi_exit_enclave(-1);
-    */
-
-  }
-  //printf("[BAAAAAAAAAAAAAAAAAAAAAAAAAAM] 0x%lx\n",addr );
   is_rt=1;
   handle_page_fault((uintptr_t) addr,0);
   is_rt=0;
