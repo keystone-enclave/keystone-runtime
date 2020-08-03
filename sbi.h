@@ -6,6 +6,7 @@
 #define __SBI_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define SBI_SET_TIMER 0
 #define SBI_CONSOLE_PUTCHAR 1
@@ -19,6 +20,7 @@
 #define SBI_SM_RESUME_ENCLAVE    107
 #define SBI_SM_RANDOM            108
 #define SBI_SM_MAILBOX_REGISTER  109 
+#define SBI_SM_MAILBOX_SEND	 110
 #define SBI_SM_EXIT_ENCLAVE     1101
 #define SBI_SM_CALL_PLUGIN      1000
 #define SBI_SM_NOT_IMPLEMENTED  1111

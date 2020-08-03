@@ -10,6 +10,7 @@
 #include "uaccess.h"
 #include "mm.h"
 #include "rt_util.h"
+#include "mailbox.h"
 
 #include "syscall_nums.h"
 
@@ -181,7 +182,12 @@ void handle_syscall(struct encl_ctx* ctx)
     copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, 2048);
     //print_strace("[ATTEST] p1 0x%p->0x%p p2 0x%p->0x%p sz %lx = %lu\r\n",arg0,arg0_trans,arg1,arg1_trans,arg2,ret);
     break;
-
+  case(RUNTIME_SYSCALL_SEND):
+    ret = send_mailbox_msg(arg0, (void *) arg1, arg2);
+    break;
+  case(RUNTIME_SYSCALL_RCV):
+    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
+    break; 
 
 #ifdef LINUX_SYSCALL_WRAPPING
   case(SYS_clock_gettime):

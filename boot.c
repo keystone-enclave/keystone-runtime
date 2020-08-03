@@ -10,6 +10,7 @@
 #include "mm.h"
 #include "env.h"
 #include "paging.h"
+#include "mailbox.h"
 
 /* defined in vm.h */
 extern uintptr_t shared_buffer;
@@ -22,6 +23,8 @@ size_t utm_size;
 /* defined in entry.S */
 extern void* encl_trap_handler;
 
+/* defined in mailbox.h */
+extern struct mailbox mailbox; 
 #ifdef USE_FREEMEM
 
 
@@ -152,6 +155,11 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* initialize user stack */
   init_user_stack_and_env();
 
+
+  /* initialize mailbox*/
+  printf("mailbox: %p\n", mailbox); 
+  init_mailbox(); 
+
   /* set trap vector */
   csr_write(stvec, &encl_trap_handler);
 
@@ -160,6 +168,9 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* set timer */
   init_timer();
+
+  /* set mailbox*/
+  init_mailbox(&mailbox); 
 
   /* Enable the FPU */
   csr_write(sstatus, csr_read(sstatus) | 0x6000);
