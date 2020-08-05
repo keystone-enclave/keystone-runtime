@@ -21,7 +21,7 @@ struct mailbox
 
 struct mailbox_header
 {
-  size_t send_eid;
+  size_t send_uid;
   size_t size; 
   uint8_t data[0]; 
 }; 

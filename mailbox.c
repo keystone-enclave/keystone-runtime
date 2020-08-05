@@ -21,6 +21,42 @@ int init_mailbox(){
   Returs the bytes written to buf.
 */
 int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
+  struct mailbox_header *hdr = (struct mailbox_header *) mailbox.data; 
+  size_t size = 0; 
+
+  //Acquire lock on the mailbox
+   
+
+  while(size < mailbox.size){
+     if(hdr->send_uid == uid){
+        //Check if the message is bigger than the buffer. 
+        if(hdr->size > buf_size){
+            return 1; 
+	}
+  
+        memcpy(buf, hdr->data, buf_size); 
+
+        //Clear the message from the mailbox
+        memset(hdr, 0, hdr->size); 
+
+        size_t rem = mailbox.size - ((size_t) (((char *) hdr) + hdr->size)) - (size_t) mailbox.data;
+        
+        if(rem < 0)
+		return 0; 
+        
+        memcpy(hdr, hdr + hdr->size, rem); 
+        
+        mailbox.size -= hdr->size; 
+     }
+
+    size += sizeof(struct mailbox_header) + hdr->size; 
+    hdr += sizeof(struct mailbox_header) + hdr->size;    
+ 
+
+  }
+  
+  //Release lock on mailbox 
+
   return 1;
 }
 /*
