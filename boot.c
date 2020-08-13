@@ -157,7 +157,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
 
   /* initialize mailbox*/
-  printf("mailbox: %p\n", mailbox); 
   init_mailbox(); 
 
   /* set trap vector */
@@ -168,9 +167,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* set timer */
   init_timer();
-
-  /* set mailbox*/
-  init_mailbox(&mailbox); 
 
   /* Enable the FPU */
   csr_write(sstatus, csr_read(sstatus) | 0x6000);

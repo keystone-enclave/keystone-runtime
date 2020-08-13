@@ -46,4 +46,8 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size);
   Acquires the enclave mailbox. 
 */
 int acquire_mailbox_lock();
+/*
+  Releases the enclave mailbox.
+*/
+int release_mailbox_lock();
 #endif

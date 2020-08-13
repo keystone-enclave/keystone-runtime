@@ -1,5 +1,8 @@
 #include "mailbox.h" 
-
+#include "printf.h"
+#include "vm.h"
+#include "uaccess.h"
+ 
 struct mailbox mailbox;
 
 /* Initializes mailbox and registers it to the SM */
@@ -10,7 +13,7 @@ int init_mailbox(){
    mailbox.lock.lock = 0;
    memset(mailbox.data, 0, MAILBOX_SIZE);
 
-   ret = SBI_CALL_1(SBI_SM_MAILBOX_REGISTER, &mailbox);
+   ret = SBI_CALL_1(SBI_SM_MAILBOX_REGISTER, kernel_va_to_pa(&mailbox));
    return ret;
 
 }
@@ -21,37 +24,39 @@ int init_mailbox(){
   Returs the bytes written to buf.
 */
 int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
-  struct mailbox_header *hdr = (struct mailbox_header *) mailbox.data; 
+  uint8_t *ptr = mailbox.data;
+  struct mailbox_header *hdr = (struct mailbox_header *) ptr;  
   size_t size = 0; 
+  size_t hdr_size = 0; 
 
   //Acquire lock on the mailbox
-   
+  acquire_mailbox_lock();    
 
   while(size < mailbox.size){
+
+     hdr_size = hdr->size; 
+
      if(hdr->send_uid == uid){
         //Check if the message is bigger than the buffer. 
         if(hdr->size > buf_size){
             return 1; 
 	}
-  
-        memcpy(buf, hdr->data, buf_size); 
+
+        copy_to_user(buf, hdr->data, buf_size); 
 
         //Clear the message from the mailbox
-        memset(hdr, 0, hdr->size); 
-
-        size_t rem = mailbox.size - ((size_t) (((char *) hdr) + hdr->size)) - (size_t) mailbox.data;
-        
-        if(rem < 0)
-		return 0; 
-        
-        memcpy(hdr, hdr + hdr->size, rem); 
-        
-        mailbox.size -= hdr->size; 
+        memset(hdr->data, 0, hdr->size);
+        memset(hdr, 0, sizeof(struct mailbox_header));
+        memcpy(hdr, ptr + hdr_size + sizeof(struct mailbox_header), mailbox.size - (size + sizeof(struct mailbox_header) + hdr_size)); 
+       
+        mailbox.size -= hdr_size + sizeof(struct mailbox_header); 
+        return 0; 
      }
 
-    size += sizeof(struct mailbox_header) + hdr->size; 
-    hdr += sizeof(struct mailbox_header) + hdr->size;    
- 
+    size += sizeof(struct mailbox_header) + hdr_size;
+    ptr += sizeof(struct mailbox_header) + hdr_size;    
+    hdr = (struct mailbox_header *) ptr;
+    release_mailbox_lock(); 
 
   }
   
@@ -62,10 +67,14 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
 /*
   Sends a msg_size byte message copied from buf to uid
   Calls the SBI function to trap to the SM
+  We do not acquire a lock here because the SM will acquire the lock. 
 */
 int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
   int ret;
-  ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, uid, buf, msg_size);
+  char cpy[256];
+  printf("[runtime] uid: %u\n", uid); 
+  copy_from_user(cpy, buf, msg_size); 
+  ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, uid, kernel_va_to_pa(cpy), msg_size);
   return ret;
 }
 /*
@@ -73,4 +82,11 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
 */
 int acquire_mailbox_lock(){
    return 1;
+}
+
+/*
+  Releases the enclave mailbox.
+*/
+int release_mailbox_lock(){
+   return 0; 
 }
