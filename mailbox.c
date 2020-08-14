@@ -39,7 +39,8 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
      if(hdr->send_uid == uid){
         //Check if the message is bigger than the buffer. 
         if(hdr->size > buf_size){
-            return 1; 
+            release_mailbox_lock();
+            return MAILBOX_ERROR; 
 	}
 
         copy_to_user(buf, hdr->data, buf_size); 
@@ -51,7 +52,7 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
        
         mailbox.size -= hdr_size + sizeof(struct mailbox_header); 
         release_mailbox_lock();
-        return 0; 
+        return MAILBOX_SUCCESS; 
      }
 
     size += sizeof(struct mailbox_header) + hdr_size;
@@ -61,7 +62,7 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
   
   //Release lock on mailbox 
   release_mailbox_lock();
-  return 1;
+  return MAILBOX_ERROR;
 }
 /*
   Sends a msg_size byte message copied from buf to uid
@@ -72,6 +73,9 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
   int ret;
   char cpy[256];
   uintptr_t ptr = kernel_va_to_pa(cpy);
+  
+  if(msg_size > MAILBOX_SIZE)
+     return MAILBOX_ERROR;
   copy_from_user(cpy, buf, msg_size); 
   ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, (uintptr_t) uid, ptr, msg_size);
   return ret; 

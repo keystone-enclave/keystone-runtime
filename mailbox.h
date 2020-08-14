@@ -10,6 +10,9 @@
 typedef struct { int lock; } spinlock_t;
 #define SPINLOCK_INIT {0}
 
+#define MAILBOX_ERROR 1 
+#define MAILBOX_SUCCESS 0 
+
 struct mailbox
 {
   size_t capacity; 
