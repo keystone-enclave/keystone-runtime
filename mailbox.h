@@ -49,9 +49,9 @@ size_t get_uid();
 /* 
   Acquires the enclave mailbox. 
 */
-int acquire_mailbox_lock();
+void acquire_mailbox_lock();
 /*
   Releases the enclave mailbox.
 */
-int release_mailbox_lock();
+void release_mailbox_lock();
 #endif

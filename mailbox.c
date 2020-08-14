@@ -50,18 +50,17 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
         memcpy(hdr, ptr + hdr_size + sizeof(struct mailbox_header), mailbox.size - (size + sizeof(struct mailbox_header) + hdr_size)); 
        
         mailbox.size -= hdr_size + sizeof(struct mailbox_header); 
+        release_mailbox_lock();
         return 0; 
      }
 
     size += sizeof(struct mailbox_header) + hdr_size;
     ptr += sizeof(struct mailbox_header) + hdr_size;    
     hdr = (struct mailbox_header *) ptr;
-    release_mailbox_lock(); 
-
   }
   
   //Release lock on mailbox 
-
+  release_mailbox_lock();
   return 1;
 }
 /*
@@ -85,13 +84,13 @@ size_t get_uid(){
 /*
   Acquires the enclave mailbox.
 */
-int acquire_mailbox_lock(){
-   return 1;
+void acquire_mailbox_lock(){
+   while(__sync_lock_test_and_set(&mailbox.lock.lock, 1));  
 }
 
 /*
   Releases the enclave mailbox.
 */
-int release_mailbox_lock(){
-   return 0; 
+void release_mailbox_lock(){
+   __sync_lock_release(&mailbox.lock.lock); 
 }
