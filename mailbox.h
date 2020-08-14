@@ -15,6 +15,7 @@ struct mailbox
   size_t capacity; 
   size_t size; 
   uint8_t enabled; 
+  size_t uid; 
   spinlock_t lock; 
   uint8_t data[MAILBOX_SIZE]; 
 }; 
@@ -42,6 +43,9 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size);
   Calls the SBI function to trap to the SM 
 */
 int send_mailbox_msg(size_t uid, void *buf, size_t msg_size);
+
+size_t get_uid(); 
+
 /* 
   Acquires the enclave mailbox. 
 */

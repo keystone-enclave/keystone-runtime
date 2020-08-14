@@ -188,7 +188,9 @@ void handle_syscall(struct encl_ctx* ctx)
   case(RUNTIME_SYSCALL_RCV):
     ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
     break; 
-
+  case(RUNTIME_SYSCALL_UID):
+    ret = mailbox.uid; 
+    break;
 #ifdef LINUX_SYSCALL_WRAPPING
   case(SYS_clock_gettime):
     ret = linux_clock_gettime((__clockid_t)arg0, (struct timespec*)arg1);

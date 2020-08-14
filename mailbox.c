@@ -70,13 +70,18 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
   We do not acquire a lock here because the SM will acquire the lock. 
 */
 int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
-//  int ret;
+  int ret;
   char cpy[256];
-  printf("[runtime] uid: %u\n", uid); 
+  uintptr_t ptr = kernel_va_to_pa(cpy);
   copy_from_user(cpy, buf, msg_size); 
-  SBI_CALL_3(SBI_SM_MAILBOX_SEND, (uintptr_t) uid, kernel_va_to_pa(cpy), msg_size);
-  return 1; 
+  ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, (uintptr_t) uid, ptr, msg_size);
+  return ret; 
 }
+
+size_t get_uid(){
+  return mailbox.uid; 
+}
+
 /*
   Acquires the enclave mailbox.
 */
