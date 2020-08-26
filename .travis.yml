@@ -14,7 +14,7 @@ git:
 env:
   - RISCV=$TRAVIS_BUILD_DIR/riscv
     PATH=$PATH:$RISCV/bin
-    KEYSTONE_SDK_DIR=$TRAVIS_BUILD_DIR/keystone-sdk
+    KEYSTONE_SDK_DIR=$TRAVIS_BUILD_DIR/keystone-sdk/build
     SDK_MIN_REVISION=$(cat SDK_MIN_REVISION)
 
 addons:
@@ -34,7 +34,7 @@ before_install:
   - git checkout $SDK_MIN_REVISION
   - mkdir build
   - cd build
-  - cmake .. -DOUTPUT_DIR=$(pwd)/../lib
+  - cmake ..
   - make
   - make install
   - popd
