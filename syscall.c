@@ -186,7 +186,7 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = send_mailbox_msg(arg0, (void *) arg1, arg2);
     break;
   case(RUNTIME_SYSCALL_RCV):
-    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
+    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2, arg3); 
     break; 
   case(RUNTIME_SYSCALL_UID):
     ret = mailbox.uid; 

@@ -155,10 +155,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* initialize user stack */
   init_user_stack_and_env();
 
-
-  /* initialize mailbox*/
-  init_mailbox(); 
-
   /* set trap vector */
   csr_write(stvec, &encl_trap_handler);
 
