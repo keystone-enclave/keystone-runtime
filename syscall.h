@@ -17,6 +17,8 @@
 #define RUNTIME_SYSCALL_SEND		1004
 #define RUNTIME_SYSCALL_RCV 		1005
 #define RUNTIME_SYSCALL_UID             1006
+#define RUNTIME_MEM_SHARE		1007
+#define RUNTIME_MEM_STOP		1008
 #define RUNTIME_SYSCALL_EXIT            1101
 
 void handle_syscall(struct encl_ctx* ctx);

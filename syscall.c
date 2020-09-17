@@ -11,6 +11,7 @@
 #include "mm.h"
 #include "rt_util.h"
 #include "mailbox.h"
+#include "memshare.h"
 
 #include "syscall_nums.h"
 
@@ -186,11 +187,17 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = send_mailbox_msg(arg0, (void *) arg1, arg2);
     break;
   case(RUNTIME_SYSCALL_RCV):
-    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2, arg3); 
+    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
     break; 
   case(RUNTIME_SYSCALL_UID):
-    ret = mailbox.uid; 
+    ret = get_uid(); 
     break;
+  case(RUNTIME_MEM_SHARE):
+    ret = mem_share(arg0);
+    break;
+  case(RUNTIME_MEM_STOP):
+    ret = mem_stop(arg0);
+    break; 
 #ifdef LINUX_SYSCALL_WRAPPING
   case(SYS_clock_gettime):
     ret = linux_clock_gettime((__clockid_t)arg0, (struct timespec*)arg1);

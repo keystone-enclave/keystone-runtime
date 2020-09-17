@@ -47,14 +47,7 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size);
 */
 int send_mailbox_msg(size_t uid, void *buf, size_t msg_size);
 
+/* Gets the enclave uid from the SM */
 size_t get_uid(); 
 
-/* 
-  Acquires the enclave mailbox. 
-*/
-void acquire_mailbox_lock();
-/*
-  Releases the enclave mailbox.
-*/
-void release_mailbox_lock();
 #endif

@@ -3,8 +3,6 @@
 #include "vm.h"
 #include "uaccess.h"
  
-struct mailbox mailbox;
-
 /*
   Retrieves a message from the mailbox from sender uid
   Copies at most buf_size bytes to buf from the message contents
@@ -38,19 +36,8 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
 }
 
 size_t get_uid(){
-  return mailbox.uid; 
+  int ret;
+  ret = SBI_CALL_0(SBI_SM_UID); 
+  return ret; 
 }
 
-/*
-  Acquires the enclave mailbox.
-*/
-void acquire_mailbox_lock(){
-   while(__sync_lock_test_and_set(&mailbox.lock.lock, 1));  
-}
-
-/*
-  Releases the enclave mailbox.
-*/
-void release_mailbox_lock(){
-   __sync_lock_release(&mailbox.lock.lock); 
-}

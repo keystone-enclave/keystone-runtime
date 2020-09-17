@@ -19,9 +19,11 @@
 #define SBI_SM_STOP_ENCLAVE      106
 #define SBI_SM_RESUME_ENCLAVE    107
 #define SBI_SM_RANDOM            108
-#define SBI_SM_MAILBOX_REGISTER  109 
+#define SBI_SM_UID               109 
 #define SBI_SM_MAILBOX_SEND	 110
 #define SBI_SM_MAILBOX_RECV      111
+#define SBI_SM_MEM_SHARE         112
+#define SBI_SM_MEM_STOP		 113
 #define SBI_SM_EXIT_ENCLAVE     1101
 #define SBI_SM_CALL_PLUGIN      1000
 #define SBI_SM_NOT_IMPLEMENTED  1111
@@ -65,11 +67,6 @@ static inline void sbi_stop_enclave(uint64_t request)
 static inline void sbi_exit_enclave(uint64_t retval)
 {
   SBI_CALL_1(SBI_SM_EXIT_ENCLAVE, retval);
-}
-
-static inline void sbi_register_mailbox(uint64_t start, size_t size)
-{
-  SBI_CALL_2(SBI_SM_MAILBOX_REGISTER, start, size); 
 }
 
 static inline uintptr_t sbi_random()
