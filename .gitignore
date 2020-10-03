@@ -1,2 +1,5 @@
 eyrie-rt
+.options_log
 *.o
+obj/
+.exists

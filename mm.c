@@ -218,8 +218,48 @@ pte_of_va(uintptr_t va)
   return pte;
 }
 
+
 void
-__map_with_reserved_page_table(uintptr_t dram_base,
+__map_with_reserved_page_table_32(uintptr_t dram_base,
+                               uintptr_t dram_size,
+                               uintptr_t ptr,
+                               pte* l2_pt)
+{
+  uintptr_t offset = 0;
+  uintptr_t leaf_level = 2;
+  pte* leaf_pt = l2_pt;
+  unsigned long dram_max =  RISCV_GET_LVL_PGSIZE(leaf_level - 1);
+
+  /* use megapage if l2_pt is null */
+  if (!l2_pt) {
+    leaf_level = 1;
+    leaf_pt = root_page_table;
+    dram_max = -1UL; 
+  }
+
+  assert(dram_size <= dram_max);
+  assert(IS_ALIGNED(dram_base, RISCV_GET_LVL_PGSIZE_BITS(leaf_level)));
+  assert(IS_ALIGNED(ptr, RISCV_GET_LVL_PGSIZE_BITS(leaf_level - 1)));
+
+  if(l2_pt) {
+       /* set root page table entry */
+       root_page_table[RISCV_GET_PT_INDEX(ptr, 1)] =
+       ptd_create(ppn(kernel_va_to_pa(l2_pt)));
+  }
+
+  for (offset = 0;
+       offset < dram_size;
+       offset += RISCV_GET_LVL_PGSIZE(leaf_level))
+  {
+        leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] =
+        pte_create(ppn(dram_base + offset),
+                 PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+  }
+
+}
+
+void
+__map_with_reserved_page_table_64(uintptr_t dram_base,
                                uintptr_t dram_size,
                                uintptr_t ptr,
                                pte* l2_pt,
@@ -257,6 +297,7 @@ __map_with_reserved_page_table(uintptr_t dram_base,
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
   }
+
 }
 
 void
@@ -266,10 +307,44 @@ map_with_reserved_page_table(uintptr_t dram_base,
                              pte* l2_pt,
                              pte* l3_pt)
 {
+  #if __riscv_xlen == 64
   if (dram_size > RISCV_GET_LVL_PGSIZE(2))
-    __map_with_reserved_page_table(dram_base, dram_size, ptr, l2_pt, 0);
+    __map_with_reserved_page_table_64(dram_base, dram_size, ptr, l2_pt, 0);
   else
-    __map_with_reserved_page_table(dram_base, dram_size, ptr, l2_pt, l3_pt);
+    __map_with_reserved_page_table_64(dram_base, dram_size, ptr, l2_pt, l3_pt);
+  #elif __riscv_xlen == 32
+  if (dram_size > RISCV_GET_LVL_PGSIZE(1))
+    __map_with_reserved_page_table_32(dram_base, dram_size, ptr, 0);
+  else
+    __map_with_reserved_page_table_32(dram_base, dram_size, ptr, l2_pt);
+  #endif
+}
+
+uintptr_t enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr){
+
+  int pte_flags = PTE_W | PTE_D | PTE_R | PTE_U | PTE_A;
+
+  // Set flags
+/*  if(prot & PROT_READ)
+    pte_flags |= PTE_R;
+  if(prot & PROT_WRITE)
+    pte_flags |= PTE_W | PTE_D;
+  if(prot & PROT_EXEC)
+    pte_flags |= PTE_X;
+*/
+  // Find a continuous VA space that will fit the req. size
+  int req_pages = vpn(PAGE_UP(base_size));
+
+
+  if(test_va_range(vpn(ptr), req_pages) != req_pages){
+        return 0;
+   }
+
+ if(map_pages(vpn(ptr), ppn(base_addr), req_pages, pte_flags) != req_pages){
+       return 0;
+   }
+
+  return ptr;
 }
 
 #endif /* USE_FREEMEM */
