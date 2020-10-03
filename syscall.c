@@ -196,12 +196,14 @@ void handle_syscall(struct encl_ctx* ctx)
   case(RUNTIME_MEM_STOP):
     ret = mem_stop(arg0);
     break;
+#ifdef USE_FREEMEM
   case(RUNTIME_SYSCALL_MAP):
     ret = enclave_map(arg0, arg1, arg2); 
     break;  
   case(RUNTIME_SYSCALL_TRANSLATE):
     ret = translate(arg0);
     break; 
+#endif
   case(RUNTIME_SYSCALL_GET_SEALING_KEY):;
     /* Stores the key receive structure */
     uintptr_t buffer_1_pa = kernel_va_to_pa(rt_copy_buffer_1);

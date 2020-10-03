@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <time.h>
 
 uintptr_t linux_uname(void* buf);
 uintptr_t linux_clock_gettime(__clockid_t clock, struct timespec *tp);
