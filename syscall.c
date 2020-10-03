@@ -190,13 +190,19 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
     break; 
   case(RUNTIME_SYSCALL_UID):
-    ret = get_uid(); 
+    ret = get_uid(arg0); 
     break;
   case(RUNTIME_MEM_SHARE):
-    ret = mem_share(arg0);
+    ret = mem_share(arg0, arg1, arg2);
     break;
   case(RUNTIME_MEM_STOP):
     ret = mem_stop(arg0);
+    break;
+  case(RUNTIME_SYSCALL_MAP):
+    ret = enclave_map(arg0, arg1, arg2); 
+    break;  
+  case(RUNTIME_SYSCALL_TRANSLATE):
+    ret = translate(arg0);
     break; 
 #ifdef LINUX_SYSCALL_WRAPPING
   case(SYS_clock_gettime):

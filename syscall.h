@@ -19,12 +19,13 @@
 #define RUNTIME_SYSCALL_UID             1006
 #define RUNTIME_MEM_SHARE		1007
 #define RUNTIME_MEM_STOP		1008
+#define RUNTIME_SYSCALL_MAP             1009
+#define RUNTIME_SYSCALL_TRANSLATE	1010
 #define RUNTIME_SYSCALL_EXIT            1101
 
 void handle_syscall(struct encl_ctx* ctx);
 void init_edge_internals(void);
-uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr,
-                                    size_t data_len);
+uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_t data_len);
 
 // Define this to enable printing of a large amount of syscall information
 //#define INTERNAL_STRACE 1

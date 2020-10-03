@@ -35,9 +35,12 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
   return ret; 
 }
 
-size_t get_uid(){
+size_t get_uid(void *uid){
   int ret;
-  ret = SBI_CALL_0(SBI_SM_UID); 
+  size_t cpy_ptr;
+  uintptr_t phys_ptr = kernel_va_to_pa(&cpy_ptr);   
+  ret = SBI_CALL_1(SBI_SM_UID, phys_ptr); 
+  copy_to_user(uid, (void *) &cpy_ptr, sizeof(size_t)); 
   return ret; 
 }
 

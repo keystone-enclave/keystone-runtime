@@ -68,6 +68,24 @@ __walk_create(pte* root, uintptr_t addr)
 }
 
 
+uintptr_t map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags){
+
+    pte* pte = __walk_create(root_page_table, vpn << RISCV_PAGE_BITS);
+    assert(flags & PTE_U);
+    if (!pte)
+	return 0;
+
+    if(*pte & PTE_V) 
+	return __va(*pte << RISCV_PAGE_BITS);
+
+
+   *pte = pte_create(phys_ppn, flags | PTE_V);
+   #ifdef USE_PAGING
+        paging_inc_user_page();
+   #endif
+   return phys_ppn << RISCV_PAGE_BITS; 
+}
+
 /* allocate a new page to a given vpn
  * returns VA of the page, (returns 0 if fails) */
 uintptr_t
@@ -124,6 +142,20 @@ free_page(uintptr_t vpn){
 
 }
 
+size_t
+map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags)
+{
+  unsigned int i;
+  for (i = 0; i < count; i++) {
+    if(!map_page(vpn + i, phys_ppn + i, flags))
+      break;
+  }
+
+
+  return i;
+}
+
+
 /* allocate n new pages from a given vpn
  * returns the number of pages allocated */
 size_t
@@ -172,7 +204,6 @@ uintptr_t
 translate(uintptr_t va)
 {
   pte* pte = __walk(root_page_table, va);
-
   if(pte && (*pte & PTE_V))
     return (pte_ppn(*pte) << RISCV_PAGE_BITS) | (RISCV_PAGE_OFFSET(va));
   else
@@ -202,7 +233,6 @@ __map_with_reserved_page_table(uintptr_t dram_base,
     leaf_level = 2;
     leaf_pt = l2_pt;
   }
-
   assert(dram_size <= RISCV_GET_LVL_PGSIZE(leaf_level - 1));
   assert(IS_ALIGNED(dram_base, RISCV_GET_LVL_PGSIZE_BITS(leaf_level)));
   assert(IS_ALIGNED(ptr, RISCV_GET_LVL_PGSIZE_BITS(leaf_level - 1)));
@@ -222,6 +252,7 @@ __map_with_reserved_page_table(uintptr_t dram_base,
        offset < dram_size;
        offset += RISCV_GET_LVL_PGSIZE(leaf_level))
   {
+
     leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] =
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
