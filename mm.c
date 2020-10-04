@@ -204,6 +204,7 @@ uintptr_t
 translate(uintptr_t va)
 {
   pte* pte = __walk(root_page_table, va);
+
   if(pte && (*pte & PTE_V))
     return (pte_ppn(*pte) << RISCV_PAGE_BITS) | (RISCV_PAGE_OFFSET(va));
   else
@@ -292,7 +293,6 @@ __map_with_reserved_page_table_64(uintptr_t dram_base,
        offset < dram_size;
        offset += RISCV_GET_LVL_PGSIZE(leaf_level))
   {
-
     leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] =
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
@@ -324,14 +324,6 @@ uintptr_t enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr){
 
   int pte_flags = PTE_W | PTE_D | PTE_R | PTE_U | PTE_A;
 
-  // Set flags
-/*  if(prot & PROT_READ)
-    pte_flags |= PTE_R;
-  if(prot & PROT_WRITE)
-    pte_flags |= PTE_W | PTE_D;
-  if(prot & PROT_EXEC)
-    pte_flags |= PTE_X;
-*/
   // Find a continuous VA space that will fit the req. size
   int req_pages = vpn(PAGE_UP(base_size));
 

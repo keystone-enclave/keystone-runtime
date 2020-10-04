@@ -132,7 +132,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);
   freemem_size = dram_base + dram_size - free_paddr;
-  debug("runtime_va_start: %p, runtime_paddr: %p\n", runtime_va_start, runtime_paddr); 
   debug("FREE: 0x%lx-0x%lx (%u KB), va 0x%lx", free_paddr, dram_base + dram_size, freemem_size/1024, freemem_va_start);
 
   /* remap kernel VA */
