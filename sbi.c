@@ -103,7 +103,7 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
   int ret;
   char cpy[256];
   uintptr_t ptr = kernel_va_to_pa(cpy);
-
+  printf("[runtime] IN RECV\n"); 
   ret = SBI_CALL_3(SBI_SM_MAILBOX_RECV, (uintptr_t) uid, ptr, buf_size);
   copy_to_user(buf, cpy, buf_size);
   return ret;
@@ -117,6 +117,7 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
   int ret;
   char cpy[256];
   uintptr_t ptr = kernel_va_to_pa(cpy);
+printf("[runtime] IN SEND\n");
 
   if(msg_size > MAILBOX_SIZE)
      return MAILBOX_ERROR;
@@ -127,6 +128,7 @@ int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
 
 size_t get_uid(void *uid){
   int ret;
+printf("[runtime] IN UID");
   size_t cpy_ptr;
   uintptr_t phys_ptr = kernel_va_to_pa(&cpy_ptr);
   ret = SBI_CALL_1(SBI_SM_UID, phys_ptr);
