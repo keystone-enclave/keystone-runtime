@@ -67,23 +67,19 @@ __walk_create(pte* root, uintptr_t addr)
   return __walk_internal(root, addr, 1);
 }
 
+uintptr_t
+map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags) {
+  pte* pte = __walk_create(root_page_table, vpn << RISCV_PAGE_BITS);
+  assert(flags & PTE_U);
+  if (!pte) return 0;
 
-uintptr_t map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags){
+  if (*pte & PTE_V) return __va(*pte << RISCV_PAGE_BITS);
 
-    pte* pte = __walk_create(root_page_table, vpn << RISCV_PAGE_BITS);
-    assert(flags & PTE_U);
-    if (!pte)
-	return 0;
-
-    if(*pte & PTE_V) 
-	return __va(*pte << RISCV_PAGE_BITS);
-
-
-   *pte = pte_create(phys_ppn, flags | PTE_V);
-   #ifdef USE_PAGING
-        paging_inc_user_page();
-   #endif
-   return phys_ppn << RISCV_PAGE_BITS; 
+  *pte = pte_create(phys_ppn, flags | PTE_V);
+#ifdef USE_PAGING
+  paging_inc_user_page();
+#endif
+  return phys_ppn << RISCV_PAGE_BITS;
 }
 
 /* allocate a new page to a given vpn
@@ -143,18 +139,14 @@ free_page(uintptr_t vpn){
 }
 
 size_t
-map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags)
-{
+map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags) {
   unsigned int i;
   for (i = 0; i < count; i++) {
-    if(!map_page(vpn + i, phys_ppn + i, flags))
-      break;
+    if (!map_page(vpn + i, phys_ppn + i, flags)) break;
   }
-
 
   return i;
 }
-
 
 /* allocate n new pages from a given vpn
  * returns the number of pages allocated */
@@ -219,53 +211,42 @@ pte_of_va(uintptr_t va)
   return pte;
 }
 
-
 void
-__map_with_reserved_page_table_32(uintptr_t dram_base,
-                               uintptr_t dram_size,
-                               uintptr_t ptr,
-                               pte* l2_pt)
-{
-  uintptr_t offset = 0;
-  uintptr_t leaf_level = 2;
-  pte* leaf_pt = l2_pt;
-  unsigned long dram_max =  RISCV_GET_LVL_PGSIZE(leaf_level - 1);
+__map_with_reserved_page_table_32(
+    uintptr_t dram_base, uintptr_t dram_size, uintptr_t ptr, pte* l2_pt) {
+  uintptr_t offset       = 0;
+  uintptr_t leaf_level   = 2;
+  pte* leaf_pt           = l2_pt;
+  unsigned long dram_max = RISCV_GET_LVL_PGSIZE(leaf_level - 1);
 
   /* use megapage if l2_pt is null */
   if (!l2_pt) {
     leaf_level = 1;
-    leaf_pt = root_page_table;
-    dram_max = -1UL; 
+    leaf_pt    = root_page_table;
+    dram_max   = -1UL;
   }
 
   assert(dram_size <= dram_max);
   assert(IS_ALIGNED(dram_base, RISCV_GET_LVL_PGSIZE_BITS(leaf_level)));
   assert(IS_ALIGNED(ptr, RISCV_GET_LVL_PGSIZE_BITS(leaf_level - 1)));
 
-  if(l2_pt) {
-       /* set root page table entry */
-       root_page_table[RISCV_GET_PT_INDEX(ptr, 1)] =
-       ptd_create(ppn(kernel_va_to_pa(l2_pt)));
+  if (l2_pt) {
+    /* set root page table entry */
+    root_page_table[RISCV_GET_PT_INDEX(ptr, 1)] =
+        ptd_create(ppn(kernel_va_to_pa(l2_pt)));
   }
 
-  for (offset = 0;
-       offset < dram_size;
-       offset += RISCV_GET_LVL_PGSIZE(leaf_level))
-  {
-        leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] =
-        pte_create(ppn(dram_base + offset),
-                 PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+  for (offset = 0; offset < dram_size;
+       offset += RISCV_GET_LVL_PGSIZE(leaf_level)) {
+    leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] = pte_create(
+        ppn(dram_base + offset), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
   }
-
 }
 
 void
-__map_with_reserved_page_table_64(uintptr_t dram_base,
-                               uintptr_t dram_size,
-                               uintptr_t ptr,
-                               pte* l2_pt,
-                               pte* l3_pt)
-{
+__map_with_reserved_page_table_64(
+    uintptr_t dram_base, uintptr_t dram_size, uintptr_t ptr, pte* l2_pt,
+    pte* l3_pt) {
   uintptr_t offset = 0;
   uintptr_t leaf_level = 3;
   pte* leaf_pt = l3_pt;
@@ -297,7 +278,6 @@ __map_with_reserved_page_table_64(uintptr_t dram_base,
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
   }
-
 }
 
 void
@@ -307,34 +287,33 @@ map_with_reserved_page_table(uintptr_t dram_base,
                              pte* l2_pt,
                              pte* l3_pt)
 {
-  #if __riscv_xlen == 64
+#if __riscv_xlen == 64
   if (dram_size > RISCV_GET_LVL_PGSIZE(2))
     __map_with_reserved_page_table_64(dram_base, dram_size, ptr, l2_pt, 0);
   else
     __map_with_reserved_page_table_64(dram_base, dram_size, ptr, l2_pt, l3_pt);
-  #elif __riscv_xlen == 32
+#elif __riscv_xlen == 32
   if (dram_size > RISCV_GET_LVL_PGSIZE(1))
     __map_with_reserved_page_table_32(dram_base, dram_size, ptr, 0);
   else
     __map_with_reserved_page_table_32(dram_base, dram_size, ptr, l2_pt);
-  #endif
+#endif
 }
 
-uintptr_t enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr){
-
+uintptr_t
+enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr) {
   int pte_flags = PTE_W | PTE_D | PTE_R | PTE_U | PTE_A;
 
   // Find a continuous VA space that will fit the req. size
   int req_pages = vpn(PAGE_UP(base_size));
 
+  if (test_va_range(vpn(ptr), req_pages) != req_pages) {
+    return 0;
+  }
 
-  if(test_va_range(vpn(ptr), req_pages) != req_pages){
-        return 0;
-   }
-
- if(map_pages(vpn(ptr), ppn(base_addr), req_pages, pte_flags) != req_pages){
-       return 0;
-   }
+  if (map_pages(vpn(ptr), ppn(base_addr), req_pages, pte_flags) != req_pages) {
+    return 0;
+  }
 
   return ptr;
 }

@@ -2,17 +2,17 @@
 // Copyright (c) 2018, The Regents of the University of California (Regents).
 // All Rights Reserved. See LICENSE for license details.
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stddef.h>
 #include "syscall.h"
-#include "string.h"
+#include <stddef.h>
+#include <stdint.h>
 #include "edge_call.h"
-#include "uaccess.h"
-#include "mm.h"
-#include "rt_util.h"
 #include "mailbox.h"
 #include "memshare.h"
 #include "mm.h"
+#include "mm.h"
+#include "rt_util.h"
+#include "string.h"
+#include "uaccess.h"
 
 #include "syscall_nums.h"
 
@@ -181,48 +181,47 @@ void handle_syscall(struct encl_ctx* ctx)
     copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, 2048);
     //print_strace("[ATTEST] p1 0x%p->0x%p p2 0x%p->0x%p sz %lx = %lu\r\n",arg0,arg0_trans,arg1,arg1_trans,arg2,ret);
     break;
-  case(RUNTIME_SYSCALL_SEND):
-    ret = send_mailbox_msg(arg0, (void *) arg1, arg2);
+  case (RUNTIME_SYSCALL_SEND):
+    ret = send_mailbox_msg(arg0, (void*)arg1, arg2);
     break;
-  case(RUNTIME_SYSCALL_RCV):
-    ret = recv_mailbox_msg(arg0, (void *) arg1, arg2); 
-    break; 
-  case(RUNTIME_SYSCALL_UID):
-    ret = get_uid(arg0); 
+  case (RUNTIME_SYSCALL_RCV):
+    ret = recv_mailbox_msg(arg0, (void*)arg1, arg2);
     break;
-  case(RUNTIME_MEM_SHARE):
+  case (RUNTIME_SYSCALL_UID):
+    ret = get_uid(arg0);
+    break;
+  case (RUNTIME_MEM_SHARE):
     ret = mem_share(arg0, arg1, arg2);
     break;
-  case(RUNTIME_MEM_STOP):
+  case (RUNTIME_MEM_STOP):
     ret = mem_stop(arg0);
     break;
 #ifdef USE_FREEMEM
-  case(RUNTIME_SYSCALL_MAP):
-    ret = enclave_map(arg0, arg1, arg2); 
-    break;  
-  case(RUNTIME_SYSCALL_TRANSLATE):
+  case (RUNTIME_SYSCALL_MAP):
+    ret = enclave_map(arg0, arg1, arg2);
+    break;
+  case (RUNTIME_SYSCALL_TRANSLATE):
     ret = translate(arg0);
-    break; 
+    break;
 #endif
-  case(RUNTIME_SYSCALL_GET_SEALING_KEY):;
+  case (RUNTIME_SYSCALL_GET_SEALING_KEY):;
     /* Stores the key receive structure */
     uintptr_t buffer_1_pa = kernel_va_to_pa(rt_copy_buffer_1);
 
     /* Stores the key identifier */
     uintptr_t buffer_2_pa = kernel_va_to_pa(rt_copy_buffer_2);
 
-    if (arg1 > sizeof(rt_copy_buffer_1) ||
-        arg3 > sizeof(rt_copy_buffer_2)) {
+    if (arg1 > sizeof(rt_copy_buffer_1) || arg3 > sizeof(rt_copy_buffer_2)) {
       ret = -1;
       break;
     }
 
-    copy_from_user(rt_copy_buffer_2, (void *)arg2, arg3);
+    copy_from_user(rt_copy_buffer_2, (void*)arg2, arg3);
 
     ret = sbi_get_sealing_key(buffer_1_pa, buffer_2_pa, arg3);
 
     if (!ret) {
-      copy_to_user((void *)arg0, (void *)rt_copy_buffer_1, arg1);
+      copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, arg1);
     }
 
     /* Delete key from copy buffer */

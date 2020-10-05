@@ -19,7 +19,9 @@ void set_program_break(uintptr_t new_break);
 
 void map_with_reserved_page_table(uintptr_t base, uintptr_t size, uintptr_t ptr, pte* l2_pt, pte* l3_pt);
 #endif /* USE_FREEMEM */
-uintptr_t map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags);
-size_t map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags);
+uintptr_t
+map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags);
+size_t
+map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags);
 
 #endif /* _MM_H_ */

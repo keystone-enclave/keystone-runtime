@@ -1,16 +1,16 @@
 #include <asm/csr.h>
 
-#include "printf.h"
+#include "env.h"
+#include "freemem.h"
 #include "interrupt.h"
+#include "mailbox.h"
+#include "mm.h"
+#include "paging.h"
+#include "printf.h"
+#include "sbi.h"
+#include "string.h"
 #include "syscall.h"
 #include "vm.h"
-#include "string.h"
-#include "sbi.h"
-#include "freemem.h"
-#include "mm.h"
-#include "env.h"
-#include "paging.h"
-#include "mailbox.h"
 
 /* defined in vm.h */
 extern uintptr_t shared_buffer;
@@ -24,7 +24,7 @@ size_t utm_size;
 extern void* encl_trap_handler;
 
 /* defined in mailbox.h */
-extern struct mailbox mailbox; 
+extern struct mailbox mailbox;
 #ifdef USE_FREEMEM
 
 
@@ -48,11 +48,11 @@ remap_kernel_space(uintptr_t runtime_base,
 {
   /* eyrie runtime is supposed to be smaller than a megapage */
 
-  #if __riscv_xlen == 64
+#if __riscv_xlen == 64
   assert(runtime_size <= RISCV_GET_LVL_PGSIZE(2));
-  #elif __riscv_xlen == 32
+#elif __riscv_xlen == 32
   assert(runtime_size <= RISCV_GET_LVL_PGSIZE(1));
-  #endif 
+#endif
 
   map_with_reserved_page_table(runtime_base, runtime_size,
      runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);

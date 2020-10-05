@@ -1,9 +1,9 @@
 #include "sbi.h"
 
-#include "vm_defs.h"
+#include "mailbox.h"
 #include "uaccess.h"
 #include "vm.h"
-#include "mailbox.h"
+#include "vm_defs.h"
 
 #define SBI_CALL(___which, ___arg0, ___arg1, ___arg2)            \
   ({                                                             \
@@ -11,10 +11,11 @@
     register uintptr_t a1 __asm__("a1") = (uintptr_t)(___arg1);  \
     register uintptr_t a2 __asm__("a2") = (uintptr_t)(___arg2);  \
     register uintptr_t a7 __asm__("a7") = (uintptr_t)(___which); \
-    __asm__ volatile("ecall"                                     \
-                     : "+r"(a0)                                  \
-                     : "r"(a1), "r"(a2), "r"(a7)                 \
-                     : "memory");                                \
+    __asm__ volatile(                                            \
+        "ecall"                                                  \
+        : "+r"(a0)                                               \
+        : "r"(a1), "r"(a2), "r"(a7)                              \
+        : "memory");                                             \
     a0;                                                          \
   })
 
@@ -72,25 +73,28 @@ sbi_attest_enclave(void* report, void* buf, uintptr_t len) {
   return SBI_CALL_3(SBI_SM_ATTEST_ENCLAVE, report, buf, len);
 }
 
-int mem_share(size_t uid, uintptr_t enclave_addr, uintptr_t enclave_size){
-   int ret;
-   uintptr_t phys_e_addr;
-   uintptr_t phys_e_size;
+int
+mem_share(size_t uid, uintptr_t enclave_addr, uintptr_t enclave_size) {
+  int ret;
+  uintptr_t phys_e_addr;
+  uintptr_t phys_e_size;
 
-   uintptr_t addr_phys_e_addr = kernel_va_to_pa(&phys_e_addr);
-   uintptr_t addr_phys_e_size = kernel_va_to_pa(&phys_e_size);
+  uintptr_t addr_phys_e_addr = kernel_va_to_pa(&phys_e_addr);
+  uintptr_t addr_phys_e_size = kernel_va_to_pa(&phys_e_size);
 
-   ret = SBI_CALL_3(SBI_SM_MEM_SHARE, (uintptr_t) uid, addr_phys_e_addr, addr_phys_e_size);
+  ret = SBI_CALL_3(
+      SBI_SM_MEM_SHARE, (uintptr_t)uid, addr_phys_e_addr, addr_phys_e_size);
 
-   copy_to_user((void *) enclave_addr, &phys_e_addr, sizeof(uintptr_t));
-   copy_to_user((void *) enclave_size, &phys_e_size, sizeof(uintptr_t));
-   return ret;
+  copy_to_user((void*)enclave_addr, &phys_e_addr, sizeof(uintptr_t));
+  copy_to_user((void*)enclave_size, &phys_e_size, sizeof(uintptr_t));
+  return ret;
 }
 
-int mem_stop(size_t uid){
-   int ret;
-   ret = SBI_CALL_1(SBI_SM_MEM_STOP, (uintptr_t) uid);
-   return ret;
+int
+mem_stop(size_t uid) {
+  int ret;
+  ret = SBI_CALL_1(SBI_SM_MEM_STOP, (uintptr_t)uid);
+  return ret;
 }
 
 /*
@@ -99,12 +103,13 @@ int mem_stop(size_t uid){
   If no message is present, this will block.
   Returs the bytes written to buf.
 */
-int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
+int
+recv_mailbox_msg(size_t uid, void* buf, size_t buf_size) {
   int ret;
   char cpy[256];
   uintptr_t ptr = kernel_va_to_pa(cpy);
 
-  ret = SBI_CALL_3(SBI_SM_MAILBOX_RECV, (uintptr_t) uid, ptr, buf_size);
+  ret = SBI_CALL_3(SBI_SM_MAILBOX_RECV, (uintptr_t)uid, ptr, buf_size);
   copy_to_user(buf, cpy, buf_size);
   return ret;
 }
@@ -113,24 +118,25 @@ int recv_mailbox_msg(size_t uid, void *buf, size_t buf_size){
   Calls the SBI function to trap to the SM
   We do not acquire a lock here because the SM will acquire the lock.
 */
-int send_mailbox_msg(size_t uid, void *buf, size_t msg_size){
+int
+send_mailbox_msg(size_t uid, void* buf, size_t msg_size) {
   int ret;
   char cpy[256];
   uintptr_t ptr = kernel_va_to_pa(cpy);
 
-  if(msg_size > MAILBOX_SIZE)
-     return MAILBOX_ERROR;
+  if (msg_size > MAILBOX_SIZE) return MAILBOX_ERROR;
   copy_from_user(cpy, buf, msg_size);
-  ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, (uintptr_t) uid, ptr, msg_size);
+  ret = SBI_CALL_3(SBI_SM_MAILBOX_SEND, (uintptr_t)uid, ptr, msg_size);
   return ret;
 }
 
-size_t get_uid(void *uid){
+size_t
+get_uid(void* uid) {
   int ret;
   size_t cpy_ptr;
   uintptr_t phys_ptr = kernel_va_to_pa(&cpy_ptr);
-  ret = SBI_CALL_1(SBI_SM_UID, phys_ptr);
-  copy_to_user(uid, (void *) &cpy_ptr, sizeof(size_t));
+  ret                = SBI_CALL_1(SBI_SM_UID, phys_ptr);
+  copy_to_user(uid, (void*)&cpy_ptr, sizeof(size_t));
   return ret;
 }
 

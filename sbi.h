@@ -5,8 +5,8 @@
 #ifndef __SBI_H_
 #define __SBI_H_
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define SBI_SET_TIMER 0
 #define SBI_CONSOLE_PUTCHAR 1
@@ -15,16 +15,16 @@
 #define SBI_SM_CREATE_ENCLAVE    101
 #define SBI_SM_DESTROY_ENCLAVE   102
 #define SBI_SM_ATTEST_ENCLAVE    103
-#define SBI_SM_GET_SEALING_KEY   104
+#define SBI_SM_GET_SEALING_KEY 104
 #define SBI_SM_RUN_ENCLAVE       105
 #define SBI_SM_STOP_ENCLAVE      106
 #define SBI_SM_RESUME_ENCLAVE    107
 #define SBI_SM_RANDOM            108
-#define SBI_SM_UID               109 
-#define SBI_SM_MAILBOX_SEND	 110
-#define SBI_SM_MAILBOX_RECV      111
-#define SBI_SM_MEM_SHARE         112
-#define SBI_SM_MEM_STOP		 113
+#define SBI_SM_UID 109
+#define SBI_SM_MAILBOX_SEND 110
+#define SBI_SM_MAILBOX_RECV 111
+#define SBI_SM_MEM_SHARE 112
+#define SBI_SM_MEM_STOP 113
 #define SBI_SM_EXIT_ENCLAVE     1101
 #define SBI_SM_CALL_PLUGIN      1000
 #define SBI_SM_NOT_IMPLEMENTED  1111
