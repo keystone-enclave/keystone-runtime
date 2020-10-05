@@ -1,7 +1,6 @@
 #include <asm/csr.h>
 
 #include "env.h"
-#include "freemem.h"
 #include "interrupt.h"
 #include "mailbox.h"
 #include "mm.h"
@@ -11,6 +10,7 @@
 #include "string.h"
 #include "syscall.h"
 #include "vm.h"
+#include "freemem.h"
 
 /* defined in vm.h */
 extern uintptr_t shared_buffer;
