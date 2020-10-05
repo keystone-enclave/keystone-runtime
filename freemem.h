@@ -1,3 +1,6 @@
+#include <stddef.h>
+#include <stdint.h>
+
 #ifdef USE_FREEMEM
 
 #ifndef __FREEMEM_H__
