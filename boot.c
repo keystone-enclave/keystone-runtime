@@ -308,6 +308,11 @@ uintptr_t get_last_addr_rt()
 
 
 //------------------------------------------------------------------------------
+
+
+
+
+
 void
 eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t dram_base,
@@ -371,11 +376,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   //printf("%d\n",__LINE__);
 
 
-  /* Enable the FPU */
-  csr_write(sstatus, csr_read(sstatus) | 0x6000);// uncomment after checking
-
-
-
   //printf("%d\n",__LINE__);
   /* booting all finished, droping to the user land */
   /*
@@ -385,17 +385,24 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   q_front=q_rear=-1;
   */
 
-  init_page_replacement_queue(dram_base);
-  //printf("%d\n",__LINE__);
 
   uintptr_t freemem_va_start_old=freemem_va_start;
+  printf("PRINTING FROM BOOT.c\n");
+  //uintptr_t *sfa=__walk(get_root_page_table_addr(),0x3ffffbf00);
+  //printf("DUMMY\n");
+  //printf("THE PAGE TABLE ENTRY IS %x\n",*sfa);
+  //*sfa= *sfa & (~PTE_V);
+  //printf("PAGE TABLE ENTRY HAS BEEN INVALIDATED\n");
+
+  csr_write(sstatus, csr_read(sstatus) | 0x6000);// uncomment after checking
+  init_page_replacement_queue(dram_base);
+   //printf("%d\n",__LINE__);
 
   uintptr_t * status_find_address=__walk(get_root_page_table_addr(),replacement_algo_queue_map[0]);
   uintptr_t pa_ppn=(*status_find_address)>>PTE_PPN_SHIFT;
   uintptr_t va_org= __va(pa_ppn<<RISCV_PAGE_BITS);
 
-
-
+  
   freemem_va_start = va_org;
   freemem_size += freemem_va_start_old-freemem_va_start;
 

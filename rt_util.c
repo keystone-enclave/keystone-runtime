@@ -1091,8 +1091,100 @@ void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
   oram_init_time=cycles2-cycles1;
 }
 
+void write_page_at_address(uintptr_t addr, uintptr_t from){
+    uintptr_t utm = shared_buffer + 1048*1048;
+    //printf("[ RUNTIME ]: WRITING AT ADDRESS %llx\n from %llx\n",addr,from);
+    memcpy((void*)(utm+addr), (void*)from, RISCV_PAGE_SIZE);
+}
+
+void read_page_from(uintptr_t addr, uintptr_t to)
+{	
+    uintptr_t utm = shared_buffer + 1048*1048;
+    //printf("[RUNTIME]: READING {ENCLAVE ADDRESS  %llx, RUNTIME ADDRESS %llx }TO RUNTIME ADDRESS %llx\n",addr,addr+utm,to);
+    memcpy((void *)to, (void*)(utm + addr), RISCV_PAGE_SIZE);
+}
+
+
+
+
+void myfaulthandler(uintptr_t addr){
+  uintptr_t *root_page_table_addr = get_root_page_table_addr();
+  uintptr_t *faultingPagePTE = __walk(root_page_table_addr, addr);
+//  printf("[RUNTIME]: Entered  MY FAULT HANDLER CALLED FOR ADDRESS %llx\n",addr);
+  if (faultingPagePTE == 0){
+    printf("[RUNTIME]: Could not resolve pte. Exiting.");
+    sbi_exit_enclave(-1);
+  }
+  if(1){//(*faultingPagePTE) & PTE_L){
+    uintptr_t victim = remove_victim_page();
+    uintptr_t victim_page_enc = pop_item[1];
+    uintptr_t victim_page_org=0;
+    if(victim != QUEUE_EMPTY)
+    {
+      uintptr_t *status_find_pte_victim = __walk(root_page_table_addr,victim_page_enc);
+      victim_page_org=__va(((*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+      write_page_at_address(victim_page_enc, victim_page_org);
+//      printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
+      free_page(vpn(victim_page_enc));
+      *status_find_pte_victim = (*status_find_pte_victim) & ~PTE_V;
+    }
+    else{
+      printf("[ RUNTIME ]: Could not find a victim. Exiting");
+      sbi_exit_enclave(-1);
+    }
+    
+    uintptr_t newpage= spa_get();
+    if(place_new_page( newpage,vpn(addr)<<RISCV_PAGE_BITS)!=ENQUE_SUCCESS)
+    {
+      printf("[runtime] Page replacement queue full. Can't handle. \n");
+      sbi_exit_enclave(-1);
+    }
+    read_page_from(vpn(addr)<<RISCV_PAGE_BITS, newpage);
+    *faultingPagePTE = pte_create( ppn(__pa(newpage)), PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L );
+  }
+  else{
+    printf("[RUNTIME]: Illegal Access. Exiting");
+    sbi_exit_enclave(-1);
+  }
+}
+
+
+void mycode(uintptr_t addr, uintptr_t *status_find_address){
+  uintptr_t current_q_size=0;
+  current_q_size=(uintptr_t)get_queue_size();
+  
+  if(first_fault)
+  {
+  	setup_page_fault_handler(addr, status_find_address);
+	printf("[RUNTIME]: SETUP PAGE FAULT DONE!\n");
+  }	
+// printf("[RUNTIME]: CURRENT Q SIZE %d AND ININT NUM PAGES %d\n",current_q_size,init_num_pages);
+  if (current_q_size + init_num_pages < free_pages_fr){
+	  uintptr_t newpage = spa_get();
+//	  printf("[RUNTIME]: Free pages detected, while handling fault 0x%zx\n",addr);
+			
+	  if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS)
+	  {
+	          printf("[runtime] Page replacement queue full. Can't handle. \n" );
+	          sbi_exit_enclave(-1);
+          }
+   	  status_find_address=__walk(get_root_page_table_addr(),addr);	  
+	  *status_find_address = pte_create(ppn(__pa(newpage)), PTE_A| PTE_D | PTE_V | PTE_R | PTE_X | PTE_W | PTE_U | PTE_L|PTE_E);
+
+  }
+  else
+	myfaulthandler(addr);
+}
+
+
+
+
+
+
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
+  mycode(addr,status_find_address);
+  return;
   printf("[runtime] Handle Page Fault called for addr 0x%zx\n", addr);
   if(first_fault)
   {
@@ -1697,17 +1789,16 @@ void rt_page_fault(struct encl_ctx_t* ctx)
 
 #ifdef FATAL_DEBUG
   unsigned long addr, cause, pc;
-  pc = ctx->regs.sepc;
+  pc = ctx->regs.sepc;pc=pc;
   addr = ctx->sbadaddr;
   cause = ctx->scause;
-  //printf("entred inside\n" );
   if(cause==0xf)
     fault_mode=1;//write
   else
     fault_mode=0;//read
   if(addr>0xfffffffffffff)
   {
-    printf("[runtime] bad adress fatal 0x%zx\n", addr);
+//    printf("[runtime] bad adress fatal 0x%zx\n", addr);
     //show_queue_contents();
 
     sbi_exit_enclave(-1);
@@ -1732,7 +1823,7 @@ void rt_page_fault(struct encl_ctx_t* ctx)
 
 
 
-   printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx)\n ", pc, addr, cause);
+//   printf("[runtime] page fault at 0x%lx on 0x%lx (scause: 0x%lx)\n ", pc, addr, cause);
   // printf("[runtime] number of pages left in spa = %u\r\n",spa_available());
   // printf("[runtime] queue size = %lu\r\n",get_queue_size());
   is_rt=1;
