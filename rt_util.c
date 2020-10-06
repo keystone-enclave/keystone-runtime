@@ -1091,12 +1091,18 @@ void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
   oram_init_time=cycles2-cycles1;
 }
 
+/* uintptr_t from is runtime virtual address
+ * uintptr_t addr is enclave virtual address
+ */
 void write_page_at_address(uintptr_t addr, uintptr_t from){
     uintptr_t utm = shared_buffer + 1048*1048;
     //printf("[ RUNTIME ]: WRITING AT ADDRESS %llx\n from %llx\n",addr,from);
     memcpy((void*)(utm+addr), (void*)from, RISCV_PAGE_SIZE);
 }
 
+/* uintptr_t addr is runtime virtual address
+ * uintptr_t to is enclave virtual address
+ */
 void read_page_from(uintptr_t addr, uintptr_t to)
 {	
     uintptr_t utm = shared_buffer + 1048*1048;
@@ -1105,75 +1111,83 @@ void read_page_from(uintptr_t addr, uintptr_t to)
 }
 
 
-
-
-void myfaulthandler(uintptr_t addr){
-  uintptr_t *root_page_table_addr = get_root_page_table_addr();
-  uintptr_t *faultingPagePTE = __walk(root_page_table_addr, addr);
-//  printf("[RUNTIME]: Entered  MY FAULT HANDLER CALLED FOR ADDRESS %llx\n",addr);
-  if (faultingPagePTE == 0){
-    printf("[RUNTIME]: Could not resolve pte. Exiting.");
-    sbi_exit_enclave(-1);
-  }
-  if(1){//(*faultingPagePTE) & PTE_L){
-    uintptr_t victim = remove_victim_page();
-    uintptr_t victim_page_enc = pop_item[1];
-    uintptr_t victim_page_org=0;
-    if(victim != QUEUE_EMPTY)
-    {
-      uintptr_t *status_find_pte_victim = __walk(root_page_table_addr,victim_page_enc);
-      victim_page_org=__va(((*status_find_pte_victim)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
-      write_page_at_address(victim_page_enc, victim_page_org);
-//      printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
-      free_page(vpn(victim_page_enc));
-      *status_find_pte_victim = (*status_find_pte_victim) & ~PTE_V;
-    }
-    else{
-      printf("[ RUNTIME ]: Could not find a victim. Exiting");
-      sbi_exit_enclave(-1);
-    }
+void kick_victim(uintptr_t addr){
+	uintptr_t *root_page_table_addr = get_root_page_table_addr();
+	uintptr_t *faultingPagePTE = __walk(root_page_table_addr, addr);
+	//printf("[RUNTIME]: Entered  MY FAULT HANDLER CALLED FOR ADDRESS %llx\n",addr);
+	//Probably unmapped. 
+	if (faultingPagePTE == 0){
+		printf("[RUNTIME]: Could not resolve pte. Exiting.");
+		sbi_exit_enclave(-1);
+	}
+	//Must be Legal, Exit otherwise.
+	if((*faultingPagePTE) & PTE_L){
+		uintptr_t victim = remove_victim_page();
+		// the enclave address of the victim, i.e, address of form 0x _ _ _ _
+		uintptr_t victim_page_enc = pop_item[1];	//would be good if pop_item could be chaged to something meaningful
+		uintptr_t victim_page_org=0;
+		if(victim != QUEUE_EMPTY)
+		{
+			uintptr_t *victimPTE = __walk(root_page_table_addr,victim_page_enc);
+			victim_page_org=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+			write_page_at_address(victim_page_enc, victim_page_org);
+//			printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
+			free_page(vpn(victim_page_enc));	//free the page, so that sp_get() has free pages to work with.
+			*victimPTE  = (*victimPTE) & ~PTE_V;
+		}
+		else{
+			printf("[RUNTIME]: Could not find a victim. Exiting");
+			sbi_exit_enclave(-1);
+		}
     
-    uintptr_t newpage= spa_get();
-    if(place_new_page( newpage,vpn(addr)<<RISCV_PAGE_BITS)!=ENQUE_SUCCESS)
-    {
-      printf("[runtime] Page replacement queue full. Can't handle. \n");
-      sbi_exit_enclave(-1);
-    }
-    read_page_from(vpn(addr)<<RISCV_PAGE_BITS, newpage);
-    *faultingPagePTE = pte_create( ppn(__pa(newpage)), PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L );
-  }
-  else{
-    printf("[RUNTIME]: Illegal Access. Exiting");
-    sbi_exit_enclave(-1);
-  }
+		uintptr_t newpage= spa_get();
+		if(place_new_page( newpage,vpn(addr)<<RISCV_PAGE_BITS)!=ENQUE_SUCCESS)
+		{
+			printf("[runtime] Page replacement queue full. Can't handle. \n");
+			sbi_exit_enclave(-1);
+		}
+		read_page_from(vpn(addr)<<RISCV_PAGE_BITS, newpage);
+		*faultingPagePTE = pte_create( ppn(__pa(newpage)), PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L );
+	}
+	else{
+		printf("[RUNTIME]: Illegal Access. Exiting");
+		sbi_exit_enclave(-1);
+	}
 }
 
 
-void mycode(uintptr_t addr, uintptr_t *status_find_address){
+void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
   uintptr_t current_q_size=0;
   current_q_size=(uintptr_t)get_queue_size();
   
   if(first_fault)
   {
-  	setup_page_fault_handler(addr, status_find_address);
+	//Initialize variables such as free_pages_fr and ORAm paramenters, in case an ORAM is being used
+  	setup_page_fault_handler(addr, faultingPagePTE);
 	printf("[RUNTIME]: SETUP PAGE FAULT DONE!\n");
   }	
-// printf("[RUNTIME]: CURRENT Q SIZE %d AND ININT NUM PAGES %d\n",current_q_size,init_num_pages);
+  //printf("[RUNTIME]: CURRENT Q SIZE %d AND ININT NUM PAGES %d\n",current_q_size,init_num_pages);
+  // free_pages_fr is by default set to 15, but can be changed using --free-pages flag on test-runner.cpp
+  // The if condition is a threshold check, to if we need to kick victim pages, or if we are within our free-pages threshold
   if (current_q_size + init_num_pages < free_pages_fr){
+ 	//printf("[RUNTIME]: Free pages detected, while handling fault 0x%zx\n",addr);
+	  faultingPagePTE=__walk(get_root_page_table_addr(),addr);
+	  if (faultingPagePTE== 0){
+	      printf("[RUNTIME]: Could not resolve pte. Exiting enclave.");
+	      sbi_exit_enclave(-1);
+	  }
 	  uintptr_t newpage = spa_get();
-//	  printf("[RUNTIME]: Free pages detected, while handling fault 0x%zx\n",addr);
-			
-	  if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS)
-	  {
+	  //this page is placed on the queue, so that it can become a candidate for victim polling
+	  if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS){
 	          printf("[runtime] Page replacement queue full. Can't handle. \n" );
 	          sbi_exit_enclave(-1);
           }
-   	  status_find_address=__walk(get_root_page_table_addr(),addr);	  
-	  *status_find_address = pte_create(ppn(__pa(newpage)), PTE_A| PTE_D | PTE_V | PTE_R | PTE_X | PTE_W | PTE_U | PTE_L|PTE_E);
+    	  //To the page table entry of the faulting address, add the the newly found free page, along with relevant flags.
+	  *faultingPagePTE = pte_create(ppn(__pa(newpage)), PTE_A|PTE_D|PTE_V|PTE_R|PTE_X|PTE_W|PTE_U|PTE_L|PTE_E);
 
   }
   else
-	myfaulthandler(addr);
+	kick_victim(addr);
 }
 
 
@@ -1183,7 +1197,8 @@ void mycode(uintptr_t addr, uintptr_t *status_find_address){
 
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
-  mycode(addr,status_find_address);
+  simplepaging(addr,status_find_address);
+  //THIS RETURN ENSURES THAT THE OLD CODE DOES NOT EXECUTE
   return;
   printf("[runtime] Handle Page Fault called for addr 0x%zx\n", addr);
   if(first_fault)
