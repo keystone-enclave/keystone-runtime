@@ -1124,15 +1124,15 @@ void kick_victim(uintptr_t addr){
 	if((*faultingPagePTE) & PTE_L){
 		uintptr_t victim = remove_victim_page();
 		// the enclave address of the victim, i.e, address of form 0x _ _ _ _
-		uintptr_t victim_page_enc = pop_item[1];	//would be good if pop_item could be chaged to something meaningful
-		uintptr_t victim_page_org=0;
+		uintptr_t vicPageEnc = pop_item[1];	//would be good if pop_item could be chaged to something meaningful
+		uintptr_t vicPageVA=0;
 		if(victim != QUEUE_EMPTY)
 		{
-			uintptr_t *victimPTE = __walk(root_page_table_addr,victim_page_enc);
-			victim_page_org=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
-			write_page_at_address(victim_page_enc, victim_page_org);
+			uintptr_t *victimPTE = __walk(root_page_table_addr,vicPageEnc);
+			vicPageVA=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+			write_page_at_address(vicPageEnc, vicPageVA);
 //			printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
-			free_page(vpn(victim_page_enc));	//free the page, so that sp_get() has free pages to work with.
+			free_page(vpn(vicPageEnc));	//free the page, so that sp_get() has free pages to work with.
 			*victimPTE  = (*victimPTE) & ~PTE_V;
 		}
 		else{
