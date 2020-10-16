@@ -7,7 +7,9 @@
 #include "sbi.h"
 
 #define MAILBOX_SIZE 256
-typedef struct { int lock; } spinlock_t;
+typedef struct { 
+  int lock; 
+} spinlock_t;
 #define SPINLOCK_INIT \
   { 0 }
 

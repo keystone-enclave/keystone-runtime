@@ -11,11 +11,10 @@
     register uintptr_t a1 __asm__("a1") = (uintptr_t)(___arg1);  \
     register uintptr_t a2 __asm__("a2") = (uintptr_t)(___arg2);  \
     register uintptr_t a7 __asm__("a7") = (uintptr_t)(___which); \
-    __asm__ volatile(                                            \
-        "ecall"                                                  \
-        : "+r"(a0)                                               \
-        : "r"(a1), "r"(a2), "r"(a7)                              \
-        : "memory");                                             \
+    __asm__ volatile("ecall"                                     \
+                     : "+r"(a0)                                  \
+                     : "r"(a1), "r"(a2), "r"(a7)                 \
+                     : "memory");                                \
     a0;                                                          \
   })
 
