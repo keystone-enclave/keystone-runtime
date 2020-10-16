@@ -9,7 +9,6 @@
 #include "mailbox.h"
 #include "memshare.h"
 #include "mm.h"
-#include "mm.h"
 #include "rt_util.h"
 #include "string.h"
 #include "uaccess.h"
