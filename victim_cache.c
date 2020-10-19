@@ -35,7 +35,7 @@ int is_queue_empty(Queue *q)
 
 void update_hashmap(uintptr_t addr, QNode *position)
 {
-    printf("[vcache] Updating hashmap of 0x%zx to 0x%zx\n", addr, position);
+//    printf("[vcache] Updating hashmap of 0x%zx to 0x%zx\n", addr, position);
     unsigned int index = addr >> RISCV_PAGE_BITS;
     victim_cache.hashmap[index] = position;
 
@@ -44,7 +44,7 @@ void update_hashmap(uintptr_t addr, QNode *position)
 QNode* get_node_position(uintptr_t addr)
 {
     unsigned int index = addr >> RISCV_PAGE_BITS;
-    printf("[vcache] Getting node pos of 0x%zx at index 0x%zx\n", addr, index);
+//    printf("[vcache] Getting node pos of 0x%zx at index 0x%zx\n", addr, index);
     return victim_cache.hashmap[index];
 }
 
@@ -59,7 +59,7 @@ QNode* create_new_node(uintptr_t addr)
 QNode* add_to_queue(uintptr_t addr, Queue *q)
 {
     QNode *new_node = create_new_node(addr);
-    printf("[testing] adding addr to queue 0x%zx 0x%zx\n", addr, new_node->pageNumber);
+//    printf("[testing] adding addr to queue 0x%zx 0x%zx\n", addr, new_node->pageNumber);
     if(is_queue_empty(q))
         q->front = q->rear = new_node;
     else 
@@ -152,10 +152,10 @@ int is_in_victim_cache(uintptr_t addr)
 void move_page_to_cache_from_enclave(uintptr_t addr)
 {
     //assume cache is not full
-    printf("[vcache] Moving 0x%zx to cache\n", addr);
+//    printf("[vcache] Moving 0x%zx to cache\n", addr);
     if(is_victim_cache_full())
     {
-        printf("[ERROR] cache full. cant add page from enclave\n");
+//        printf("[ERROR] cache full. cant add page from enclave\n");
         return;
     }
     Queue *q = victim_cache.lru_queue;
@@ -169,7 +169,7 @@ void move_page_to_cache_from_enclave(uintptr_t addr)
 
 void move_page_to_enclave_from_cache(uintptr_t addr)
 {
-    printf("[vcache] Move page 0x%zx to enclave\n", addr);
+//    printf("[vcache] Move page 0x%zx to enclave\n", addr);
     QNode *node_ptr = get_node_position(addr);
     update_hashmap(addr, 0);
     display_hashmap();
@@ -183,7 +183,7 @@ uintptr_t get_lru_victim_from_cache()
 {
     if(is_victim_cache_empty())
     {
-        printf("ERROR - CACHE FULL. CANT GET LRU\n");
+//        printf("ERROR - CACHE FULL. CANT GET LRU\n");
         return 0;
     }
     return victim_cache.lru_queue->front->pageNumber << RISCV_PAGE_BITS; // >> or << ??
@@ -201,7 +201,7 @@ void remove_lru_page_from_cache()
 
 void move_lru_to_mru_in_cache()
 {
-    printf("Moving page 0x%zx to end of queue\n");
+//    printf("Moving page 0x%zx to end of queue\n");
     Queue *q = victim_cache.lru_queue; //cant be empty
     QNode *lru_node = q->front;
     //remove lru from front
@@ -218,26 +218,26 @@ void move_lru_to_mru_in_cache()
 
 void display_queue(Queue *q)
 {
-    QNode *node = q->front;
+/*    QNode *node = q->front;
     while(node)
     {
         printf(" [%zd] ", node->pageNumber);
         node = node->next;
     }
-    printf("\n");
+    printf("\n");*/
 }
 
 void display_hashmap()
 {
-    int size = 15;
+   /* int size = 15;
     unsigned long i = 0;
     for(i=0; i<size; i++)
-        printf("%d -> 0x%zx\n", i, victim_cache.hashmap[i]);
+        printf("%d -> 0x%zx\n", i, victim_cache.hashmap[i]);*/
 }
 
 void testing_cache()
 {
-    printf("[cache] Entered Testing\n");
+//    printf("[cache] Entered Testing\n");
     Queue *q = victim_cache.lru_queue;
     move_page_to_cache_from_enclave(0x1000);
     move_page_to_cache_from_enclave(0x2000);
@@ -247,16 +247,16 @@ void testing_cache()
     move_page_to_cache_from_enclave(0x6000);
     display_queue(q);
     remove_lru_page_from_cache();
-    printf("[testing] removed lru \n");
+//  printf("[testing] removed lru \n");
     display_queue(q);
     move_page_to_enclave_from_cache(0x3000);
-    printf("[testing] moved page 0x3000 \n");
+//  printf("[testing] moved page 0x3000 \n");
     display_queue(q);
     move_page_to_enclave_from_cache(0x2000);
-    printf("[testing] moved page 0x2000 \n");
+//    printf("[testing] moved page 0x2000 \n");
     display_queue(q);
     move_page_to_enclave_from_cache(0x5000);
-    printf("[testing] moved page 0x5000 \n");
+//    printf("[testing] moved page 0x5000 \n");
     display_queue(q);
 
     // addr = remove_mru_from_queue(q);

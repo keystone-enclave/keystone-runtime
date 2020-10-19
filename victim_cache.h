@@ -4,7 +4,7 @@
 #include "vm.h"
 #define CACHE_SIZE 5*RISCV_PAGE_SIZE //2*1024*1024
 #define MAX_VICTIM_CACHE_PAGES 5
-#define MAX_VIRTUAL_PAGES 100
+#define MAX_VIRTUAL_PAGES 2000
 
 typedef struct QNode { 
     uintptr_t pageNumber; // the page number stored in this QNode

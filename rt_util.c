@@ -720,36 +720,39 @@ uintptr_t get_runtime_addr(uintptr_t victim_page_enc)
   return va_runtime;
 }
 
+void  write_page_at_address(uintptr_t,uintptr_t);
 //NOTE - JUST WRITES TO WORAM RIGHT NOW
 //REQUIREMENT - Victim Cache size should be atleast 1
 void write_to_victim_cache_handle_full(uintptr_t addr, uintptr_t req_addr) 
 {
-  printf("addr 0x%zx req_addr 0x%zx\n", addr, req_addr);
+//  printf("addr 0x%zx req_addr 0x%zx\n", addr, req_addr);
   // Step 1 - Get LRU Page from cache
   uintptr_t page_out = get_lru_victim_from_cache();
   if(page_out >> RISCV_PAGE_BITS == req_addr >> RISCV_PAGE_BITS)
   {
-    printf("Access lru page 0x%zx to prevent its replacement\n", req_addr);
+//    printf("Access lru page 0x%zx to prevent its replacement\n", req_addr);
     move_lru_to_mru_in_cache();
     page_out = get_lru_victim_from_cache();
   }
   uintptr_t page_out_va = get_runtime_addr(page_out);
-  printf("Lru page enclave addr 0x%zx runtime va 0x%zx\n", page_out, page_out_va);
+//  printf("Lru page enclave addr 0x%zx runtime va 0x%zx\n", page_out, page_out_va);
 
   /* 
     WRITE TO OTHER ORAM TYPES CAN BE HANDLED HERE IN STEP 2
      BY PASSING A FLAG TO THIS FUNCTION
   */
   // Step 2 - Write the page contents to ORAM
+  // COMMENTED BY MRIGANKA
   store_victim_page_to_woram(page_out, page_out_va, confidentiality, authentication);
+  
   pages_written++;
-  printf("Moved 0x%zx to oram\n", page_out);
+//  printf("Moved 0x%zx to oram\n", page_out);
 
-  printf("Removing lru from the cache\n");
+// printf("Removing lru from the cache\n");
   // Step 3 - Remove the page from cache
   remove_lru_page_from_cache();
 
-  printf("Freed page 0x%zx\n", page_out);
+  //printf("Freed page 0x%zx\n", page_out);
   // Step 4 - Free the page (Cache has 1 free page now)
   free_page(vpn(page_out));
 
@@ -1111,84 +1114,113 @@ void read_page_from(uintptr_t addr, uintptr_t to)
 }
 
 
-void kick_victim(uintptr_t addr){
-	uintptr_t *root_page_table_addr = get_root_page_table_addr();
-	uintptr_t *faultingPagePTE = __walk(root_page_table_addr, addr);
-	//printf("[RUNTIME]: Entered  MY FAULT HANDLER CALLED FOR ADDRESS %llx\n",addr);
-	//Probably unmapped. 
-	if (faultingPagePTE == 0){
-		printf("[RUNTIME]: Could not resolve pte. Exiting.");
-		sbi_exit_enclave(-1);
-	}
-	//Must be Legal, Exit otherwise.
-	if((*faultingPagePTE) & PTE_L){
-		uintptr_t victim = remove_victim_page();
-		// the enclave address of the victim, i.e, address of form 0x _ _ _ _
-		uintptr_t vicPageEnc = pop_item[1];	//would be good if pop_item could be chaged to something meaningful
-		uintptr_t vicPageVA=0;
-		if(victim != QUEUE_EMPTY)
-		{
-			uintptr_t *victimPTE = __walk(root_page_table_addr,vicPageEnc);
-			vicPageVA=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
-			write_page_at_address(vicPageEnc, vicPageVA);
-//			printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
-			free_page(vpn(vicPageEnc));	//free the page, so that sp_get() has free pages to work with.
-			*victimPTE  = (*victimPTE) & ~PTE_V;
+void kick_victim(uintptr_t addr, uintptr_t *faultingPagePTE){
+	uintptr_t victim = remove_victim_page();
+	// the enclave address of the victim, i.e, address of form 0x _ _ _ _
+	uintptr_t vicPageEnc = pop_item[1];	//would be good if pop_item could be chaged to something meaningful
+	uintptr_t vicPageVA=0;
+	if(victim != QUEUE_EMPTY)
+	{
+		uintptr_t *victimPTE = __walk(get_root_page_table_addr(),vicPageEnc);
+
+
+		if(v_cache){
+		
+			if(first_page_replacement){
+				initialize_victim_cache();
+				first_page_replacement=0;
+			}			
+			if(is_victim_cache_full()){
+//				printf("[RUNTIME]: THE VICTIM CACHE IS FULL\n");
+				write_to_victim_cache_handle_full(vicPageEnc, addr);
+//			        printf("[RUNTIME]: TRAP\n");	
+			}
+			else{
+				move_page_to_cache_from_enclave(vicPageEnc);
+			}
+			
+			*victimPTE = (*victimPTE) & ~PTE_V;
+		       	return;
 		}
-		else{
-			printf("[RUNTIME]: Could not find a victim. Exiting");
-			sbi_exit_enclave(-1);
-		}
-    
-		uintptr_t newpage= spa_get();
-		if(place_new_page( newpage,vpn(addr)<<RISCV_PAGE_BITS)!=ENQUE_SUCCESS)
-		{
-			printf("[runtime] Page replacement queue full. Can't handle. \n");
-			sbi_exit_enclave(-1);
-		}
-		read_page_from(vpn(addr)<<RISCV_PAGE_BITS, newpage);
-		*faultingPagePTE = pte_create( ppn(__pa(newpage)), PTE_D|PTE_A | PTE_V|PTE_R | PTE_X | PTE_W | PTE_U  | PTE_L );
+
+		//vicPageVA=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+		vicPageVA = get_runtime_addr(vicPageEnc);
+		//write_page_at_address(vicPageEnc, vicPageVA);   
+		store_victim_page_to_woram(vicPageEnc, vicPageVA, confidentiality, authentication);
+//		printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
+		free_page(vpn(vicPageEnc));	//free the page, so that sp_get() has free pages to work with.
+		*victimPTE  = (*victimPTE) & ~PTE_V;
 	}
 	else{
-		printf("[RUNTIME]: Illegal Access. Exiting");
+		printf("[RUNTIME]: Could not find a victim. Exiting");
 		sbi_exit_enclave(-1);
+	}
+    
+}
+
+void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
+	uintptr_t current_q_size=0;
+	current_q_size=(uintptr_t)get_queue_size();
+	if(first_fault)
+	{
+		//Initialize variables such as free_pages_fr and ORAm paramenters, in case an ORAM is being used
+	  	setup_page_fault_handler(addr, faultingPagePTE);
+		printf("[RUNTIME]: SETUP PAGE FAULT DONE!\n");
+	}
+	if(faultingPagePTE==0)
+        	faultingPagePTE=__walk(get_root_page_table_addr(),addr); 
+
+	if (faultingPagePTE== 0){
+		printf("[RUNTIME]: Could not resolve pte. Exiting enclave.");
+	        sbi_exit_enclave(-1);
+	}
+	else if(!((*faultingPagePTE) & PTE_L)){ //Must be Legal, Exit otherwise.
+  		printf("[RUNTIME]: Illegal Access. Exiting");
+	        sbi_exit_enclave(-1);
+	}
+ 
+	//printf("[RUNTIME]: CURRENT Q SIZE %d AND ININT NUM PAGES %d\n",current_q_size,init_num_pages);
+	// free_pages_fr is by default set to 15, but can be changed using --free-pages flag on test-runner.cpp
+	//The if condition is a threshold check,to if we need to kick victim pages, or if we are within our free-pages threshold
+	
+	int victim_page_reserved =0;
+	if (v_cache)
+		victim_page_reserved=MAX_VICTIM_CACHE_PAGES;
+
+	//Kick only if we are out of space in the initial free pages... other wise jist spa_get() and return!
+	if (current_q_size + init_num_pages + victim_page_reserved>= free_pages_fr){
+ 		//printf("[RUNTIME]: Free pages detected, while handling fault 0x%zx\n",addr);
+	
+		kick_victim(addr,faultingPagePTE);
+	}
+	//If first replacement has not happened yet, then in no way can the victim cache be useful.
+	if(v_cache && !first_page_replacement && is_in_victim_cache(addr)){	
+		move_page_to_enclave_from_cache(addr);		
+		*faultingPagePTE = *faultingPagePTE | PTE_V;
+		uintptr_t luckyPageVA = __va(((*faultingPagePTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
+		if(place_new_page(luckyPageVA, vpn(addr)<<RISCV_PAGE_BITS)!=ENQUE_SUCCESS){
+			printf("[runtime] Page replacement queue full. Can't handle. \n" );
+			sbi_exit_enclave(-1);
+		}
+
+		return;
+	}
+	uintptr_t newpage = spa_get();
+	
+	if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS){
+  		printf("[runtime] Page replacement queue full. Can't handle. \n" );
+	 	sbi_exit_enclave(-1);
+	}
+
+	//read_page_from(vpn(addr)<<RISCV_PAGE_BITS, newpage)		//This line simply copies into the page just allocated to the enclave;
+	if(((*faultingPagePTE)>>PTE_PPN_SHIFT)==0){ 	// The fault is due to first access to a malloced page, hence no prior record, just give a page full of zeros
+		allocate_fresh_page(newpage, faultingPagePTE);
+	}
+	else{	// Pge might have a prior data in it, and since its not the forst access, and not in the enclave as well, it must be in the back store.
+		get_page_from_woram(addr, newpage, faultingPagePTE, fault_mode, confidentiality, authentication);
 	}
 }
 
-
-void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
-  uintptr_t current_q_size=0;
-  current_q_size=(uintptr_t)get_queue_size();
-  
-  if(first_fault)
-  {
-	//Initialize variables such as free_pages_fr and ORAm paramenters, in case an ORAM is being used
-  	setup_page_fault_handler(addr, faultingPagePTE);
-	printf("[RUNTIME]: SETUP PAGE FAULT DONE!\n");
-  }	
-  //printf("[RUNTIME]: CURRENT Q SIZE %d AND ININT NUM PAGES %d\n",current_q_size,init_num_pages);
-  // free_pages_fr is by default set to 15, but can be changed using --free-pages flag on test-runner.cpp
-  // The if condition is a threshold check, to if we need to kick victim pages, or if we are within our free-pages threshold
-  if (current_q_size + init_num_pages < free_pages_fr){
- 	//printf("[RUNTIME]: Free pages detected, while handling fault 0x%zx\n",addr);
-	  faultingPagePTE=__walk(get_root_page_table_addr(),addr);
-	  if (faultingPagePTE== 0){
-	      printf("[RUNTIME]: Could not resolve pte. Exiting enclave.");
-	      sbi_exit_enclave(-1);
-	  }
-	  uintptr_t newpage = spa_get();
-	  //this page is placed on the queue, so that it can become a candidate for victim polling
-	  if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS){
-	          printf("[runtime] Page replacement queue full. Can't handle. \n" );
-	          sbi_exit_enclave(-1);
-          }
-    	  //To the page table entry of the faulting address, add the the newly found free page, along with relevant flags.
-	  *faultingPagePTE = pte_create(ppn(__pa(newpage)), PTE_A|PTE_D|PTE_V|PTE_R|PTE_X|PTE_W|PTE_U|PTE_L|PTE_E);
-
-  }
-  else
-	kick_victim(addr);
-}
 
 
 
@@ -1198,8 +1230,10 @@ void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
   simplepaging(addr,status_find_address);
+//  printf("______XXXXXXXXXXXXXXXXXXXXXX__________________%d_____XXXXXXXXXXXXXXXXXXXXXXX__________________________\n",v_cache);
   //THIS RETURN ENSURES THAT THE OLD CODE DOES NOT EXECUTE
   return;
+  
   printf("[runtime] Handle Page Fault called for addr 0x%zx\n", addr);
   if(first_fault)
   {

@@ -10,8 +10,8 @@ void initialize_woram_array()
     woram.woram_array = utm_start + UTM_ARRAY_STARTING_OFFSET;
     woram.main_area_size = SCALING_FACTOR * WORAM_SIZE;
     woram.holding_area_size = WORAM_SIZE - woram.main_area_size;
-    printf("[woram] Main Area N = %zd, Holding Area M = %zd\n", 
-                    woram.main_area_size, woram.holding_area_size);
+//    printf("[woram] Main Area N = %zd, Holding Area M = %zd\n", 
+//                    woram.main_area_size, woram.holding_area_size);
     initialize_position_map();
     woram.write_access_counter = 0;
     sanity_check(); //Optional. TODO - remove later
@@ -29,9 +29,9 @@ void initialize_position_map(void)
 
 void display_position_map()
 {
-    printf("[woram] Displaying Position Map Contents of WORAM with size %zd\n", woram.main_area_size);
-    for(uintptr_t addr = 0; addr < woram.main_area_size; addr ++ )
-        printf("[woram] Logical Address : 0x%zx , Physical Address : 0x%zx\n", addr, woram.position_map[addr]);
+//    printf("[woram] Displaying Position Map Contents of WORAM with size %zd\n", woram.main_area_size);
+//    for(uintptr_t addr = 0; addr < woram.main_area_size; addr ++ )
+//        printf("[woram] Logical Address : 0x%zx , Physical Address : 0x%zx\n", addr, woram.position_map[addr]);
     
 }
 
@@ -50,7 +50,7 @@ void sanity_check()
 
     if (pages_ptr[9].address != woram.woram_array)
     {
-        printf("[woram] woram sanity check failed. Exiting\n");
+//        printf("[woram] woram sanity check failed. Exiting\n");
         sbi_exit_enclave(-1);
     }
 }
@@ -68,7 +68,7 @@ void testing()
       unsigned long long start = ((unsigned long long)(i*(N/(double)M)))%N;
       unsigned long long end = ((unsigned long long)((i+1)*(N/(double)M)))%N;
       if (end < start) end = N;
-      printf("[woram] access = %zd, start = %zd, end = %zd\n", i, start, end);
+//      printf("[woram] access = %zd, start = %zd, end = %zd\n", i, start, end);
     }
 }
 
@@ -164,7 +164,7 @@ void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t vict
   pages victim_page;
   victim_page.address = victim_page_enclave_va;
   memcpy((void*)victim_page.data,(void*)victim_page_runtime_va, RISCV_PAGE_SIZE);
-  printf("[woram] writing victim page addr 0x%lx to woram\n", victim_page.address);
+//  printf("[woram] writing victim page addr 0x%lx to woram\n", victim_page.address);
   version_numbers[vpn(victim_page_enclave_va)]++;
   victim_page.ver_num=version_numbers[vpn(victim_page_enclave_va)];
   //TODO - Can remove confidentiality, authenticity flags and encrypt by default later
@@ -182,7 +182,7 @@ void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t vict
 void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, 
                 unsigned long access_mode, int confidentiality, int authentication)
 {
-  printf("[woram] Getting page 0x%lx from woram\n", addr);
+//  printf("[woram] Getting page 0x%lx from woram\n", addr);
   pages *returned_page = (pages*)malloc(sizeof(pages)); 
   woram_read_access(addr, returned_page);
   pages brought_page = *returned_page;
