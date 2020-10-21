@@ -8,6 +8,7 @@
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define ERROR(...) fprintf(stderr, "[ERROR]  " __VA_ARGS__)
@@ -32,7 +33,7 @@ precise_time_str(double seconds) {
 
   char* out;
   double adjusted = seconds * precision;
-  int err = asprintf(&out, "%f%s", trunc(adjusted * 1000) / 1000, prec_name);
+  asprintf(&out, "%f%s", trunc(adjusted * 1000) / 1000, prec_name);
   return out;
 }
 
@@ -88,7 +89,7 @@ run_bench(
 
   clock_t chunk_start, chunk_end;
   size_t chunk;
-  double mean, m2;
+  double mean = 0, m2 = 0;
 
   for (chunk = 0; chunk < nchunks; chunk++) {
     chunk_start = clock();
@@ -127,6 +128,53 @@ run_bench(
   return 0;
 }
 
+static int
+approximate_chunk_size(
+    struct bench_opts* opts, struct bench* bench, void* ctx,
+    size_t* chunk_size) {
+  double single_time, _single_std;
+
+  if (opts->verbose)
+    printf("`%s`: Measuring single iteration... ", bench->name);
+
+  int err = run_bench(bench, ctx, 1, 1, &single_time, &_single_std);
+  if (err) return err;
+
+  if (opts->verbose) {
+    char* iter_time = precise_time_str(single_time);
+    assert(iter_time);
+    printf("<%s\n", iter_time);
+    free(iter_time);
+  }
+
+  double approx_measured_iters = opts->measure_secs / single_time;
+  *chunk_size                  = pow(2.0, log2(approx_measured_iters) / 2);
+  return 0;
+}
+
+static int
+approximate_bench_chunks(
+    struct bench_opts* opts, struct bench* bench, void* ctx, size_t chunk_size,
+    size_t* nchunks) {
+  clock_t measure_clocks = opts->measure_secs * CLOCKS_PER_SEC;
+  size_t measured_iters;
+
+  if (opts->verbose)
+    printf(
+        "`%s`: Counting num iterations in %ds... ", bench->name,
+        opts->measure_secs);
+
+  int err =
+      measure_iters(bench, ctx, measure_clocks, chunk_size, &measured_iters);
+  if (err) return err;
+
+  if (opts->verbose) printf("%zu iterations.\n", measured_iters);
+
+  size_t bench_iters = (opts->bench_secs / opts->measure_secs) * measured_iters;
+  *nchunks           = bench_iters / chunk_size;
+  return 0;
+}
+
 int
 run_benches(
     struct bench_opts* opts, struct bench* benches, size_t nbenches,
@@ -140,10 +188,9 @@ run_benches(
     }
   }
 
-  int measure_secs = 2;
-  int bench_secs   = 10;
+  int measure_secs = opts->measure_secs;
+  int bench_secs   = opts->bench_secs;
   assert(bench_secs % measure_secs == 0);
-  clock_t measure_clocks = measure_secs * CLOCKS_PER_SEC;
 
 #define CHECK_ERR(err, ...) \
   if (err) {                \
@@ -157,39 +204,18 @@ run_benches(
     if (opts->filter && regexec(&filter, bench->name, 0, NULL, 0) != 0)
       continue;
 
-    size_t measured_iters;
-    clock_t bench_time;
     char* iter_time;
     int err;
+    size_t chunk_size;
+    size_t nchunks;
 
-    double single_time, _single_std;
+    err = approximate_chunk_size(opts, bench, ctx, &chunk_size);
+    CHECK_ERR(err, "Failed to approximate chunk size for `%s`!\n", bench->name);
 
-    if (opts->verbose)
-      printf("`%s`: Measuring single iteration... ", bench->name);
-    err = run_bench(bench, ctx, 1, 1, &single_time, &_single_std);
-    CHECK_ERR(err, "Failed to measure `%s`!\n", bench->name);
-
-    if (opts->verbose) {
-      iter_time = precise_time_str(single_time);
-      assert(iter_time);
-      printf("<%s\n", iter_time);
-      free(iter_time);
-    }
-
-    double approx_measured_iters = measure_secs / single_time;
-    size_t chunk_size            = pow(2.0, log2(approx_measured_iters) / 2);
-
-    if (opts->verbose)
-      printf(
-          "`%s`: Counting num iterations in %ds... ", bench->name,
-          measure_secs);
-    err =
-        measure_iters(bench, ctx, measure_clocks, chunk_size, &measured_iters);
-    CHECK_ERR(err, "Failed to measure `%s`!\n", bench->name);
-    if (opts->verbose) printf("%zu iterations.\n", measured_iters);
-
-    size_t bench_iters = (bench_secs / measure_secs) * measured_iters;
-    size_t nchunks     = bench_iters / chunk_size;
+    err = approximate_bench_chunks(opts, bench, ctx, chunk_size, &nchunks);
+    CHECK_ERR(
+        err, "Failed to approximate # benchmark iters for `%s`!\n",
+        bench->name);
 
     double chunk_mean, chunk_std;
 
@@ -233,7 +259,10 @@ bench_arg_parser(int key, char* val, struct argp_state* state) {
 
 struct bench_opts
 bench_argp(int argc, char** argv) {
-  struct bench_opts opts = {};
+  struct bench_opts opts = {
+      .measure_secs = 2,
+      .bench_secs   = 10,
+  };
 
   struct argp_option argp_opts[] = {
       {.name = "filter", .key = 'f', .arg = "REGEXP"},

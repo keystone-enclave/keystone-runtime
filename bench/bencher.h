@@ -13,6 +13,8 @@ struct bench {
 struct bench_opts {
   bool verbose;
   char* filter;
+  int measure_secs;
+  int bench_secs;
 };
 
 struct bench_opts

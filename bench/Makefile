@@ -1,4 +1,4 @@
-CFLAGS := -I . -g -lm -O3
+CFLAGS := -I . -g -lm -O3 -Wall -Wextra
 
 .PHONY: bencher clean
 
