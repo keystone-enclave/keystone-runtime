@@ -27,5 +27,7 @@ merk_insert(merkle_node_t* root, uintptr_t key, const uint8_t hash[32]);
 bool
 merk_verify(
     volatile merkle_node_t* root, uintptr_t key, const uint8_t hash_out[32]);
+void
+merk_clear(merkle_node_t* root);
 
 #endif

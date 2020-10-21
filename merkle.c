@@ -105,6 +105,20 @@ merk_free_node(merkle_node_t* node) {
   }
 }
 
+void
+merk_clear(merkle_node_t* root) {
+  if (root->left) {
+    merk_clear(root->left);
+    merk_free_node(root->left);
+    root->left = NULL;
+  }
+  if (root->right) {
+    merk_clear(root->right);
+    merk_free_node(root->right);
+    root->right = NULL;
+  }
+}
+
 static bool
 merk_verify_single_node(
     const merkle_node_t* node, const merkle_node_t* left,
