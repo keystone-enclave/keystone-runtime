@@ -216,16 +216,29 @@ merk_insert(merkle_tree_t *tree, uintptr_t key, const merk_hash_t *hash) {
       .children     = { old_root, ins.right_node },
       .child_hashes = { merk_calc_hash(old_root), merk_calc_hash(ins.right_node) },
     };
-    tree->root_hash = merk_calc_hash(tree->root);
   }
+  tree->root_hash = merk_calc_hash(tree->root);
   return 0;
 }
 
 
 bool
-merk_verify(merkle_node_t *node, uintptr_t key, const uint8_t _hash[32]) {
+merk_verify(merkle_tree_t *tree, uintptr_t key, const uint8_t _hash[32]) {
   merk_hash_t *hash = (merk_hash_t *)_hash;
   merkle_node_t next_node;
+
+  merkle_node_t *node = tree->root;
+  if (!node)
+    return false;
+
+  merk_hash_t found_hash = merk_calc_hash(node);
+  if (!!memcmp(&found_hash, &tree->root_hash, sizeof found_hash)) {
+    // Something corrupted the root's data; fail
+    fprintf(stderr, "Merkle root hash corrupted while querying key=%zx!\n", key);
+    // printf("Expected %lx, found %lx", *(uint64_t *)tree->root_hash.val, *(uint64_t *)found_hash.val);
+    // printf(" in node "); _print_node_id(node); printf("!\n");
+    return false;
+  }
 
   while (true) {
     size_t i = merk_key_search(node, key);
@@ -254,12 +267,12 @@ merk_verify(merkle_node_t *node, uintptr_t key, const uint8_t _hash[32]) {
     // printf("Traversing node "); _print_node_id(node); printf(" -> node "); _print_node_id(&next_node); printf("!\n");
     node = &next_node;
 
-    merk_hash_t found_hash = merk_calc_hash(node);
+    found_hash = merk_calc_hash(node);
     if (!!memcmp(&found_hash, &expected_hash, sizeof found_hash)) {
       // Something corrupted this node's data; fail
       fprintf(stderr, "Merkle tree hash corrupted while querying key=%zx!\n", key);
-      printf("Expected %lx, found %lx", *(uint64_t *)expected_hash.val, *(uint64_t *)found_hash.val);
-      printf(" in node "); _print_node_id(node); printf("!\n");
+      // printf("Expected %lx, found %lx", *(uint64_t *)expected_hash.val, *(uint64_t *)found_hash.val);
+      // printf(" in node "); _print_node_id(node); printf("!\n");
       return false;
     }
   }

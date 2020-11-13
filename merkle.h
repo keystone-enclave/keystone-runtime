@@ -46,7 +46,7 @@ int
 merk_insert(merkle_tree_t* root, uintptr_t key, const merk_hash_t *hash);
 bool
 merk_verify(
-    merkle_node_t* root, uintptr_t key, const uint8_t hash[32]);
+    merkle_tree_t* root, uintptr_t key, const uint8_t hash[32]);
 void
 merk_clear(merkle_node_t* root);
 bool
