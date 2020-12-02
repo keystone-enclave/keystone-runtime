@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #define BIT(n) (1ul << (n))
 #define MASK(n) (BIT(n) - 1ul)
 #define IS_ALIGNED(n, b) (!((n)&MASK(b)))
@@ -64,3 +66,7 @@
 #define PTE_PPN_SHIFT 10
 
 typedef uintptr_t pte;
+uintptr_t
+__va(uintptr_t pa);
+uintptr_t
+__pa(uintptr_t va);

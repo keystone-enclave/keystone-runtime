@@ -15,6 +15,17 @@
 extern uintptr_t shared_buffer;
 extern uintptr_t shared_buffer_size;
 
+uintptr_t load_pa_start;
+uintptr_t
+__va(uintptr_t pa) {
+  return (pa - load_pa_start) + EYRIE_LOAD_START;
+}
+
+uintptr_t
+__pa(uintptr_t va) {
+  return (va - EYRIE_LOAD_START) + load_pa_start;
+}
+
 /* initial memory layout */
 uintptr_t utm_base;
 size_t utm_size;

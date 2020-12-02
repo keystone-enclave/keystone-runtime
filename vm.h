@@ -22,17 +22,6 @@ static inline uintptr_t kernel_va_to_pa(void* ptr)
   return (uintptr_t) ptr - kernel_offset;
 }
 
-uintptr_t load_pa_start;
-static inline uintptr_t __va(uintptr_t pa)
-{
-  return (pa - load_pa_start) + EYRIE_LOAD_START;
-}
-
-static inline uintptr_t __pa(uintptr_t va)
-{
-  return (va - EYRIE_LOAD_START) + load_pa_start;
-}
-
 static inline pte pte_create(uintptr_t ppn, int type)
 {
   return (pte)((ppn << PTE_PPN_SHIFT) | PTE_V | (type & PTE_FLAG_MASK) );
@@ -78,10 +67,6 @@ pte load_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PA
 
 /* Program break */
 uintptr_t program_break;
-
-/* freemem */
-uintptr_t freemem_va_start;
-size_t freemem_size;
 #endif // USE_FREEMEM
 
 /* shared buffer */
