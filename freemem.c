@@ -15,7 +15,6 @@
  * SPA can allocate/free a page in constant time. */
 
 static pg_list_t spa_free_pages;
-
 /* get a free page from the simple page allocator */
 uintptr_t
 spa_get(void)
@@ -23,7 +22,7 @@ spa_get(void)
   uintptr_t free_page;
 
   if (LIST_EMPTY(spa_free_pages)) {
-    printf("eyrie simple page allocator runs out of free pages %s","\n");
+    printf("eyrie simple page allocator runs out of free pages %lld %s",spa_available(),"\n");
     return 0;
   }
 

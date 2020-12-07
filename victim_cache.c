@@ -186,7 +186,7 @@ uintptr_t get_lru_victim_from_cache()
 //        printf("ERROR - CACHE FULL. CANT GET LRU\n");
         return 0;
     }
-    return victim_cache.lru_queue->front->pageNumber << RISCV_PAGE_BITS; // >> or << ??
+    return (((victim_cache.lru_queue)->front)->pageNumber) << RISCV_PAGE_BITS; // >> or << ??
 }
 
 void remove_lru_page_from_cache()
@@ -229,7 +229,7 @@ void display_queue(Queue *q)
 
 void display_hashmap()
 {
-   /* int size = 15;
+/*    int size = 15;
     unsigned long i = 0;
     for(i=0; i<size; i++)
         printf("%d -> 0x%zx\n", i, victim_cache.hashmap[i]);*/

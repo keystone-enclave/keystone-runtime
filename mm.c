@@ -12,7 +12,6 @@ int ff=1;
 static uintptr_t current_program_break;
 static uintptr_t current_program_break_rt;
 
-
 uintptr_t get_program_break(){
   return current_program_break;
 }
@@ -60,7 +59,7 @@ __walk_internal(pte_t* root, uintptr_t addr, int create)
 
 /* walk the page table and return PTE
  * return 0 if no mapping exists */
-pte_t*// change to static after sometime
+pte_t*
 __walk(pte_t* root, uintptr_t addr)
 {
 
@@ -158,14 +157,15 @@ alloc_page(uintptr_t vpn, int flags)
 
 void
 free_page(uintptr_t vpn){
-
+	
   pte_t* pte = __walk(root_page_table, vpn << RISCV_PAGE_BITS);
 
   // No such PTE, or invalid
 
-  if(!pte || !(*pte & PTE_V))// uncomment these two lines for full tracing
-    return;
+  if(!pte){// || !(*pte & PTE_V)){// uncomment these two lines for full tracing
 
+	  return;
+  }
   uintptr_t ppn = pte_ppn(*pte);
   // Mark invalid
   // TODO maybe do more here

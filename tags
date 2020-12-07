@@ -1,0 +1,1692 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+A	roram.c	/^int A=0;$/;"	v
+AES128	aess.h	6;"	d
+AES_BLOCKLEN	aess.h	10;"	d
+AES_CBC_decrypt_buffers	aess.c	/^void AES_CBC_decrypt_buffers(struct AES_ctx* ctx, uint8_t* buf,  uint32_t length)$/;"	f
+AES_CBC_encrypt_buffers	aess.c	/^void AES_CBC_encrypt_buffers(struct AES_ctx *ctx,uint8_t* buf, uint32_t length)$/;"	f
+AES_KEYLEN	aess.h	13;"	d
+AES_ctx	aess.h	/^struct AES_ctx$/;"	s
+AES_init_ctx_ivs	aess.c	/^void AES_init_ctx_ivs(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)$/;"	f
+AES_keyExpSize	aess.h	14;"	d
+ALIGN	tmplib (copy)/partial_linkage.h	4;"	d
+ALIGN	tmplib/partial_linkage.h	4;"	d
+ALIGN_STR	tmplib (copy)/partial_linkage.h	5;"	d
+ALIGN_STR	tmplib/partial_linkage.h	5;"	d
+ALLOW_USER_ACCESS	tmplib (copy)/uaccess.h	28;"	d
+ALLOW_USER_ACCESS	tmplib/uaccess.h	28;"	d
+AMO_address_misaligned	vm.h	63;"	d
+ARCH_HAS_READ_CURRENT_TIMER	timex.h	21;"	d
+ARITY	rt_util.h	106;"	d
+ARRAY_SIZE	rt_util.h	45;"	d
+ASM_NL	tmplib (copy)/partial_linkage.h	3;"	d
+ASM_NL	tmplib/partial_linkage.h	3;"	d
+ASM_OBJS	Makefile	/^ASM_OBJS = $(patsubst %.S,%.o,$(ASM_SRCS))$/;"	m
+ASM_OBJS	tmplib (copy)/Makefile	/^ASM_OBJS = $(patsubst %.S,%.o,$(ASM_SRCS))$/;"	m
+ASM_OBJS	tmplib/Makefile	/^ASM_OBJS = $(patsubst %.S,%.o,$(ASM_SRCS))$/;"	m
+ASM_SRCS	Makefile	/^ASM_SRCS = entry.S$/;"	m
+ASM_SRCS	tmplib (copy)/Makefile	/^ASM_SRCS = uaccess.S$/;"	m
+ASM_SRCS	tmplib/Makefile	/^ASM_SRCS = uaccess.S$/;"	m
+AT_BASE	elf.h	12;"	d
+AT_BASE_PLATFORM	elf.h	42;"	d
+AT_CLKTCK	elf.h	20;"	d
+AT_DCACHEBSIZE	elf.h	32;"	d
+AT_EGID	elf.h	19;"	d
+AT_ENTRY	elf.h	14;"	d
+AT_EUID	elf.h	17;"	d
+AT_EXECFD	elf.h	7;"	d
+AT_EXECFN	elf.h	48;"	d
+AT_FLAGS	elf.h	13;"	d
+AT_FPUCW	elf.h	29;"	d
+AT_GID	elf.h	18;"	d
+AT_HWCAP	elf.h	24;"	d
+AT_HWCAP2	elf.h	46;"	d
+AT_ICACHEBSIZE	elf.h	33;"	d
+AT_IGNORE	elf.h	6;"	d
+AT_IGNOREPPC	elf.h	38;"	d
+AT_NOTELF	elf.h	15;"	d
+AT_NULL	elf.h	5;"	d
+AT_PAGESZ	elf.h	11;"	d
+AT_PHDR	elf.h	8;"	d
+AT_PHENT	elf.h	9;"	d
+AT_PHNUM	elf.h	10;"	d
+AT_PLATFORM	elf.h	23;"	d
+AT_RANDOM	elf.h	44;"	d
+AT_SECURE	elf.h	40;"	d
+AT_SYSINFO	elf.h	52;"	d
+AT_SYSINFO_EHDR	elf.h	53;"	d
+AT_UCACHEBSIZE	elf.h	34;"	d
+AT_UID	elf.h	16;"	d
+AUXV_COUNT	env.c	27;"	d	file:
+AddRoundKey	aess.c	/^static void AddRoundKey(uint8_t round,state_t* state,uint8_t* RoundKey)$/;"	f	file:
+BACKUP_BUFFER_SIZE	vm.h	232;"	d
+BACKUP_BUFFER_SIZE_ORAM	vm.h	234;"	d
+BACKUP_BUFFER_SIZE_OTHERS	vm.h	235;"	d
+BACKUP_BUFFER_SIZE_RORAM	vm.h	233;"	d
+BIT	vm.h	10;"	d
+BLOCKS_FOR_TIME_COUNTING	rt_util.h	121;"	d
+BLOCK_SIZE	rt_util.h	46;"	d
+BUILD_DEFS	tmplib (copy)/Makefile	/^BUILD_DEFS = -D__riscv_xlen=64 -D__ASSEMBLY__ -include partial_linkage.h$/;"	m
+BUILD_DEFS	tmplib/Makefile	/^BUILD_DEFS = -D__riscv_xlen=64 -D__ASSEMBLY__ -include partial_linkage.h$/;"	m
+Block	oram.h	/^typedef struct Block$/;"	s
+Block	oram.h	/^} Block;$/;"	t	typeref:struct:Block
+Block_Opam	opam.h	/^typedef struct Block_Opam$/;"	s
+Block_Opam	opam.h	/^} Block_Opam;$/;"	t	typeref:struct:Block_Opam
+Block_Opam_md	opam.h	/^typedef struct Block_Opam_md$/;"	s
+Block_Opam_md	opam.h	/^} Block_Opam_md;$/;"	t	typeref:struct:Block_Opam_md
+Block_md	oram.h	/^typedef struct Block_md$/;"	s
+Block_md	oram.h	/^} Block_md;$/;"	t	typeref:struct:Block_md
+Block_roram	roram.h	/^typedef struct Block_roram$/;"	s
+Block_roram	roram.h	/^} Block_roram;$/;"	t	typeref:struct:Block_roram
+Breakpoint	vm.h	60;"	d
+Bucket	oram.h	/^typedef struct Bucket$/;"	s
+Bucket	oram.h	/^}Bucket;$/;"	t	typeref:struct:Bucket
+Bucket_md	oram.h	/^typedef struct Bucket_md$/;"	s
+Bucket_md	oram.h	/^}Bucket_md;$/;"	t	typeref:struct:Bucket_md
+Bucket_opam	opam.h	/^typedef struct Bucket_opam$/;"	s
+Bucket_opam	opam.h	/^}Bucket_opam;$/;"	t	typeref:struct:Bucket_opam
+Bucket_opam_md	opam.h	/^typedef struct Bucket_opam_md$/;"	s
+Bucket_opam_md	opam.h	/^}Bucket_opam_md;$/;"	t	typeref:struct:Bucket_opam_md
+Bucket_roram	roram.h	/^typedef struct Bucket_roram$/;"	s
+Bucket_roram	roram.h	/^} Bucket_roram;$/;"	t	typeref:struct:Bucket_roram
+Bucket_roram_md	roram.h	/^typedef struct Bucket_roram_md$/;"	s
+Bucket_roram_md	roram.h	/^} Bucket_roram_md;$/;"	t	typeref:struct:Bucket_roram_md
+CACHE_SIZE	victim_cache.h	5;"	d
+CACHING_LEVEL	roram.h	18;"	d
+CAN_ALLOC_P	tiny-malloc.c	120;"	d	file:
+CAN_ALLOC_P	tiny-malloc.c	124;"	d	file:
+CBC	aess.h	2;"	d
+CC	Makefile	/^CC = riscv64-unknown-linux-gnu-gcc$/;"	m
+CC	tmplib (copy)/Makefile	/^CC = riscv64-unknown-linux-gnu-gcc$/;"	m
+CC	tmplib/Makefile	/^CC = riscv64-unknown-linux-gnu-gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -Wall -Werror -fPIC -fno-builtin $(OPTIONS_FLAGS)$/;"	m
+CFLAGS	tmplib (copy)/Makefile	/^CFLAGS = -Wall -Werror -fPIC -I.$/;"	m
+CFLAGS	tmplib/Makefile	/^CFLAGS = -Wall -Werror -fPIC -I.$/;"	m
+CLOCK_FREQ	linux_wrap.c	10;"	d	file:
+COPY_FROM_USER	syscall.c	28;"	d	file:
+COPY_HEADERS	tmplib (copy)/Makefile	/^COPY_HEADERS =$/;"	m
+COPY_HEADERS	tmplib/Makefile	/^COPY_HEADERS =$/;"	m
+COPY_TARGETS	tmplib (copy)/Makefile	/^COPY_TARGETS = $(ASM_OBJS) $(COPY_HEADERS)$/;"	m
+COPY_TARGETS	tmplib/Makefile	/^COPY_TARGETS = $(ASM_OBJS) $(COPY_HEADERS)$/;"	m
+COPY_TO_USER	syscall.c	27;"	d	file:
+COPY_USER_BLKSZ	tmplib (copy)/uaccess.S	/^#define COPY_USER_BLKSZ (COPY_USER_UNROLL * SZREG)$/;"	d
+COPY_USER_BLKSZ	tmplib/uaccess.S	/^#define COPY_USER_BLKSZ (COPY_USER_UNROLL * SZREG)$/;"	d
+COPY_USER_UNROLL	tmplib (copy)/uaccess.S	/^#define COPY_USER_UNROLL 8$/;"	d
+COPY_USER_UNROLL	tmplib/uaccess.S	/^#define COPY_USER_UNROLL 8$/;"	d
+COPY_WASTE	rt_util.h	104;"	d
+Cipher	aess.c	/^static void Cipher(state_t* state, uint8_t* RoundKey)$/;"	f	file:
+Contains	oram.c	/^int Contains(unsigned int Stemp[ARRAY_SIZE], int Stemp_len, uintptr_t address)$/;"	f
+DEFAULT_CLOCK_DELAY	interrupt.c	15;"	d	file:
+DEQUE_SUCCESS	page_replacement.h	4;"	d
+DISK_IMAGE	Makefile	/^DISK_IMAGE = ..\/busybear-linux\/busybear.bin$/;"	m
+DUMMY_BLOCK_ADDR	rt_util.h	43;"	d
+DUMMY_PAGES_READ	rt_util.h	98;"	d
+DUMMY_PAGES_WRITTEN	rt_util.h	99;"	d
+ENCL_CONTEXT_SIZE	entry.S	/^#define ENCL_CONTEXT_SIZE (REGBYTES*35)$/;"	d
+ENCL_STACK_SIZE	entry.S	/^#define ENCL_STACK_SIZE (8*1024)$/;"	d
+ENC_PFH	rt_util.h	50;"	d
+END	tmplib (copy)/partial_linkage.h	15;"	d
+END	tmplib/partial_linkage.h	15;"	d
+ENDPROC	tmplib (copy)/partial_linkage.h	24;"	d
+ENDPROC	tmplib/partial_linkage.h	24;"	d
+ENQUE_SUCCESS	page_replacement.h	3;"	d
+ENTRY	tmplib (copy)/partial_linkage.h	8;"	d
+ENTRY	tmplib/partial_linkage.h	8;"	d
+EXC_BREAKPOINT	tmplib (copy)/asm/csr.h	60;"	d
+EXC_BREAKPOINT	tmplib/asm/csr.h	60;"	d
+EXC_INST_ACCESS	tmplib (copy)/asm/csr.h	59;"	d
+EXC_INST_ACCESS	tmplib/asm/csr.h	59;"	d
+EXC_INST_MISALIGNED	tmplib (copy)/asm/csr.h	58;"	d
+EXC_INST_MISALIGNED	tmplib/asm/csr.h	58;"	d
+EXC_INST_PAGE_FAULT	tmplib (copy)/asm/csr.h	64;"	d
+EXC_INST_PAGE_FAULT	tmplib/asm/csr.h	64;"	d
+EXC_LOAD_ACCESS	tmplib (copy)/asm/csr.h	61;"	d
+EXC_LOAD_ACCESS	tmplib/asm/csr.h	61;"	d
+EXC_LOAD_PAGE_FAULT	tmplib (copy)/asm/csr.h	65;"	d
+EXC_LOAD_PAGE_FAULT	tmplib/asm/csr.h	65;"	d
+EXC_STORE_ACCESS	tmplib (copy)/asm/csr.h	62;"	d
+EXC_STORE_ACCESS	tmplib/asm/csr.h	62;"	d
+EXC_STORE_PAGE_FAULT	tmplib (copy)/asm/csr.h	66;"	d
+EXC_STORE_PAGE_FAULT	tmplib/asm/csr.h	66;"	d
+EXC_SYSCALL	tmplib (copy)/asm/csr.h	63;"	d
+EXC_SYSCALL	tmplib/asm/csr.h	63;"	d
+EXTENSIONS	rt_util.h	94;"	d
+EYRIE_ANON_REGION_END	vm.h	38;"	d
+EYRIE_ANON_REGION_START	vm.h	37;"	d
+EYRIE_LOAD_START	vm.h	34;"	d
+EYRIE_UNTRUSTED_START	vm.h	35;"	d
+EYRIE_USER_STACK_END	vm.h	43;"	d
+EYRIE_USER_STACK_SIZE	vm.h	39;"	d
+EYRIE_USER_STACK_START	vm.h	36;"	d
+Environment_call	vm.h	65;"	d
+FATAL_DEBUG	rt_util.h	7;"	d
+FLAGS_CHAR	printf.c	68;"	d	file:
+FLAGS_HASH	printf.c	66;"	d	file:
+FLAGS_LEFT	printf.c	63;"	d	file:
+FLAGS_LONG	printf.c	70;"	d	file:
+FLAGS_LONG_LONG	printf.c	71;"	d	file:
+FLAGS_PLUS	printf.c	64;"	d	file:
+FLAGS_PRECISION	printf.c	72;"	d	file:
+FLAGS_SHORT	printf.c	69;"	d	file:
+FLAGS_SPACE	printf.c	65;"	d	file:
+FLAGS_UPPERCASE	printf.c	67;"	d	file:
+FLAGS_ZEROPAD	printf.c	62;"	d	file:
+FREE_PAGES_FR	rt_util.h	93;"	d
+FULL_TRACE	rt_util.c	43;"	d	file:
+FULL_TRACE_CHUNK	rt_util.c	46;"	d	file:
+G	roram.c	/^int G=0;$/;"	v
+HASH_SIZE	ssha3.h	9;"	d
+HOST_CONTEXT_SIZE	entry.S	/^#define HOST_CONTEXT_SIZE (REGBYTES*32)$/;"	d
+INIT_NUM_PAGES	rt_util.h	91;"	d
+INTERRUPT_CAUSE_EXTERNAL	interrupt.h	10;"	d
+INTERRUPT_CAUSE_SOFTWARE	interrupt.h	8;"	d
+INTERRUPT_CAUSE_TIMER	interrupt.h	9;"	d
+INTERVAL	rt_util.c	41;"	d	file:
+IS_ALIGNED	vm.h	12;"	d
+Illegal_instruction	vm.h	59;"	d
+Instruction_access_fault	vm.h	58;"	d
+Instruction_address_misaligned	vm.h	57;"	d
+Instruction_page_fault	vm.h	66;"	d
+InvCipher	aess.c	/^static void InvCipher(state_t* state,uint8_t* RoundKey)$/;"	f	file:
+InvMixColumns	aess.c	/^static void InvMixColumns(state_t* state)$/;"	f	file:
+InvShiftRows	aess.c	/^static void InvShiftRows(state_t* state)$/;"	f	file:
+InvSubBytes	aess.c	/^static void InvSubBytes(state_t* state)$/;"	f	file:
+Iv	aess.h	/^  uint8_t Iv[AES_BLOCKLEN];$/;"	m	struct:AES_ctx
+KECCAKF_ROUNDS	ssha3.h	11;"	d
+KeyExpansion	aess.c	/^static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)$/;"	f	file:
+Key_hmac	rt_util.c	/^uint8_t Key_hmac[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+Key_hmac	woram.h	/^    uint8_t *Key_hmac;$/;"	m	struct:key_utilities
+L	vm.h	/^int L;$/;"	v
+LDFLAGS	Makefile	/^LDFLAGS = -static -nostdlib$/;"	m
+LGREG	tmplib (copy)/asm/asm.h	34;"	d
+LGREG	tmplib/asm/asm.h	34;"	d
+LINK	Makefile	/^LINK = riscv64-unknown-linux-gnu-ld$/;"	m
+LIST_EMPTY	freemem.h	7;"	d
+LIST_INIT	freemem.h	8;"	d
+LOAD	entry.S	/^#define LOAD ld$/;"	d
+LOG_REGBYTES	entry.S	/^#define LOG_REGBYTES  3$/;"	d
+LWU	entry.S	/^#define LWU lwu$/;"	d
+Load_access_fault	vm.h	62;"	d
+Load_page_fault	vm.h	67;"	d
+MALLOC_DIRECTION	tiny-malloc.c	56;"	d	file:
+MALLOC_LIMIT	tiny-malloc.c	114;"	d	file:
+MALLOC_LIMIT	tiny-malloc.c	116;"	d	file:
+MALLOC_MINIMUM_GAP	tiny-malloc.c	110;"	d	file:
+MALLOC_SIZE	vm.h	241;"	d
+MALLOC_SIZE2	vm.h	242;"	d
+MASK	vm.h	11;"	d
+MAX_STASH_OCC	rt_util.h	100;"	d
+MAX_STRACE_PRINT	io_wrap.c	20;"	d	file:
+MAX_VICTIM_CACHE_PAGES	victim_cache.h	6;"	d
+MAX_VIRTUAL_PAGES	victim_cache.h	7;"	d
+MIN_ENCLAVE_VADDR	vm.h	40;"	d
+MIN_HASH_NUM	roram.h	20;"	d
+MOUNT_DIR	Makefile	/^MOUNT_DIR = .\/tmp_busybear$/;"	m
+MULTIPLY_AS_A_FUNCTION	aess.c	59;"	d	file:
+M_ALIGN	tiny-malloc.c	96;"	d	file:
+M_ALIGN_SUB	tiny-malloc.c	100;"	d	file:
+MixColumns	aess.c	/^static void MixColumns(state_t* state)$/;"	f	file:
+Multiply	aess.c	302;"	d	file:
+N	vm.h	/^int N;$/;"	v
+NEXT_PAGE	freemem.h	6;"	d
+NO_OF_COUNTERS	rt_util.h	52;"	d
+NO_ORAM	rt_util.h	47;"	d
+Nb	aess.c	49;"	d	file:
+Nk	aess.c	52;"	d	file:
+Nr	aess.c	53;"	d	file:
+OBJS	Makefile	/^OBJS = $(patsubst %.c,%.o,$(SRCS))$/;"	m
+OCALL_GET_CONTENT_FROM_UTM	rt_util.c	33;"	d	file:
+OCALL_GET_CONTENT_FROM_UTM_ENC_PFH	rt_util.c	37;"	d	file:
+OCALL_GET_STRING	tiny-malloc.c	60;"	d	file:
+OCALL_GET_TESTING_PARAMS	rt_util.c	35;"	d	file:
+OCALL_OPAM_READ_BUCKETS	opam.h	4;"	d
+OCALL_OPAM_READ_BUCKETS_D	opam.h	8;"	d
+OCALL_OPAM_READ_BUCKETS_MD	opam.h	6;"	d
+OCALL_OPAM_WRITE_BUCKETS	opam.h	5;"	d
+OCALL_OPAM_WRITE_BUCKETS_D	opam.h	9;"	d
+OCALL_OPAM_WRITE_BUCKETS_MD	opam.h	7;"	d
+OCALL_PRINT_BUFFER	tiny-malloc.c	58;"	d	file:
+OCALL_PRINT_COUNTERS	rt_util.c	38;"	d	file:
+OCALL_PRINT_VALUE	tiny-malloc.c	59;"	d	file:
+OCALL_READ_BUCKETS	oram.h	5;"	d
+OCALL_RORAM_READ_BLOCK	roram.h	5;"	d
+OCALL_RORAM_READ_BUCKET	roram.h	6;"	d
+OCALL_RORAM_READ_BUCKET_METADATA	roram.h	4;"	d
+OCALL_RORAM_WRITE_BLOCK	roram.h	8;"	d
+OCALL_RORAM_WRITE_BUCKET	roram.h	9;"	d
+OCALL_RORAM_WRITE_BUCKET_METADATA	roram.h	7;"	d
+OCALL_STORE_CONTENT_TO_UTM	rt_util.c	34;"	d	file:
+OCALL_STORE_CONTENT_TO_UTM_ENC_PFH	rt_util.c	36;"	d	file:
+OCALL_WRITE_BUCKETS	oram.h	6;"	d
+OPAM	rt_util.h	49;"	d
+OPAM_STASH_SIZE	opam.h	11;"	d
+OPAM_TREE_SIZE	opam.h	12;"	d
+OPTIONS_FLAGS	Makefile	/^OPTIONS_FLAGS ?= -DUSE_FREEMEM$/;"	m
+ORAM_ACC	rt_util.h	102;"	d
+ORAM_INIT	rt_util.h	103;"	d
+ORAM_STASH_SIZE	oram.h	10;"	d
+ORAM_TREE_SIZE	oram.h	11;"	d
+PAGES_READ	rt_util.h	89;"	d
+PAGES_WRITTEN	rt_util.h	90;"	d
+PAGE_DOWN	vm.h	30;"	d
+PAGE_FAULT_COUNT	rt_util.h	92;"	d
+PAGE_FAULT_HANDLER_ENC_ADDR	rt_util.h	/^       PAGE_FAULT_HANDLER_OPAM=2, PAGE_FAULT_HANDLER_ENC_ADDR=3 }page_fault_type;$/;"	e	enum:__anon4
+PAGE_FAULT_HANDLER_OPAM	rt_util.h	/^       PAGE_FAULT_HANDLER_OPAM=2, PAGE_FAULT_HANDLER_ENC_ADDR=3 }page_fault_type;$/;"	e	enum:__anon4
+PAGE_FAULT_HANDLER_ORAM	rt_util.h	/^typedef enum  { PAGE_FAULT_HANDLER_SIMPLE=0, PAGE_FAULT_HANDLER_ORAM=1,$/;"	e	enum:__anon4
+PAGE_FAULT_HANDLER_SIMPLE	rt_util.h	/^typedef enum  { PAGE_FAULT_HANDLER_SIMPLE=0, PAGE_FAULT_HANDLER_ORAM=1,$/;"	e	enum:__anon4
+PAGE_UP	vm.h	31;"	d
+PATH_ORAM	rt_util.h	48;"	d
+PRINTF_FTOA_BUFFER_SIZE	printf.c	46;"	d	file:
+PRINTF_NTOA_BUFFER_SIZE	printf.c	41;"	d	file:
+PRINTF_SUPPORT_FLOAT	printf.c	49;"	d	file:
+PRINTF_SUPPORT_LONG_LONG	printf.c	52;"	d	file:
+PRINTF_SUPPORT_PTRDIFF_T	printf.c	56;"	d	file:
+PRP	roram.c	/^void PRP(uint8_t* arr, int n)$/;"	f
+PTE_A	vm.h	51;"	d
+PTE_D	vm.h	52;"	d
+PTE_E	vm.h	54;"	d
+PTE_G	vm.h	50;"	d
+PTE_L	vm.h	53;"	d
+PTE_PPN_SHIFT	vm.h	20;"	d
+PTE_R	vm.h	46;"	d
+PTE_U	vm.h	49;"	d
+PTE_V	vm.h	45;"	d
+PTE_W	vm.h	47;"	d
+PTE_X	vm.h	48;"	d
+QNode	victim_cache.h	/^typedef struct QNode { $/;"	s
+QNode	victim_cache.h	/^} QNode; $/;"	t	typeref:struct:QNode
+QUEUE_EMPTY	page_replacement.h	2;"	d
+QUEUE_FULL	page_replacement.h	1;"	d
+QUEUE_SIZE	vm.h	14;"	d
+Queue	victim_cache.h	/^typedef struct Queue { $/;"	s
+Queue	victim_cache.h	/^} Queue;$/;"	t	typeref:struct:Queue
+REAL_PAGES_READ	rt_util.h	96;"	d
+REAL_PAGES_WRITTEN	rt_util.h	97;"	d
+REAL_SIZE	tiny-malloc.c	131;"	d	file:
+REGBYTES	entry.S	/^#define REGBYTES (1<<LOG_REGBYTES)$/;"	d
+REG_L	tmplib (copy)/asm/asm.h	31;"	d
+REG_L	tmplib/asm/asm.h	31;"	d
+REG_S	tmplib (copy)/asm/asm.h	32;"	d
+REG_S	tmplib/asm/asm.h	32;"	d
+RISCV_GET_LVL_PGSIZE	vm.h	26;"	d
+RISCV_GET_LVL_PGSIZE_BITS	vm.h	25;"	d
+RISCV_GET_PT_INDEX	vm.h	22;"	d
+RISCV_INT	tmplib (copy)/asm/asm.h	61;"	d
+RISCV_INT	tmplib/asm/asm.h	61;"	d
+RISCV_LGINT	tmplib (copy)/asm/asm.h	63;"	d
+RISCV_LGINT	tmplib/asm/asm.h	63;"	d
+RISCV_LGPTR	tmplib (copy)/asm/asm.h	40;"	d
+RISCV_LGPTR	tmplib (copy)/asm/asm.h	44;"	d
+RISCV_LGPTR	tmplib (copy)/asm/asm.h	50;"	d
+RISCV_LGPTR	tmplib (copy)/asm/asm.h	54;"	d
+RISCV_LGPTR	tmplib/asm/asm.h	40;"	d
+RISCV_LGPTR	tmplib/asm/asm.h	44;"	d
+RISCV_LGPTR	tmplib/asm/asm.h	50;"	d
+RISCV_LGPTR	tmplib/asm/asm.h	54;"	d
+RISCV_LGSHORT	tmplib (copy)/asm/asm.h	71;"	d
+RISCV_LGSHORT	tmplib/asm/asm.h	71;"	d
+RISCV_PAGE_BITS	vm.h	18;"	d
+RISCV_PAGE_OFFSET	vm.h	21;"	d
+RISCV_PAGE_SIZE	vm.h	19;"	d
+RISCV_PTR	tmplib (copy)/asm/asm.h	38;"	d
+RISCV_PTR	tmplib (copy)/asm/asm.h	42;"	d
+RISCV_PTR	tmplib (copy)/asm/asm.h	48;"	d
+RISCV_PTR	tmplib (copy)/asm/asm.h	52;"	d
+RISCV_PTR	tmplib/asm/asm.h	38;"	d
+RISCV_PTR	tmplib/asm/asm.h	42;"	d
+RISCV_PTR	tmplib/asm/asm.h	48;"	d
+RISCV_PTR	tmplib/asm/asm.h	52;"	d
+RISCV_PT_INDEX_BITS	vm.h	16;"	d
+RISCV_PT_LEVELS	vm.h	17;"	d
+RISCV_SHORT	tmplib (copy)/asm/asm.h	69;"	d
+RISCV_SHORT	tmplib/asm/asm.h	69;"	d
+RISCV_SZINT	tmplib (copy)/asm/asm.h	62;"	d
+RISCV_SZINT	tmplib/asm/asm.h	62;"	d
+RISCV_SZPTR	tmplib (copy)/asm/asm.h	39;"	d
+RISCV_SZPTR	tmplib (copy)/asm/asm.h	43;"	d
+RISCV_SZPTR	tmplib (copy)/asm/asm.h	49;"	d
+RISCV_SZPTR	tmplib (copy)/asm/asm.h	53;"	d
+RISCV_SZPTR	tmplib/asm/asm.h	39;"	d
+RISCV_SZPTR	tmplib/asm/asm.h	43;"	d
+RISCV_SZPTR	tmplib/asm/asm.h	49;"	d
+RISCV_SZPTR	tmplib/asm/asm.h	53;"	d
+RISCV_SZSHORT	tmplib (copy)/asm/asm.h	70;"	d
+RISCV_SZSHORT	tmplib/asm/asm.h	70;"	d
+RORAM	rt_util.h	51;"	d
+RORAM_BUCKET_SIZE	roram.h	12;"	d
+RORAM_TREE_SIZE	roram.h	14;"	d
+RORAM_TREE_TOP_SIZE	roram.h	16;"	d
+ROTL64	ssha3.h	15;"	d
+ROUND_DOWN	vm.h	29;"	d
+ROUND_UP	vm.h	28;"	d
+RUNTIME	Makefile	/^RUNTIME = eyrie-rt$/;"	m
+RUNTIME_SYSCALL_ATTEST_ENCLAVE	syscall.h	16;"	d
+RUNTIME_SYSCALL_EXIT	syscall.h	17;"	d
+RUNTIME_SYSCALL_OCALL	syscall.h	14;"	d
+RUNTIME_SYSCALL_RAND	syscall.h	19;"	d
+RUNTIME_SYSCALL_SBRK	syscall.h	18;"	d
+RUNTIME_SYSCALL_SHAREDCOPY	syscall.h	15;"	d
+RUNTIME_SYSCALL_UNKNOWN	syscall.h	13;"	d
+Rcon	aess.c	/^static const uint8_t Rcon[11] = {$/;"	v	file:
+Reserved	vm.h	61;"	d
+RoundKey	aess.h	/^  uint8_t RoundKey[AES_keyExpSize];$/;"	m	struct:AES_ctx
+S	oram.c	/^Block *S;$/;"	v
+SATP_MODE	tmplib (copy)/asm/csr.h	47;"	d
+SATP_MODE	tmplib (copy)/asm/csr.h	51;"	d
+SATP_MODE	tmplib/asm/csr.h	47;"	d
+SATP_MODE	tmplib/asm/csr.h	51;"	d
+SATP_MODE_32	tmplib (copy)/asm/csr.h	46;"	d
+SATP_MODE_32	tmplib/asm/csr.h	46;"	d
+SATP_MODE_39	tmplib (copy)/asm/csr.h	50;"	d
+SATP_MODE_39	tmplib/asm/csr.h	50;"	d
+SATP_PPN	tmplib (copy)/asm/csr.h	45;"	d
+SATP_PPN	tmplib (copy)/asm/csr.h	49;"	d
+SATP_PPN	tmplib/asm/csr.h	45;"	d
+SATP_PPN	tmplib/asm/csr.h	49;"	d
+SBI_CALL	sbi.h	26;"	d
+SBI_CALL_0	sbi.h	39;"	d
+SBI_CALL_1	sbi.h	40;"	d
+SBI_CALL_2	sbi.h	41;"	d
+SBI_CALL_3	sbi.h	42;"	d
+SBI_CONSOLE_GETCHAR	sbi.h	12;"	d
+SBI_CONSOLE_PUTCHAR	sbi.h	11;"	d
+SBI_SET_TIMER	sbi.h	10;"	d
+SBI_SM_ATTEST_ENCLAVE	sbi.h	16;"	d
+SBI_SM_CREATE_ENCLAVE	sbi.h	14;"	d
+SBI_SM_DESTROY_ENCLAVE	sbi.h	15;"	d
+SBI_SM_ENCLAVE_GETRANDOM	sbi.h	20;"	d
+SBI_SM_EXIT_ENCLAVE	sbi.h	21;"	d
+SBI_SM_NOT_IMPLEMENTED	sbi.h	22;"	d
+SBI_SM_PRINT_HELLO_WORLD	sbi.h	24;"	d
+SBI_SM_RANDOM	sbi.h	23;"	d
+SBI_SM_RESUME_ENCLAVE	sbi.h	19;"	d
+SBI_SM_RUN_ENCLAVE	sbi.h	17;"	d
+SBI_SM_STOP_ENCLAVE	sbi.h	18;"	d
+SCALING_FACTOR	woram.h	8;"	d
+SDK_EDGE_LIB	Makefile	/^SDK_EDGE_LIB = $(SDK_LIB_DIR)\/libkeystone-edge.a$/;"	m
+SDK_INCLUDE_EDGE_DIR	Makefile	/^SDK_INCLUDE_EDGE_DIR = $(SDK_LIB_DIR)\/edge\/include$/;"	m
+SDK_LIB_DIR	Makefile	/^SDK_LIB_DIR = ..\/..\/lib$/;"	m
+SHA3_H	ssha3.h	5;"	d
+SIE_SSIE	tmplib (copy)/asm/csr.h	55;"	d
+SIE_SSIE	tmplib/asm/csr.h	55;"	d
+SIE_STIE	tmplib (copy)/asm/csr.h	56;"	d
+SIE_STIE	tmplib/asm/csr.h	56;"	d
+SIZE_OF_SETUP	env.c	30;"	d	file:
+SRCS	Makefile	/^SRCS = boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c page_replacement.c chacha20_asm.c aess.c ssha3.c opam.c oram.c roram.c tiny-malloc.c index_q.c woram.c victim_cache.c$/;"	m
+SR_FS	tmplib (copy)/asm/csr.h	25;"	d
+SR_FS	tmplib/asm/csr.h	25;"	d
+SR_FS_CLEAN	tmplib (copy)/asm/csr.h	28;"	d
+SR_FS_CLEAN	tmplib/asm/csr.h	28;"	d
+SR_FS_DIRTY	tmplib (copy)/asm/csr.h	29;"	d
+SR_FS_DIRTY	tmplib/asm/csr.h	29;"	d
+SR_FS_INITIAL	tmplib (copy)/asm/csr.h	27;"	d
+SR_FS_INITIAL	tmplib/asm/csr.h	27;"	d
+SR_FS_OFF	tmplib (copy)/asm/csr.h	26;"	d
+SR_FS_OFF	tmplib/asm/csr.h	26;"	d
+SR_SD	tmplib (copy)/asm/csr.h	38;"	d
+SR_SD	tmplib (copy)/asm/csr.h	40;"	d
+SR_SD	tmplib/asm/csr.h	38;"	d
+SR_SD	tmplib/asm/csr.h	40;"	d
+SR_SIE	tmplib (copy)/asm/csr.h	20;"	d
+SR_SIE	tmplib/asm/csr.h	20;"	d
+SR_SPIE	tmplib (copy)/asm/csr.h	21;"	d
+SR_SPIE	tmplib/asm/csr.h	21;"	d
+SR_SPP	tmplib (copy)/asm/csr.h	22;"	d
+SR_SPP	tmplib/asm/csr.h	22;"	d
+SR_SUM	tmplib (copy)/asm/csr.h	23;"	d
+SR_SUM	tmplib/asm/csr.h	23;"	d
+SR_XS	tmplib (copy)/asm/csr.h	31;"	d
+SR_XS	tmplib/asm/csr.h	31;"	d
+SR_XS_CLEAN	tmplib (copy)/asm/csr.h	34;"	d
+SR_XS_CLEAN	tmplib/asm/csr.h	34;"	d
+SR_XS_DIRTY	tmplib (copy)/asm/csr.h	35;"	d
+SR_XS_DIRTY	tmplib/asm/csr.h	35;"	d
+SR_XS_INITIAL	tmplib (copy)/asm/csr.h	33;"	d
+SR_XS_INITIAL	tmplib/asm/csr.h	33;"	d
+SR_XS_OFF	tmplib (copy)/asm/csr.h	32;"	d
+SR_XS_OFF	tmplib/asm/csr.h	32;"	d
+STASH_SIZE	rt_util.h	44;"	d
+STASH_SIZE_RORAM	roram.h	11;"	d
+STORE	entry.S	/^#define STORE sd$/;"	d
+SUM_STASH_OCC	rt_util.h	101;"	d
+SYS_accept	syscall_nums.h	482;"	d
+SYS_accept4	syscall_nums.h	522;"	d
+SYS_acct	syscall_nums.h	369;"	d
+SYS_add_key	syscall_nums.h	497;"	d
+SYS_adjtimex	syscall_nums.h	451;"	d
+SYS_arch_specific_syscall	syscall_nums.h	524;"	d
+SYS_bind	syscall_nums.h	480;"	d
+SYS_bpf	syscall_nums.h	545;"	d
+SYS_brk	syscall_nums.h	494;"	d
+SYS_capget	syscall_nums.h	370;"	d
+SYS_capset	syscall_nums.h	371;"	d
+SYS_chdir	syscall_nums.h	329;"	d
+SYS_chroot	syscall_nums.h	331;"	d
+SYS_clock_adjtime	syscall_nums.h	531;"	d
+SYS_clock_getres	syscall_nums.h	394;"	d
+SYS_clock_gettime	syscall_nums.h	393;"	d
+SYS_clock_nanosleep	syscall_nums.h	395;"	d
+SYS_clock_settime	syscall_nums.h	392;"	d
+SYS_clone	syscall_nums.h	500;"	d
+SYS_close	syscall_nums.h	337;"	d
+SYS_connect	syscall_nums.h	483;"	d
+SYS_copy_file_range	syscall_nums.h	550;"	d
+SYS_delete_module	syscall_nums.h	386;"	d
+SYS_dup	syscall_nums.h	304;"	d
+SYS_dup3	syscall_nums.h	305;"	d
+SYS_epoll_create1	syscall_nums.h	301;"	d
+SYS_epoll_ctl	syscall_nums.h	302;"	d
+SYS_epoll_pwait	syscall_nums.h	303;"	d
+SYS_eventfd2	syscall_nums.h	300;"	d
+SYS_execve	syscall_nums.h	501;"	d
+SYS_execveat	syscall_nums.h	546;"	d
+SYS_exit	syscall_nums.h	373;"	d
+SYS_exit_group	syscall_nums.h	374;"	d
+SYS_faccessat	syscall_nums.h	328;"	d
+SYS_fadvise64	syscall_nums.h	503;"	d
+SYS_fallocate	syscall_nums.h	327;"	d
+SYS_fanotify_init	syscall_nums.h	527;"	d
+SYS_fanotify_mark	syscall_nums.h	528;"	d
+SYS_fchdir	syscall_nums.h	330;"	d
+SYS_fchmod	syscall_nums.h	332;"	d
+SYS_fchmodat	syscall_nums.h	333;"	d
+SYS_fchown	syscall_nums.h	335;"	d
+SYS_fchownat	syscall_nums.h	334;"	d
+SYS_fcntl	syscall_nums.h	306;"	d
+SYS_fdatasync	syscall_nums.h	363;"	d
+SYS_fgetxattr	syscall_nums.h	291;"	d
+SYS_finit_module	syscall_nums.h	538;"	d
+SYS_flistxattr	syscall_nums.h	294;"	d
+SYS_flock	syscall_nums.h	313;"	d
+SYS_fremovexattr	syscall_nums.h	297;"	d
+SYS_fsetxattr	syscall_nums.h	288;"	d
+SYS_fstat	syscall_nums.h	360;"	d
+SYS_fstatat	syscall_nums.h	359;"	d
+SYS_fstatfs	syscall_nums.h	324;"	d
+SYS_fsync	syscall_nums.h	362;"	d
+SYS_ftruncate	syscall_nums.h	326;"	d
+SYS_futex	syscall_nums.h	378;"	d
+SYS_get_mempolicy	syscall_nums.h	516;"	d
+SYS_get_robust_list	syscall_nums.h	380;"	d
+SYS_getcpu	syscall_nums.h	448;"	d
+SYS_getcwd	syscall_nums.h	298;"	d
+SYS_getdents64	syscall_nums.h	341;"	d
+SYS_getegid	syscall_nums.h	457;"	d
+SYS_geteuid	syscall_nums.h	455;"	d
+SYS_getgid	syscall_nums.h	456;"	d
+SYS_getgroups	syscall_nums.h	438;"	d
+SYS_getitimer	syscall_nums.h	382;"	d
+SYS_getpeername	syscall_nums.h	485;"	d
+SYS_getpgid	syscall_nums.h	435;"	d
+SYS_getpid	syscall_nums.h	452;"	d
+SYS_getppid	syscall_nums.h	453;"	d
+SYS_getpriority	syscall_nums.h	421;"	d
+SYS_getrandom	syscall_nums.h	543;"	d
+SYS_getresgid	syscall_nums.h	430;"	d
+SYS_getresuid	syscall_nums.h	428;"	d
+SYS_getrlimit	syscall_nums.h	443;"	d
+SYS_getrusage	syscall_nums.h	445;"	d
+SYS_getsid	syscall_nums.h	436;"	d
+SYS_getsockname	syscall_nums.h	484;"	d
+SYS_getsockopt	syscall_nums.h	489;"	d
+SYS_gettid	syscall_nums.h	458;"	d
+SYS_gettimeofday	syscall_nums.h	449;"	d
+SYS_getuid	syscall_nums.h	454;"	d
+SYS_getxattr	syscall_nums.h	289;"	d
+SYS_init_module	syscall_nums.h	385;"	d
+SYS_inotify_add_watch	syscall_nums.h	308;"	d
+SYS_inotify_init1	syscall_nums.h	307;"	d
+SYS_inotify_rm_watch	syscall_nums.h	309;"	d
+SYS_io_cancel	syscall_nums.h	284;"	d
+SYS_io_destroy	syscall_nums.h	282;"	d
+SYS_io_getevents	syscall_nums.h	285;"	d
+SYS_io_setup	syscall_nums.h	281;"	d
+SYS_io_submit	syscall_nums.h	283;"	d
+SYS_ioctl	syscall_nums.h	310;"	d
+SYS_ioprio_get	syscall_nums.h	312;"	d
+SYS_ioprio_set	syscall_nums.h	311;"	d
+SYS_kcmp	syscall_nums.h	537;"	d
+SYS_kexec_load	syscall_nums.h	384;"	d
+SYS_keyctl	syscall_nums.h	499;"	d
+SYS_kill	syscall_nums.h	409;"	d
+SYS_lgetxattr	syscall_nums.h	290;"	d
+SYS_linkat	syscall_nums.h	318;"	d
+SYS_listen	syscall_nums.h	481;"	d
+SYS_listxattr	syscall_nums.h	292;"	d
+SYS_llistxattr	syscall_nums.h	293;"	d
+SYS_lookup_dcookie	syscall_nums.h	299;"	d
+SYS_lremovexattr	syscall_nums.h	296;"	d
+SYS_lseek	syscall_nums.h	342;"	d
+SYS_lsetxattr	syscall_nums.h	287;"	d
+SYS_madvise	syscall_nums.h	513;"	d
+SYS_mbind	syscall_nums.h	515;"	d
+SYS_membarrier	syscall_nums.h	548;"	d
+SYS_memfd_create	syscall_nums.h	544;"	d
+SYS_migrate_pages	syscall_nums.h	518;"	d
+SYS_mincore	syscall_nums.h	512;"	d
+SYS_mkdirat	syscall_nums.h	315;"	d
+SYS_mknodat	syscall_nums.h	314;"	d
+SYS_mlock	syscall_nums.h	508;"	d
+SYS_mlock2	syscall_nums.h	549;"	d
+SYS_mlockall	syscall_nums.h	510;"	d
+SYS_mmap	syscall_nums.h	502;"	d
+SYS_mount	syscall_nums.h	320;"	d
+SYS_move_pages	syscall_nums.h	519;"	d
+SYS_mprotect	syscall_nums.h	506;"	d
+SYS_mq_getsetattr	syscall_nums.h	465;"	d
+SYS_mq_notify	syscall_nums.h	464;"	d
+SYS_mq_open	syscall_nums.h	460;"	d
+SYS_mq_timedreceive	syscall_nums.h	463;"	d
+SYS_mq_timedsend	syscall_nums.h	462;"	d
+SYS_mq_unlink	syscall_nums.h	461;"	d
+SYS_mremap	syscall_nums.h	496;"	d
+SYS_msgctl	syscall_nums.h	467;"	d
+SYS_msgget	syscall_nums.h	466;"	d
+SYS_msgrcv	syscall_nums.h	468;"	d
+SYS_msgsnd	syscall_nums.h	469;"	d
+SYS_msync	syscall_nums.h	507;"	d
+SYS_munlock	syscall_nums.h	509;"	d
+SYS_munlockall	syscall_nums.h	511;"	d
+SYS_munmap	syscall_nums.h	495;"	d
+SYS_name_to_handle_at	syscall_nums.h	529;"	d
+SYS_nanosleep	syscall_nums.h	381;"	d
+SYS_nfsservctl	syscall_nums.h	322;"	d
+SYS_open_by_handle_at	syscall_nums.h	530;"	d
+SYS_openat	syscall_nums.h	336;"	d
+SYS_perf_event_open	syscall_nums.h	521;"	d
+SYS_personality	syscall_nums.h	372;"	d
+SYS_pipe2	syscall_nums.h	339;"	d
+SYS_pivot_root	syscall_nums.h	321;"	d
+SYS_pkey_alloc	syscall_nums.h	554;"	d
+SYS_pkey_free	syscall_nums.h	555;"	d
+SYS_pkey_mprotect	syscall_nums.h	553;"	d
+SYS_ppoll	syscall_nums.h	353;"	d
+SYS_prctl	syscall_nums.h	447;"	d
+SYS_pread64	syscall_nums.h	347;"	d
+SYS_preadv	syscall_nums.h	349;"	d
+SYS_preadv2	syscall_nums.h	551;"	d
+SYS_prlimit64	syscall_nums.h	526;"	d
+SYS_process_vm_readv	syscall_nums.h	535;"	d
+SYS_process_vm_writev	syscall_nums.h	536;"	d
+SYS_pselect6	syscall_nums.h	352;"	d
+SYS_ptrace	syscall_nums.h	397;"	d
+SYS_pwrite64	syscall_nums.h	348;"	d
+SYS_pwritev	syscall_nums.h	350;"	d
+SYS_pwritev2	syscall_nums.h	552;"	d
+SYS_quotactl	syscall_nums.h	340;"	d
+SYS_read	syscall_nums.h	343;"	d
+SYS_readahead	syscall_nums.h	493;"	d
+SYS_readlinkat	syscall_nums.h	358;"	d
+SYS_readv	syscall_nums.h	345;"	d
+SYS_reboot	syscall_nums.h	422;"	d
+SYS_recvfrom	syscall_nums.h	487;"	d
+SYS_recvmmsg	syscall_nums.h	523;"	d
+SYS_recvmsg	syscall_nums.h	492;"	d
+SYS_remap_file_pages	syscall_nums.h	514;"	d
+SYS_removexattr	syscall_nums.h	295;"	d
+SYS_renameat2	syscall_nums.h	541;"	d
+SYS_request_key	syscall_nums.h	498;"	d
+SYS_restart_syscall	syscall_nums.h	408;"	d
+SYS_riscv_flush_icache	syscall_nums.h	557;"	d
+SYS_rt_sigaction	syscall_nums.h	414;"	d
+SYS_rt_sigpending	syscall_nums.h	416;"	d
+SYS_rt_sigprocmask	syscall_nums.h	415;"	d
+SYS_rt_sigqueueinfo	syscall_nums.h	418;"	d
+SYS_rt_sigreturn	syscall_nums.h	419;"	d
+SYS_rt_sigsuspend	syscall_nums.h	413;"	d
+SYS_rt_sigtimedwait	syscall_nums.h	417;"	d
+SYS_rt_tgsigqueueinfo	syscall_nums.h	520;"	d
+SYS_sched_get_priority_max	syscall_nums.h	405;"	d
+SYS_sched_get_priority_min	syscall_nums.h	406;"	d
+SYS_sched_getaffinity	syscall_nums.h	403;"	d
+SYS_sched_getattr	syscall_nums.h	540;"	d
+SYS_sched_getparam	syscall_nums.h	401;"	d
+SYS_sched_getscheduler	syscall_nums.h	400;"	d
+SYS_sched_rr_get_interval	syscall_nums.h	407;"	d
+SYS_sched_setaffinity	syscall_nums.h	402;"	d
+SYS_sched_setattr	syscall_nums.h	539;"	d
+SYS_sched_setparam	syscall_nums.h	398;"	d
+SYS_sched_setscheduler	syscall_nums.h	399;"	d
+SYS_sched_yield	syscall_nums.h	404;"	d
+SYS_seccomp	syscall_nums.h	542;"	d
+SYS_semctl	syscall_nums.h	471;"	d
+SYS_semget	syscall_nums.h	470;"	d
+SYS_semop	syscall_nums.h	473;"	d
+SYS_semtimedop	syscall_nums.h	472;"	d
+SYS_sendfile	syscall_nums.h	351;"	d
+SYS_sendmmsg	syscall_nums.h	534;"	d
+SYS_sendmsg	syscall_nums.h	491;"	d
+SYS_sendto	syscall_nums.h	486;"	d
+SYS_set_mempolicy	syscall_nums.h	517;"	d
+SYS_set_robust_list	syscall_nums.h	379;"	d
+SYS_set_tid_address	syscall_nums.h	376;"	d
+SYS_setdomainname	syscall_nums.h	442;"	d
+SYS_setfsgid	syscall_nums.h	432;"	d
+SYS_setfsuid	syscall_nums.h	431;"	d
+SYS_setgid	syscall_nums.h	424;"	d
+SYS_setgroups	syscall_nums.h	439;"	d
+SYS_sethostname	syscall_nums.h	441;"	d
+SYS_setitimer	syscall_nums.h	383;"	d
+SYS_setns	syscall_nums.h	533;"	d
+SYS_setpgid	syscall_nums.h	434;"	d
+SYS_setpriority	syscall_nums.h	420;"	d
+SYS_setregid	syscall_nums.h	423;"	d
+SYS_setresgid	syscall_nums.h	429;"	d
+SYS_setresuid	syscall_nums.h	427;"	d
+SYS_setreuid	syscall_nums.h	425;"	d
+SYS_setrlimit	syscall_nums.h	444;"	d
+SYS_setsid	syscall_nums.h	437;"	d
+SYS_setsockopt	syscall_nums.h	488;"	d
+SYS_settimeofday	syscall_nums.h	450;"	d
+SYS_setuid	syscall_nums.h	426;"	d
+SYS_setxattr	syscall_nums.h	286;"	d
+SYS_shmat	syscall_nums.h	476;"	d
+SYS_shmctl	syscall_nums.h	475;"	d
+SYS_shmdt	syscall_nums.h	477;"	d
+SYS_shmget	syscall_nums.h	474;"	d
+SYS_shutdown	syscall_nums.h	490;"	d
+SYS_sigaltstack	syscall_nums.h	412;"	d
+SYS_signalfd4	syscall_nums.h	354;"	d
+SYS_socket	syscall_nums.h	478;"	d
+SYS_socketpair	syscall_nums.h	479;"	d
+SYS_splice	syscall_nums.h	356;"	d
+SYS_statfs	syscall_nums.h	323;"	d
+SYS_swapoff	syscall_nums.h	505;"	d
+SYS_swapon	syscall_nums.h	504;"	d
+SYS_symlinkat	syscall_nums.h	317;"	d
+SYS_sync	syscall_nums.h	361;"	d
+SYS_sync_file_range	syscall_nums.h	364;"	d
+SYS_syncfs	syscall_nums.h	532;"	d
+SYS_sysinfo	syscall_nums.h	459;"	d
+SYS_syslog	syscall_nums.h	396;"	d
+SYS_sysriscv	syscall_nums.h	556;"	d
+SYS_tee	syscall_nums.h	357;"	d
+SYS_tgkill	syscall_nums.h	411;"	d
+SYS_timer_create	syscall_nums.h	387;"	d
+SYS_timer_delete	syscall_nums.h	391;"	d
+SYS_timer_getoverrun	syscall_nums.h	389;"	d
+SYS_timer_gettime	syscall_nums.h	388;"	d
+SYS_timer_settime	syscall_nums.h	390;"	d
+SYS_timerfd_create	syscall_nums.h	365;"	d
+SYS_timerfd_gettime	syscall_nums.h	367;"	d
+SYS_timerfd_settime	syscall_nums.h	366;"	d
+SYS_times	syscall_nums.h	433;"	d
+SYS_tkill	syscall_nums.h	410;"	d
+SYS_truncate	syscall_nums.h	325;"	d
+SYS_umask	syscall_nums.h	446;"	d
+SYS_umount2	syscall_nums.h	319;"	d
+SYS_uname	syscall_nums.h	440;"	d
+SYS_unlinkat	syscall_nums.h	316;"	d
+SYS_unshare	syscall_nums.h	377;"	d
+SYS_userfaultfd	syscall_nums.h	547;"	d
+SYS_utimensat	syscall_nums.h	368;"	d
+SYS_vhangup	syscall_nums.h	338;"	d
+SYS_vmsplice	syscall_nums.h	355;"	d
+SYS_wait4	syscall_nums.h	525;"	d
+SYS_waitid	syscall_nums.h	375;"	d
+SYS_write	syscall_nums.h	344;"	d
+SYS_writev	syscall_nums.h	346;"	d
+SZREG	tmplib (copy)/asm/asm.h	33;"	d
+SZREG	tmplib/asm/asm.h	33;"	d
+S_len	oram.c	/^int S_len=0;$/;"	v
+S_o	roram.c	/^int S_o=0;$/;"	v
+S_opam_md	opam.c	/^Block_Opam_md *S_opam_md;$/;"	v
+S_opam_md_len	opam.c	/^int S_opam_md_len=0;$/;"	v
+S_roram	roram.c	/^Block_roram *S_roram;$/;"	v
+S_roram	roram.h	/^Block_roram *S_roram;\/\/ stash pointer$/;"	v
+S_roram_len	roram.c	/^int S_roram_len=0;$/;"	v
+S_roram_md	roram.c	/^Bucket_roram_md *S_roram_md;$/;"	v
+S_roram_md	roram.h	/^Bucket_roram_md *S_roram_md;\/\/ not used$/;"	v
+Sg	oram.c	/^Block *Sg;$/;"	v
+Sg_len	oram.c	/^int Sg_len=0;$/;"	v
+Sg_roram_len	roram.c	/^int Sg_roram_len=0;$/;"	v
+ShiftRows	aess.c	/^static void ShiftRows(state_t* state)$/;"	f	file:
+Store_AMO_access_fault	vm.h	64;"	d
+Store_AMO_page_fault	vm.h	68;"	d
+SubBytes	aess.c	/^static void SubBytes(state_t* state)$/;"	f	file:
+THRESHOLD_OPS	rt_util.c	118;"	d	file:
+THRESHOLD_PAGES	rt_util.c	40;"	d	file:
+TMPLIB	Makefile	/^TMPLIB = uaccess.o$/;"	m
+TOTAL_PAGES	rt_util.h	95;"	d
+UNAME_MACHINE	linux_wrap.c	65;"	d	file:
+UNAME_NODENAME	linux_wrap.c	62;"	d	file:
+UNAME_RELEASE	linux_wrap.c	63;"	d	file:
+UNAME_SYSNAME	linux_wrap.c	61;"	d	file:
+UNAME_VERSION	linux_wrap.c	64;"	d	file:
+UTM_ARRAY_STARTING_OFFSET	woram.h	6;"	d
+UniformRandom	rt_util.c	/^unsigned int UniformRandom()$/;"	f
+VICTIM_CACHE_H	victim_cache.h	2;"	d
+WORAM	rt_util.h	53;"	d
+WORAM_H	woram.h	2;"	d
+WORAM_SIZE	woram.h	7;"	d
+XorWithIv	aess.c	/^static void XorWithIv(uint8_t* buf, uint8_t* Iv)$/;"	f	file:
+Z	vm.h	/^unsigned int Z;$/;"	v
+_AC	tmplib (copy)/linux/const.h	17;"	d
+_AC	tmplib (copy)/linux/const.h	21;"	d
+_AC	tmplib/linux/const.h	17;"	d
+_AC	tmplib/linux/const.h	21;"	d
+_ASM_RISCV_ASM_H	tmplib (copy)/asm/asm.h	15;"	d
+_ASM_RISCV_ASM_H	tmplib/asm/asm.h	15;"	d
+_ASM_RISCV_CSR_H	tmplib (copy)/asm/csr.h	15;"	d
+_ASM_RISCV_CSR_H	tmplib/asm/csr.h	15;"	d
+_ASM_RISCV_LINKAGE_H	tmplib (copy)/asm/linkage.h	15;"	d
+_ASM_RISCV_LINKAGE_H	tmplib (copy)/linux/linkage.h	15;"	d
+_ASM_RISCV_LINKAGE_H	tmplib/asm/linkage.h	15;"	d
+_ASM_RISCV_LINKAGE_H	tmplib/linux/linkage.h	15;"	d
+_AT	tmplib (copy)/linux/const.h	18;"	d
+_AT	tmplib (copy)/linux/const.h	22;"	d
+_AT	tmplib/linux/const.h	18;"	d
+_AT	tmplib/linux/const.h	22;"	d
+_BITUL	tmplib (copy)/linux/const.h	25;"	d
+_BITUL	tmplib/linux/const.h	25;"	d
+_BITULL	tmplib (copy)/linux/const.h	26;"	d
+_BITULL	tmplib/linux/const.h	26;"	d
+_ELF_H_	elf.h	3;"	d
+_INTERRUPT_H_	interrupt.h	6;"	d
+_IO_WRAP_H_	io_wrap.h	2;"	d
+_LINUX_CONST_H	tmplib (copy)/linux/const.h	5;"	d
+_LINUX_CONST_H	tmplib/linux/const.h	5;"	d
+_LINUX_WRAP_H_	linux_wrap.h	2;"	d
+_MM_H_	mm.h	2;"	d
+_PRINTF_H_	printf.h	33;"	d
+_REGS_H_	regs.h	7;"	d
+_RT_UTIL_H_	rt_util.h	2;"	d
+_TIME_X_	timex.h	2;"	d
+_UACCESS_H_	tmplib (copy)/uaccess.h	2;"	d
+_UACCESS_H_	tmplib/uaccess.h	2;"	d
+_UIO_H_	tmplib (copy)/uio.h	2;"	d
+_UIO_H_	tmplib/uio.h	2;"	d
+__AC	tmplib (copy)/linux/const.h	20;"	d
+__AC	tmplib/linux/const.h	20;"	d
+__ALIGN	tmplib (copy)/asm/linkage.h	17;"	d
+__ALIGN	tmplib (copy)/linux/linkage.h	17;"	d
+__ALIGN	tmplib/asm/linkage.h	17;"	d
+__ALIGN	tmplib/linux/linkage.h	17;"	d
+__ALIGN_STR	tmplib (copy)/asm/linkage.h	18;"	d
+__ALIGN_STR	tmplib (copy)/linux/linkage.h	18;"	d
+__ALIGN_STR	tmplib/asm/linkage.h	18;"	d
+__ALIGN_STR	tmplib/linux/linkage.h	18;"	d
+__ASM_STR	tmplib (copy)/asm/asm.h	18;"	d
+__ASM_STR	tmplib (copy)/asm/asm.h	20;"	d
+__ASM_STR	tmplib/asm/asm.h	18;"	d
+__ASM_STR	tmplib/asm/asm.h	20;"	d
+__COMMON_H__	common.h	2;"	d
+__ENV_H__	env.h	2;"	d
+__FREEMEM_H__	freemem.h	4;"	d
+__MALLOC_H__	malloc.h	2;"	d
+__NR_accept	syscall_nums.h	204;"	d
+__NR_accept4	syscall_nums.h	244;"	d
+__NR_acct	syscall_nums.h	91;"	d
+__NR_add_key	syscall_nums.h	219;"	d
+__NR_adjtimex	syscall_nums.h	173;"	d
+__NR_arch_specific_syscall	syscall_nums.h	246;"	d
+__NR_bind	syscall_nums.h	202;"	d
+__NR_bpf	syscall_nums.h	267;"	d
+__NR_brk	syscall_nums.h	216;"	d
+__NR_capget	syscall_nums.h	92;"	d
+__NR_capset	syscall_nums.h	93;"	d
+__NR_chdir	syscall_nums.h	51;"	d
+__NR_chroot	syscall_nums.h	53;"	d
+__NR_clock_adjtime	syscall_nums.h	253;"	d
+__NR_clock_getres	syscall_nums.h	116;"	d
+__NR_clock_gettime	syscall_nums.h	115;"	d
+__NR_clock_nanosleep	syscall_nums.h	117;"	d
+__NR_clock_settime	syscall_nums.h	114;"	d
+__NR_clone	syscall_nums.h	222;"	d
+__NR_close	syscall_nums.h	59;"	d
+__NR_connect	syscall_nums.h	205;"	d
+__NR_copy_file_range	syscall_nums.h	272;"	d
+__NR_delete_module	syscall_nums.h	108;"	d
+__NR_dup	syscall_nums.h	26;"	d
+__NR_dup3	syscall_nums.h	27;"	d
+__NR_epoll_create1	syscall_nums.h	23;"	d
+__NR_epoll_ctl	syscall_nums.h	24;"	d
+__NR_epoll_pwait	syscall_nums.h	25;"	d
+__NR_eventfd2	syscall_nums.h	22;"	d
+__NR_execve	syscall_nums.h	223;"	d
+__NR_execveat	syscall_nums.h	268;"	d
+__NR_exit	syscall_nums.h	95;"	d
+__NR_exit_group	syscall_nums.h	96;"	d
+__NR_faccessat	syscall_nums.h	50;"	d
+__NR_fadvise64	syscall_nums.h	225;"	d
+__NR_fallocate	syscall_nums.h	49;"	d
+__NR_fanotify_init	syscall_nums.h	249;"	d
+__NR_fanotify_mark	syscall_nums.h	250;"	d
+__NR_fchdir	syscall_nums.h	52;"	d
+__NR_fchmod	syscall_nums.h	54;"	d
+__NR_fchmodat	syscall_nums.h	55;"	d
+__NR_fchown	syscall_nums.h	57;"	d
+__NR_fchownat	syscall_nums.h	56;"	d
+__NR_fcntl	syscall_nums.h	28;"	d
+__NR_fdatasync	syscall_nums.h	85;"	d
+__NR_fgetxattr	syscall_nums.h	13;"	d
+__NR_finit_module	syscall_nums.h	260;"	d
+__NR_flistxattr	syscall_nums.h	16;"	d
+__NR_flock	syscall_nums.h	35;"	d
+__NR_fremovexattr	syscall_nums.h	19;"	d
+__NR_fsetxattr	syscall_nums.h	10;"	d
+__NR_fstat	syscall_nums.h	82;"	d
+__NR_fstatat	syscall_nums.h	81;"	d
+__NR_fstatfs	syscall_nums.h	46;"	d
+__NR_fsync	syscall_nums.h	84;"	d
+__NR_ftruncate	syscall_nums.h	48;"	d
+__NR_futex	syscall_nums.h	100;"	d
+__NR_get_mempolicy	syscall_nums.h	238;"	d
+__NR_get_robust_list	syscall_nums.h	102;"	d
+__NR_getcpu	syscall_nums.h	170;"	d
+__NR_getcwd	syscall_nums.h	20;"	d
+__NR_getdents64	syscall_nums.h	63;"	d
+__NR_getegid	syscall_nums.h	179;"	d
+__NR_geteuid	syscall_nums.h	177;"	d
+__NR_getgid	syscall_nums.h	178;"	d
+__NR_getgroups	syscall_nums.h	160;"	d
+__NR_getitimer	syscall_nums.h	104;"	d
+__NR_getpeername	syscall_nums.h	207;"	d
+__NR_getpgid	syscall_nums.h	157;"	d
+__NR_getpid	syscall_nums.h	174;"	d
+__NR_getppid	syscall_nums.h	175;"	d
+__NR_getpriority	syscall_nums.h	143;"	d
+__NR_getrandom	syscall_nums.h	265;"	d
+__NR_getresgid	syscall_nums.h	152;"	d
+__NR_getresuid	syscall_nums.h	150;"	d
+__NR_getrlimit	syscall_nums.h	165;"	d
+__NR_getrusage	syscall_nums.h	167;"	d
+__NR_getsid	syscall_nums.h	158;"	d
+__NR_getsockname	syscall_nums.h	206;"	d
+__NR_getsockopt	syscall_nums.h	211;"	d
+__NR_gettid	syscall_nums.h	180;"	d
+__NR_gettimeofday	syscall_nums.h	171;"	d
+__NR_getuid	syscall_nums.h	176;"	d
+__NR_getxattr	syscall_nums.h	11;"	d
+__NR_init_module	syscall_nums.h	107;"	d
+__NR_inotify_add_watch	syscall_nums.h	30;"	d
+__NR_inotify_init1	syscall_nums.h	29;"	d
+__NR_inotify_rm_watch	syscall_nums.h	31;"	d
+__NR_io_cancel	syscall_nums.h	6;"	d
+__NR_io_destroy	syscall_nums.h	4;"	d
+__NR_io_getevents	syscall_nums.h	7;"	d
+__NR_io_setup	syscall_nums.h	3;"	d
+__NR_io_submit	syscall_nums.h	5;"	d
+__NR_ioctl	syscall_nums.h	32;"	d
+__NR_ioprio_get	syscall_nums.h	34;"	d
+__NR_ioprio_set	syscall_nums.h	33;"	d
+__NR_kcmp	syscall_nums.h	259;"	d
+__NR_kexec_load	syscall_nums.h	106;"	d
+__NR_keyctl	syscall_nums.h	221;"	d
+__NR_kill	syscall_nums.h	131;"	d
+__NR_lgetxattr	syscall_nums.h	12;"	d
+__NR_linkat	syscall_nums.h	40;"	d
+__NR_listen	syscall_nums.h	203;"	d
+__NR_listxattr	syscall_nums.h	14;"	d
+__NR_llistxattr	syscall_nums.h	15;"	d
+__NR_lookup_dcookie	syscall_nums.h	21;"	d
+__NR_lremovexattr	syscall_nums.h	18;"	d
+__NR_lseek	syscall_nums.h	64;"	d
+__NR_lsetxattr	syscall_nums.h	9;"	d
+__NR_madvise	syscall_nums.h	235;"	d
+__NR_mbind	syscall_nums.h	237;"	d
+__NR_membarrier	syscall_nums.h	270;"	d
+__NR_memfd_create	syscall_nums.h	266;"	d
+__NR_migrate_pages	syscall_nums.h	240;"	d
+__NR_mincore	syscall_nums.h	234;"	d
+__NR_mkdirat	syscall_nums.h	37;"	d
+__NR_mknodat	syscall_nums.h	36;"	d
+__NR_mlock	syscall_nums.h	230;"	d
+__NR_mlock2	syscall_nums.h	271;"	d
+__NR_mlockall	syscall_nums.h	232;"	d
+__NR_mmap	syscall_nums.h	224;"	d
+__NR_mount	syscall_nums.h	42;"	d
+__NR_move_pages	syscall_nums.h	241;"	d
+__NR_mprotect	syscall_nums.h	228;"	d
+__NR_mq_getsetattr	syscall_nums.h	187;"	d
+__NR_mq_notify	syscall_nums.h	186;"	d
+__NR_mq_open	syscall_nums.h	182;"	d
+__NR_mq_timedreceive	syscall_nums.h	185;"	d
+__NR_mq_timedsend	syscall_nums.h	184;"	d
+__NR_mq_unlink	syscall_nums.h	183;"	d
+__NR_mremap	syscall_nums.h	218;"	d
+__NR_msgctl	syscall_nums.h	189;"	d
+__NR_msgget	syscall_nums.h	188;"	d
+__NR_msgrcv	syscall_nums.h	190;"	d
+__NR_msgsnd	syscall_nums.h	191;"	d
+__NR_msync	syscall_nums.h	229;"	d
+__NR_munlock	syscall_nums.h	231;"	d
+__NR_munlockall	syscall_nums.h	233;"	d
+__NR_munmap	syscall_nums.h	217;"	d
+__NR_name_to_handle_at	syscall_nums.h	251;"	d
+__NR_nanosleep	syscall_nums.h	103;"	d
+__NR_nfsservctl	syscall_nums.h	44;"	d
+__NR_open_by_handle_at	syscall_nums.h	252;"	d
+__NR_openat	syscall_nums.h	58;"	d
+__NR_perf_event_open	syscall_nums.h	243;"	d
+__NR_personality	syscall_nums.h	94;"	d
+__NR_pipe2	syscall_nums.h	61;"	d
+__NR_pivot_root	syscall_nums.h	43;"	d
+__NR_pkey_alloc	syscall_nums.h	276;"	d
+__NR_pkey_free	syscall_nums.h	277;"	d
+__NR_pkey_mprotect	syscall_nums.h	275;"	d
+__NR_ppoll	syscall_nums.h	75;"	d
+__NR_prctl	syscall_nums.h	169;"	d
+__NR_pread64	syscall_nums.h	69;"	d
+__NR_preadv	syscall_nums.h	71;"	d
+__NR_preadv2	syscall_nums.h	273;"	d
+__NR_prlimit64	syscall_nums.h	248;"	d
+__NR_process_vm_readv	syscall_nums.h	257;"	d
+__NR_process_vm_writev	syscall_nums.h	258;"	d
+__NR_pselect6	syscall_nums.h	74;"	d
+__NR_ptrace	syscall_nums.h	119;"	d
+__NR_pwrite64	syscall_nums.h	70;"	d
+__NR_pwritev	syscall_nums.h	72;"	d
+__NR_pwritev2	syscall_nums.h	274;"	d
+__NR_quotactl	syscall_nums.h	62;"	d
+__NR_read	syscall_nums.h	65;"	d
+__NR_readahead	syscall_nums.h	215;"	d
+__NR_readlinkat	syscall_nums.h	80;"	d
+__NR_readv	syscall_nums.h	67;"	d
+__NR_reboot	syscall_nums.h	144;"	d
+__NR_recvfrom	syscall_nums.h	209;"	d
+__NR_recvmmsg	syscall_nums.h	245;"	d
+__NR_recvmsg	syscall_nums.h	214;"	d
+__NR_remap_file_pages	syscall_nums.h	236;"	d
+__NR_removexattr	syscall_nums.h	17;"	d
+__NR_renameat2	syscall_nums.h	263;"	d
+__NR_request_key	syscall_nums.h	220;"	d
+__NR_restart_syscall	syscall_nums.h	130;"	d
+__NR_riscv_flush_icache	syscall_nums.h	279;"	d
+__NR_rt_sigaction	syscall_nums.h	136;"	d
+__NR_rt_sigpending	syscall_nums.h	138;"	d
+__NR_rt_sigprocmask	syscall_nums.h	137;"	d
+__NR_rt_sigqueueinfo	syscall_nums.h	140;"	d
+__NR_rt_sigreturn	syscall_nums.h	141;"	d
+__NR_rt_sigsuspend	syscall_nums.h	135;"	d
+__NR_rt_sigtimedwait	syscall_nums.h	139;"	d
+__NR_rt_tgsigqueueinfo	syscall_nums.h	242;"	d
+__NR_sched_get_priority_max	syscall_nums.h	127;"	d
+__NR_sched_get_priority_min	syscall_nums.h	128;"	d
+__NR_sched_getaffinity	syscall_nums.h	125;"	d
+__NR_sched_getattr	syscall_nums.h	262;"	d
+__NR_sched_getparam	syscall_nums.h	123;"	d
+__NR_sched_getscheduler	syscall_nums.h	122;"	d
+__NR_sched_rr_get_interval	syscall_nums.h	129;"	d
+__NR_sched_setaffinity	syscall_nums.h	124;"	d
+__NR_sched_setattr	syscall_nums.h	261;"	d
+__NR_sched_setparam	syscall_nums.h	120;"	d
+__NR_sched_setscheduler	syscall_nums.h	121;"	d
+__NR_sched_yield	syscall_nums.h	126;"	d
+__NR_seccomp	syscall_nums.h	264;"	d
+__NR_semctl	syscall_nums.h	193;"	d
+__NR_semget	syscall_nums.h	192;"	d
+__NR_semop	syscall_nums.h	195;"	d
+__NR_semtimedop	syscall_nums.h	194;"	d
+__NR_sendfile	syscall_nums.h	73;"	d
+__NR_sendmmsg	syscall_nums.h	256;"	d
+__NR_sendmsg	syscall_nums.h	213;"	d
+__NR_sendto	syscall_nums.h	208;"	d
+__NR_set_mempolicy	syscall_nums.h	239;"	d
+__NR_set_robust_list	syscall_nums.h	101;"	d
+__NR_set_tid_address	syscall_nums.h	98;"	d
+__NR_setdomainname	syscall_nums.h	164;"	d
+__NR_setfsgid	syscall_nums.h	154;"	d
+__NR_setfsuid	syscall_nums.h	153;"	d
+__NR_setgid	syscall_nums.h	146;"	d
+__NR_setgroups	syscall_nums.h	161;"	d
+__NR_sethostname	syscall_nums.h	163;"	d
+__NR_setitimer	syscall_nums.h	105;"	d
+__NR_setns	syscall_nums.h	255;"	d
+__NR_setpgid	syscall_nums.h	156;"	d
+__NR_setpriority	syscall_nums.h	142;"	d
+__NR_setregid	syscall_nums.h	145;"	d
+__NR_setresgid	syscall_nums.h	151;"	d
+__NR_setresuid	syscall_nums.h	149;"	d
+__NR_setreuid	syscall_nums.h	147;"	d
+__NR_setrlimit	syscall_nums.h	166;"	d
+__NR_setsid	syscall_nums.h	159;"	d
+__NR_setsockopt	syscall_nums.h	210;"	d
+__NR_settimeofday	syscall_nums.h	172;"	d
+__NR_setuid	syscall_nums.h	148;"	d
+__NR_setxattr	syscall_nums.h	8;"	d
+__NR_shmat	syscall_nums.h	198;"	d
+__NR_shmctl	syscall_nums.h	197;"	d
+__NR_shmdt	syscall_nums.h	199;"	d
+__NR_shmget	syscall_nums.h	196;"	d
+__NR_shutdown	syscall_nums.h	212;"	d
+__NR_sigaltstack	syscall_nums.h	134;"	d
+__NR_signalfd4	syscall_nums.h	76;"	d
+__NR_socket	syscall_nums.h	200;"	d
+__NR_socketpair	syscall_nums.h	201;"	d
+__NR_splice	syscall_nums.h	78;"	d
+__NR_statfs	syscall_nums.h	45;"	d
+__NR_swapoff	syscall_nums.h	227;"	d
+__NR_swapon	syscall_nums.h	226;"	d
+__NR_symlinkat	syscall_nums.h	39;"	d
+__NR_sync	syscall_nums.h	83;"	d
+__NR_sync_file_range	syscall_nums.h	86;"	d
+__NR_syncfs	syscall_nums.h	254;"	d
+__NR_sysinfo	syscall_nums.h	181;"	d
+__NR_syslog	syscall_nums.h	118;"	d
+__NR_sysriscv	syscall_nums.h	278;"	d
+__NR_tee	syscall_nums.h	79;"	d
+__NR_tgkill	syscall_nums.h	133;"	d
+__NR_timer_create	syscall_nums.h	109;"	d
+__NR_timer_delete	syscall_nums.h	113;"	d
+__NR_timer_getoverrun	syscall_nums.h	111;"	d
+__NR_timer_gettime	syscall_nums.h	110;"	d
+__NR_timer_settime	syscall_nums.h	112;"	d
+__NR_timerfd_create	syscall_nums.h	87;"	d
+__NR_timerfd_gettime	syscall_nums.h	89;"	d
+__NR_timerfd_settime	syscall_nums.h	88;"	d
+__NR_times	syscall_nums.h	155;"	d
+__NR_tkill	syscall_nums.h	132;"	d
+__NR_truncate	syscall_nums.h	47;"	d
+__NR_umask	syscall_nums.h	168;"	d
+__NR_umount2	syscall_nums.h	41;"	d
+__NR_uname	syscall_nums.h	162;"	d
+__NR_unlinkat	syscall_nums.h	38;"	d
+__NR_unshare	syscall_nums.h	99;"	d
+__NR_userfaultfd	syscall_nums.h	269;"	d
+__NR_utimensat	syscall_nums.h	90;"	d
+__NR_vhangup	syscall_nums.h	60;"	d
+__NR_vmsplice	syscall_nums.h	77;"	d
+__NR_wait4	syscall_nums.h	247;"	d
+__NR_waitid	syscall_nums.h	97;"	d
+__NR_write	syscall_nums.h	66;"	d
+__NR_writev	syscall_nums.h	68;"	d
+__REG_SEL	tmplib (copy)/asm/asm.h	24;"	d
+__REG_SEL	tmplib (copy)/asm/asm.h	26;"	d
+__REG_SEL	tmplib/asm/asm.h	24;"	d
+__REG_SEL	tmplib/asm/asm.h	26;"	d
+__SBI_H_	sbi.h	6;"	d
+__STRING_H__	string.h	2;"	d
+__SYSCALL_H__	syscall.h	6;"	d
+__VM_H__	vm.h	2;"	d
+__continue_walk_create	mm.c	/^__continue_walk_create(pte_t* root, uintptr_t addr, pte_t* pte)$/;"	f	file:
+__malloc_end_rt	tiny-malloc.c	/^static void * __malloc_end_rt = 0;$/;"	v	file:
+__malloc_freelist	tiny-malloc.c	/^static fle __malloc_freelist = 0;$/;"	v	file:
+__pa	vm.h	/^static inline uintptr_t __pa(uintptr_t va)$/;"	f
+__save_context	entry.S	/^__save_context:$/;"	l
+__va	vm.h	/^static inline uintptr_t __va(uintptr_t pa)$/;"	f
+__walk	mm.c	/^__walk(pte_t* root, uintptr_t addr)$/;"	f
+__walk_create	mm.c	/^__walk_create(pte_t* root, uintptr_t addr)$/;"	f
+__walk_during_page_fault	mm.c	/^__walk_during_page_fault(pte_t* root, uintptr_t addr)$/;"	f
+__walk_internal	mm.c	/^__walk_internal(pte_t* root, uintptr_t addr, int create)$/;"	f	file:
+_atoi	printf.c	/^static unsigned int _atoi(const char** str)$/;"	f	file:
+_epc	tmplib (copy)/uaccess.S	/^_epc:$/;"	l
+_epc	tmplib/uaccess.S	/^_epc:$/;"	l
+_ftoa	printf.c	/^static size_t _ftoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, double value, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_is_digit	printf.c	/^static inline bool _is_digit(char ch)$/;"	f	file:
+_ntoa_format	printf.c	/^static size_t _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t maxlen, char* buf, size_t len, bool negative, unsigned int base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_ntoa_long	printf.c	/^static size_t _ntoa_long(out_fct_type out, char* buffer, size_t idx, size_t maxlen, unsigned long value, bool negative, unsigned long base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_ntoa_long_long	printf.c	/^static size_t _ntoa_long_long(out_fct_type out, char* buffer, size_t idx, size_t maxlen, unsigned long long value, bool negative, unsigned long long base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_out_buffer	printf.c	/^static inline void _out_buffer(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_char	printf.c	/^static inline void _out_char(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_fct	printf.c	/^static inline void _out_fct(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_null	printf.c	/^static inline void _out_null(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_putchar	printf.c	/^void _putchar(char character)$/;"	f
+_start	entry.S	/^_start:$/;"	l
+_strlen	printf.h	/^static inline unsigned int _strlen(const char* str)$/;"	f
+_vsnprintf	printf.c	/^static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const char* format, va_list va)$/;"	f	file:
+a0	regs.h	/^	uintptr_t a0;$/;"	m	struct:regs_t
+a1	regs.h	/^	uintptr_t a1;$/;"	m	struct:regs_t
+a2	regs.h	/^	uintptr_t a2;$/;"	m	struct:regs_t
+a3	regs.h	/^	uintptr_t a3;$/;"	m	struct:regs_t
+a4	regs.h	/^	uintptr_t a4;$/;"	m	struct:regs_t
+a5	regs.h	/^	uintptr_t a5;$/;"	m	struct:regs_t
+a6	regs.h	/^	uintptr_t a6;$/;"	m	struct:regs_t
+a7	regs.h	/^	uintptr_t a7;$/;"	m	struct:regs_t
+access	oram.c	/^void access(char op, int a, char *datastar, char *ret_buf,int extension)$/;"	f
+access_opam	opam.c	/^int access_opam(char op, int a, char *datastar, char *ret_buf,int extension)$/;"	f
+access_roram	roram.c	/^void access_roram(char op, int a, char *datastar, char *ret_pag,int extension)$/;"	f
+add_to_queue	victim_cache.c	/^QNode* add_to_queue(uintptr_t addr, Queue *q)$/;"	f
+add_to_stash	roram.c	/^void add_to_stash(int a,char* retdata)$/;"	f
+addr	roram.h	/^    uintptr_t addr[RORAM_BUCKET_SIZE];$/;"	m	struct:Bucket_roram_md
+address	opam.h	/^    uintptr_t address;$/;"	m	struct:Block_Opam_md
+address	oram.h	/^    uintptr_t address;$/;"	m	struct:Block
+address	oram.h	/^    uintptr_t address;$/;"	m	struct:Block_md
+address	roram.h	/^    uintptr_t address;$/;"	m	struct:Block_roram
+address	vm.h	/^  uintptr_t address;$/;"	m	struct:pages
+address	vm.h	/^  uintptr_t address;$/;"	m	struct:pages_at
+alloc	rt_util.c	/^uintptr_t alloc=0;$/;"	v
+alloc_page	mm.c	/^alloc_page(uintptr_t vpn, int flags)$/;"	f
+alloc_pages	mm.c	/^alloc_pages(uintptr_t vpn, size_t count, int flags)$/;"	f
+allocate_fresh_page	rt_util.c	/^void allocate_fresh_page(uintptr_t new_alloc_page, uintptr_t *status_find_address)$/;"	f
+arg	printf.c	/^  void* arg;$/;"	m	struct:__anon1	file:
+args_user	rt_util.c	/^enclave_options args_user;$/;"	v
+assert	common.h	7;"	d
+authentication	rt_util.c	/^int authentication =1;$/;"	v
+b	ssha3.h	/^        uint8_t b[200];                     \/\/ 8-bit bytes$/;"	m	union:__anon2::__anon3
+backup_shared_memory	rt_util.c	/^char *backup_shared_memory;$/;"	v
+blk_i_d_ro	roram.c	/^Block_roram  blk_i_d_ro;$/;"	v
+block_map	vm.h	/^int *block_map;$/;"	v
+blocks	opam.h	/^    Block_Opam blocks[1];$/;"	m	struct:Bucket_opam
+blocks	opam.h	/^    Block_Opam_md blocks[1];$/;"	m	struct:Bucket_opam_md
+blocks	oram.h	/^    Block blocks[4];$/;"	m	struct:Bucket
+blocks	oram.h	/^    Block_md blocks[4];$/;"	m	struct:Bucket_md
+blocks	roram.h	/^    Block_roram blocks[RORAM_BUCKET_SIZE];$/;"	m	struct:Bucket_roram
+brought_page	rt_util.c	/^pages brought_page;$/;"	v
+brought_page_at	rt_util.c	/^pages_at brought_page_at;$/;"	v
+buc_i	oram.c	/^Bucket buc_i;$/;"	v
+buc_i_d	opam.c	/^Bucket_opam buc_i_d;$/;"	v
+buc_i_d_ro	roram.c	/^Bucket_roram *buc_i_d_ro;$/;"	v
+buc_i_md	opam.c	/^Bucket_opam_md buc_i_md;$/;"	v
+buc_i_md_ro	roram.c	/^Bucket_roram_md buc_i_md_ro;$/;"	v
+buc_i_po_md	oram.c	/^Bucket_md buc_i_po_md;$/;"	v
+buff	rt_util.c	/^char *buff;$/;"	v
+buff_size	rt_util.c	/^uintptr_t buff_size;$/;"	v
+buffer_start	tmplib (copy)/uio.h	/^  void* buffer_start;$/;"	m	struct:iovec
+buffer_start	tmplib/uio.h	/^  void* buffer_start;$/;"	m	struct:iovec
+calculate_hmac	rt_util.c	/^void calculate_hmac(pages* p, char* hm, uintptr_t hm_len)$/;"	f
+calculate_hmac_for_enc_pfh	rt_util.c	/^void calculate_hmac_for_enc_pfh(pages_at* p, char* hm, uintptr_t hm_len)$/;"	f
+calculate_hmac_woram	woram.c	/^void calculate_hmac_woram(pages* p, char* hm, uintptr_t hm_len)$/;"	f
+calloc	tiny-malloc.c	/^calloc (size_t n, size_t elem_size)$/;"	f
+ceil	rt_util.c	/^double ceil(double x)$/;"	f
+cfree	tiny-malloc.c	/^cfree (void *p)$/;"	f
+chacha20	chacha20_asm.S	/^chacha20:$/;"	l
+chacha20constants	chacha20_asm.S	/^chacha20constants:$/;"	l
+chacha20masks	chacha20_asm.S	/^chacha20masks:$/;"	l
+chachakey	rt_util.c	/^char chachakey[32];$/;"	v
+chachanonce	rt_util.c	/^char chachanonce[16];$/;"	v
+check_hashes	ssha3.c	/^int check_hashes(void* hash1, size_t len1, void* hash2, size_t len2)$/;"	f
+check_range_and_call_sbrk	tiny-malloc.c	/^void check_range_and_call_sbrk(void *addr, size_t sz)$/;"	f
+clear_bits	page_replacement.c	/^void clear_bits()$/;"	f
+clock_counter	vm.h	/^uintptr_t clock_counter;$/;"	v
+clock_insert	page_replacement.c	/^uintptr_t clock_insert(uintptr_t item_org_va, uintptr_t item_enc_va)$/;"	f
+clock_remove	page_replacement.c	/^uintptr_t clock_remove()$/;"	f
+confidentiality	rt_util.c	/^int confidentiality=1;$/;"	v
+confidentiality	rt_util.h	/^  uint8_t confidentiality;$/;"	m	struct:enclave_options_t
+copy_from_user	tmplib (copy)/uaccess.h	/^copy_from_user(void *to, const void *from, unsigned long n)$/;"	f
+copy_from_user	tmplib/uaccess.h	/^copy_from_user(void *to, const void *from, unsigned long n)$/;"	f
+copy_from_user_page_wise	syscall.c	/^uintptr_t copy_from_user_page_wise(void* buffer_data_start, void* data, size_t data_len)$/;"	f
+copy_root_page_table	boot.c	/^copy_root_page_table()$/;"	f
+copy_to_user	tmplib (copy)/uaccess.h	/^copy_to_user(void *to, const void *from, unsigned long n)$/;"	f
+copy_to_user	tmplib/uaccess.h	/^copy_to_user(void *to, const void *from, unsigned long n)$/;"	f
+copy_to_user_page_wise	syscall.c	/^uintptr_t copy_to_user_page_wise(void* data,void* buffer_data_start,  size_t data_len)$/;"	f
+copy_waste	rt_util.c	/^uintptr_t copy_waste=0;$/;"	v
+count	freemem.h	/^	unsigned int count;$/;"	m	struct:pg_list_t
+count	roram.h	/^    uintptr_t count;$/;"	m	struct:Bucket_roram_md
+count	rt_util.h	/^  uintptr_t count;$/;"	m	struct:counter_t
+count_ext	rt_util.c	/^int count_ext=0;$/;"	v
+counter	rt_util.h	/^} counter;$/;"	t	typeref:struct:counter_t
+counter_t	rt_util.h	/^typedef struct counter_t$/;"	s
+counters	rt_util.c	/^counter counters[NO_OF_COUNTERS];$/;"	v
+countpf	rt_util.c	/^int countpf=0;\/\/9$/;"	v
+create_new_node	victim_cache.c	/^QNode* create_new_node(uintptr_t addr)$/;"	f
+csr_clear	tmplib (copy)/asm/csr.h	122;"	d
+csr_clear	tmplib/asm/csr.h	122;"	d
+csr_read	tmplib (copy)/asm/csr.h	79;"	d
+csr_read	tmplib/asm/csr.h	79;"	d
+csr_read_clear	tmplib (copy)/asm/csr.h	113;"	d
+csr_read_clear	tmplib/asm/csr.h	113;"	d
+csr_read_set	tmplib (copy)/asm/csr.h	96;"	d
+csr_read_set	tmplib/asm/csr.h	96;"	d
+csr_set	tmplib (copy)/asm/csr.h	105;"	d
+csr_set	tmplib/asm/csr.h	105;"	d
+csr_swap	tmplib (copy)/asm/csr.h	70;"	d
+csr_swap	tmplib/asm/csr.h	70;"	d
+csr_write	tmplib (copy)/asm/csr.h	88;"	d
+csr_write	tmplib/asm/csr.h	88;"	d
+ctx_d2	aess.c	/^ struct AES_ctx ctx_d2;$/;"	v	typeref:struct:AES_ctx
+ctx_e2	aess.c	/^ struct AES_ctx ctx_e2;$/;"	v	typeref:struct:AES_ctx
+current_program_break	mm.c	/^static uintptr_t current_program_break;$/;"	v	file:
+current_program_break_rt	mm.c	/^static uintptr_t current_program_break_rt;$/;"	v	file:
+cycles_t	timex.h	/^typedef unsigned long cycles_t;$/;"	t
+data	opam.h	/^    char data[BLOCK_SIZE];$/;"	m	struct:Block_Opam
+data	oram.h	/^    char data[BLOCK_SIZE];$/;"	m	struct:Block
+data	roram.h	/^    char data[RISCV_PAGE_SIZE];$/;"	m	struct:Block_roram
+data	vm.h	/^  char data[RISCV_PAGE_SIZE];$/;"	m	struct:pages
+data	vm.h	/^  char data[RISCV_PAGE_SIZE];$/;"	m	struct:pages_at
+debug	rt_util.c	/^int debug =0;$/;"	v
+debug_mode	rt_util.h	/^  uint8_t debug_mode;$/;"	m	struct:enclave_options_t
+decrypt_page	aess.c	/^ void decrypt_page(uint8_t* in, uintptr_t in_size,uint8_t *key,uint8_t *iv)$/;"	f
+deplete_free_pages_for_testing	rt_util.c	/^void deplete_free_pages_for_testing(uintptr_t left)\/\/this is only for testing$/;"	f
+deque	page_replacement.c	/^uintptr_t deque()$/;"	f
+deque2	index_q.c	/^uintptr_t deque2()$/;"	f
+destt	rt_util.c	/^char destt[4096];$/;"	v
+dispatch_edgecall_ocall	syscall.c	/^uintptr_t dispatch_edgecall_ocall( unsigned long call_id,$/;"	f
+dispatch_edgecall_syscall	syscall.c	/^uintptr_t dispatch_edgecall_syscall(edge_syscall_t* syscall_data_ptr, size_t data_len){$/;"	f
+display_hashmap	victim_cache.c	/^void display_hashmap()$/;"	f
+display_page_contents	rt_util.c	/^void display_page_contents(uintptr_t start)$/;"	f
+display_page_contents_arr	roram.c	/^void display_page_contents_arr(char *a)$/;"	f
+display_position_map	woram.c	/^void display_position_map()$/;"	f
+display_queue	victim_cache.c	/^void display_queue(Queue *q)$/;"	f
+display_test_params	rt_util.c	/^void display_test_params()$/;"	f
+do_something_extra	rt_util.c	/^void do_something_extra()$/;"	f
+dum	roram.c	/^char dum;$/;"	v
+dummy	vm.h	/^  uintptr_t dummy;$/;"	m	struct:pages
+dummy	vm.h	/^  uintptr_t dummy;$/;"	m	struct:pages_at
+early_reshuffle	roram.c	/^void early_reshuffle(int* pl)$/;"	f
+enable_oram	rt_util.c	/^int enable_oram=1;$/;"	v
+encl_ctx_t	regs.h	/^struct encl_ctx_t {$/;"	s
+encl_trap_handler	entry.S	/^encl_trap_handler:$/;"	l
+enclave_options	rt_util.h	/^} enclave_options;$/;"	t	typeref:struct:enclave_options_t
+enclave_options_t	rt_util.h	/^typedef struct enclave_options_t {$/;"	s
+encrypt_page	aess.c	/^ void encrypt_page(uint8_t* in, uintptr_t in_size,uint8_t *key,uint8_t *iv)$/;"	f
+enczer0	rt_util.c	/^char enczer0[RISCV_PAGE_SIZE]={0,};$/;"	v
+enque	page_replacement.c	/^uintptr_t enque(uintptr_t item_org_va, uintptr_t item_enc_va)$/;"	f
+enque2	index_q.c	/^uintptr_t enque2(uintptr_t item_enc_va)$/;"	f
+evict_path	roram.c	/^void evict_path()$/;"	f
+exc	rt_util.c	/^int exc=0;$/;"	v
+eyrie_boot	boot.c	/^eyrie_boot(uintptr_t dummy, \/\/ $a0 contains the return value from the SBI$/;"	f
+fault_lim	rt_util.c	/^int fault_lim;$/;"	v
+fault_limit	rt_util.h	/^  int fault_limit;$/;"	m	struct:enclave_options_t
+fault_mode	rt_util.c	/^uintptr_t fault_mode;$/;"	v
+fcc	rt_util.c	/^int fcc=0;$/;"	v
+fct	printf.c	/^  void  (*fct)(char character, void* arg);$/;"	m	struct:__anon1	file:
+fctprintf	printf.c	/^int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...)$/;"	f
+ff	mm.c	/^int ff=1;$/;"	v
+fill_page_with_zeroes	rt_util.c	/^void fill_page_with_zeroes(char* page_addrs)$/;"	f
+first_fault	rt_util.c	/^int first_fault=1;\/\/dont change$/;"	v
+first_page_replacement	rt_util.c	/^int first_page_replacement = 1; \/\/used for victim cache$/;"	v
+firstimeaccess	rt_util.c	/^char *firstimeaccess;$/;"	v
+fle	malloc.h	/^} *fle;$/;"	t	typeref:struct:freelist_entry
+frame_size	vm.h	/^uintptr_t frame_size;$/;"	v
+free	tiny-malloc.c	/^free (void *block_p)$/;"	f
+free_cache_pages	victim_cache.h	/^    unsigned long long free_cache_pages; \/\/ = VICTIM_CACHE_PAGES;$/;"	m	struct:victim_cache
+free_indices	vm.h	/^uintptr_t *free_indices;$/;"	v
+free_page	mm.c	/^free_page(uintptr_t vpn){$/;"	f
+free_pages	mm.c	/^free_pages(uintptr_t vpn, size_t count){$/;"	f
+free_pages_fr	rt_util.c	/^uintptr_t free_pages_fr=0;\/\/7$/;"	v
+freelist_entry	malloc.h	/^typedef struct freelist_entry {$/;"	s
+freemem_size	vm.h	/^size_t freemem_size;$/;"	v
+freemem_va_start	vm.h	/^uintptr_t freemem_va_start;$/;"	v
+front	index_q.h	/^uintptr_t front;$/;"	v
+front	victim_cache.h	/^    QNode *front, *rear; $/;"	m	struct:Queue
+gdum	roram.c	/^char gdum;$/;"	v
+getSBoxInvert	aess.c	147;"	d	file:
+getSBoxValue	aess.c	140;"	d	file:
+get_block_offset	roram.c	/^uint8_t get_block_offset(uintptr_t a)\/\/ALGO 5.1$/;"	f
+get_clock_queue_size	page_replacement.c	/^uintptr_t get_clock_queue_size()$/;"	f
+get_cycles	timex.h	14;"	d
+get_cycles64	timex.h	/^static inline uint64_t get_cycles64(void)$/;"	f
+get_cycles_inline	timex.h	/^static inline cycles_t get_cycles_inline(void)$/;"	f
+get_last_addr	boot.c	/^uintptr_t get_last_addr()$/;"	f
+get_last_addr_rt	boot.c	/^uintptr_t get_last_addr_rt()$/;"	f
+get_lru_victim_from_cache	victim_cache.c	/^uintptr_t get_lru_victim_from_cache()$/;"	f
+get_node_position	victim_cache.c	/^QNode* get_node_position(uintptr_t addr)$/;"	f
+get_page_from_woram	woram.c	/^void get_page_from_woram(uintptr_t addr, uintptr_t new_alloc_page, uintptr_t *status_find_address, $/;"	f
+get_pos	woram.c	/^uintptr_t get_pos(uintptr_t addr)$/;"	f
+get_program_break	mm.c	/^uintptr_t get_program_break(){$/;"	f
+get_program_break_rt	mm.c	/^uintptr_t get_program_break_rt(){$/;"	f
+get_q_size	page_replacement.c	/^uintptr_t get_q_size()$/;"	f
+get_q_size2	index_q.c	/^uintptr_t get_q_size2()$/;"	f
+get_queue_size	page_replacement.c	/^uintptr_t get_queue_size()$/;"	f
+get_root_page_table_addr	mm.c	/^pte_t* get_root_page_table_addr()$/;"	f
+get_runtime_addr	rt_util.c	/^uintptr_t get_runtime_addr(uintptr_t victim_page_enc)$/;"	f
+get_stack_size	page_replacement.c	/^uintptr_t get_stack_size()$/;"	f
+get_stash_count	roram.c	/^uintptr_t get_stash_count()$/;"	f
+get_tree_index	rt_util.c	/^int get_tree_index(int x)$/;"	f
+global_j	roram.c	/^int global_j;$/;"	v
+gp	regs.h	/^	uintptr_t gp;$/;"	m	struct:regs_t
+handle_copy_from_shared	syscall.c	/^uintptr_t handle_copy_from_shared(void* dst, uintptr_t offset, size_t size){$/;"	f
+handle_interrupts	interrupt.c	/^void handle_interrupts(struct encl_ctx_t* regs)$/;"	f
+handle_page_fault	rt_util.c	/^void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)$/;"	f
+handle_sbrk	syscall.c	/^uintptr_t handle_sbrk(size_t bytes)$/;"	f
+handle_srand	syscall.c	/^uintptr_t handle_srand(size_t loc,size_t sz)$/;"	f
+handle_syscall	syscall.c	/^void handle_syscall(struct encl_ctx_t* ctx)$/;"	f
+handle_timer_interrupt	interrupt.c	/^void handle_timer_interrupt()$/;"	f
+hashmap	victim_cache.h	/^    QNode **hashmap;$/;"	m	struct:victim_cache
+head	freemem.h	/^	uintptr_t head;$/;"	m	struct:pg_list_t
+hmac	vm.h	/^  char hmac[32];$/;"	m	struct:pages
+hmac	vm.h	/^  char hmac[32];$/;"	m	struct:pages_at
+holding_area_size	woram.h	/^    unsigned long long holding_area_size;       \/\/ M$/;"	m	struct:woram
+init_edge_internals	syscall.c	/^void init_edge_internals(){$/;"	f
+init_freemem	boot.c	/^init_freemem()$/;"	f
+init_num_pages	rt_util.c	/^uintptr_t init_num_pages=0;\/\/8$/;"	v
+init_page_replacement_queue	boot.c	/^void init_page_replacement_queue(uintptr_t dram_base)\/\/ this initializes the queue which is used in the page replacement algorithm$/;"	f
+init_timer	interrupt.c	/^void init_timer(void)$/;"	f
+init_user_stack_and_env	boot.c	/^init_user_stack_and_env()$/;"	f
+initalize_oram	oram.c	/^void initalize_oram()$/;"	f
+initialize_hashmap	victim_cache.c	/^void initialize_hashmap()$/;"	f
+initialize_opam	opam.c	/^void initialize_opam()$/;"	f
+initialize_position_map	woram.c	/^void initialize_position_map(void)$/;"	f
+initialize_queue	victim_cache.c	/^void initialize_queue()$/;"	f
+initialize_roram	roram.c	/^void initialize_roram()$/;"	f
+initialize_victim_cache	victim_cache.c	/^void initialize_victim_cache()$/;"	f
+initialize_woram_array	woram.c	/^void initialize_woram_array()$/;"	f
+integrity_protection	rt_util.h	/^  uint8_t integrity_protection;$/;"	m	struct:enclave_options_t
+io_syscall_close	io_wrap.c	/^uintptr_t io_syscall_close(int fd){$/;"	f
+io_syscall_fstatat	io_wrap.c	/^uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,$/;"	f
+io_syscall_fsync	io_wrap.c	/^uintptr_t io_syscall_fsync(int fd){$/;"	f
+io_syscall_ftruncate	io_wrap.c	/^uintptr_t io_syscall_ftruncate(int fd, off_t offset){$/;"	f
+io_syscall_lseek	io_wrap.c	/^uintptr_t io_syscall_lseek(int fd, off_t offset, int whence){$/;"	f
+io_syscall_openat	io_wrap.c	/^uintptr_t io_syscall_openat(int dirfd, char* path,$/;"	f
+io_syscall_read	io_wrap.c	/^uintptr_t io_syscall_read(int fd, void* buf, size_t len){$/;"	f
+io_syscall_readv	io_wrap.c	/^uintptr_t io_syscall_readv(int fd, const struct iovec *iov, int iovcnt){$/;"	f
+io_syscall_sync	io_wrap.c	/^uintptr_t io_syscall_sync(){$/;"	f
+io_syscall_unlinkat	io_wrap.c	/^uintptr_t io_syscall_unlinkat(int dirfd, char* path,$/;"	f
+io_syscall_write	io_wrap.c	/^uintptr_t io_syscall_write(int fd, void* buf, size_t len){$/;"	f
+io_syscall_writev	io_wrap.c	/^uintptr_t io_syscall_writev(int fd, const struct iovec *iov, int iovcnt){$/;"	f
+iovec	tmplib (copy)/uio.h	/^struct iovec{$/;"	s
+iovec	tmplib/uio.h	/^struct iovec{$/;"	s
+is_Empty_queue	page_replacement.c	/^intptr_t is_Empty_queue()$/;"	f
+is_Empty_queue2	index_q.c	/^intptr_t is_Empty_queue2()$/;"	f
+is_Empty_stack	page_replacement.c	/^uintptr_t is_Empty_stack()$/;"	f
+is_Full_queue	page_replacement.c	/^uintptr_t is_Full_queue()$/;"	f
+is_Full_queue2	index_q.c	/^uintptr_t is_Full_queue2()$/;"	f
+is_Full_stack	page_replacement.c	/^uintptr_t is_Full_stack()$/;"	f
+is_hash	roram.h	/^    char is_hash[RORAM_BUCKET_SIZE];\/\/\/\/ extra for paper$/;"	m	struct:Bucket_roram_md
+is_in_victim_cache	victim_cache.c	/^int is_in_victim_cache(uintptr_t addr)$/;"	f
+is_queue_empty	victim_cache.c	/^int is_queue_empty(Queue *q)$/;"	f
+is_rt	vm.h	/^uintptr_t is_rt;$/;"	v
+is_victim_cache_empty	victim_cache.c	/^int is_victim_cache_empty()$/;"	f
+is_victim_cache_full	victim_cache.c	/^int is_victim_cache_full()$/;"	f
+iv	opam.h	/^    uint8_t iv[16];\/\/ IV is length 16 bytes$/;"	m	struct:Block_Opam_md
+iv	oram.h	/^    uint8_t iv[16];\/\/ IV is length 16 bytes$/;"	m	struct:Block
+iv	roram.h	/^    uint8_t iv[16];\/\/ IV is length 16 bytes$/;"	m	struct:Block_roram
+iv	vm.h	/^   char iv[16];$/;"	m	struct:iv_page
+iv_aes	rt_util.c	/^uint8_t iv_aes[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+iv_aes	woram.h	/^    uint8_t *iv_aes;$/;"	m	struct:key_utilities
+iv_page	vm.h	/^ typedef struct iv_page$/;"	s
+iv_page	vm.h	/^ }iv_page;$/;"	t	typeref:struct:iv_page
+iv_testing	rt_util.c	/^char iv_testing[16];$/;"	v
+ivd	opam.h	/^    uint8_t ivd[16];\/\/ IV is length 16 bytes$/;"	m	struct:Block_Opam_md
+kernel_l2_page_table	vm.h	/^pte_t kernel_l2_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));$/;"	v
+kernel_l3_page_table	vm.h	/^pte_t kernel_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));$/;"	v
+kernel_offset	vm.h	/^uintptr_t kernel_offset;$/;"	v
+kernel_va_to_pa	vm.h	/^static inline uintptr_t kernel_va_to_pa(void* ptr)$/;"	f
+key	rt_util.c	/^uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+key	woram.h	/^    uint8_t *key;$/;"	m	struct:key_utilities
+key_aes	rt_util.c	/^uint8_t key_aes[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+key_aes	woram.h	/^    uint8_t *key_aes;$/;"	m	struct:key_utilities
+key_chacha	rt_util.c	/^uint8_t key_chacha[]={0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c,0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};$/;"	v
+key_chacha	woram.h	/^    uint8_t *key_chacha;$/;"	m	struct:key_utilities
+key_hmac	rt_util.c	/^uint8_t key_hmac[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+key_hmac	woram.h	/^    uint8_t *key_hmac;$/;"	m	struct:key_utilities
+key_testing	rt_util.c	/^char key_testing[AES_KEYLEN];$/;"	v
+key_utilities	woram.h	/^struct key_utilities$/;"	s
+keys	woram.h	/^struct key_utilities keys;$/;"	v	typeref:struct:key_utilities
+kick_victim	rt_util.c	/^void kick_victim(uintptr_t addr, uintptr_t *faultingPagePTE){$/;"	f
+knocked_page_addr	vm.h	/^uintptr_t *knocked_page_addr;$/;"	v
+len	tmplib (copy)/uio.h	/^  size_t len;$/;"	m	struct:iovec
+len	tmplib/uio.h	/^  size_t len;$/;"	m	struct:iovec
+linux_RET_BAD_wrap	linux_wrap.c	/^uintptr_t linux_RET_BAD_wrap(unsigned long which){$/;"	f
+linux_RET_ZERO_wrap	linux_wrap.c	/^uintptr_t linux_RET_ZERO_wrap(unsigned long which){$/;"	f
+linux_clock_gettime	linux_wrap.c	/^uintptr_t linux_clock_gettime(__clockid_t clock, struct timespec *tp){$/;"	f
+linux_getpid	linux_wrap.c	/^uintptr_t linux_getpid(){$/;"	f
+linux_getrandom	linux_wrap.c	/^uintptr_t linux_getrandom(void *buf, size_t buflen, unsigned int flags){$/;"	f
+linux_rt_sigprocmask	linux_wrap.c	/^uintptr_t linux_rt_sigprocmask(int how, const sigset_t *set, sigset_t *oldset){$/;"	f
+linux_set_tid_address	linux_wrap.c	/^uintptr_t linux_set_tid_address(int* tidptr_t){$/;"	f
+linux_uname	linux_wrap.c	/^uintptr_t linux_uname(void* buf){$/;"	f
+load_l2_page_table	vm.h	/^pte_t load_l2_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));$/;"	v
+load_l3_page_table	vm.h	/^pte_t load_l3_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));$/;"	v
+load_pa_start	vm.h	/^uintptr_t load_pa_start;$/;"	v
+log2	rt_util.c	/^double log2(int x)$/;"	f
+lru_queue	victim_cache.h	/^    Queue *lru_queue;$/;"	m	struct:victim_cache
+main_area_size	woram.h	/^    unsigned long long main_area_size;          \/\/ N$/;"	m	struct:woram
+mallinfo	tiny-malloc.c	/^mallinfo (void)$/;"	f
+malloc	tiny-malloc.c	/^malloc (size_t sz)$/;"	f
+malloc_stats	tiny-malloc.c	/^malloc_stats(void)$/;"	f
+malloc_usable_size	tiny-malloc.c	/^malloc_usable_size (void *block_p)$/;"	f
+mallopt	tiny-malloc.c	/^mallopt (int n, int v)$/;"	f
+map_physical_memory	boot.c	/^map_physical_memory(uintptr_t dram_base,$/;"	f
+map_physical_memory_with_kilopages	boot.c	/^map_physical_memory_with_kilopages(uintptr_t dram_base,$/;"	f
+map_physical_memory_with_megapages	boot.c	/^map_physical_memory_with_megapages(uintptr_t dram_base,$/;"	f
+max_stash_occ	rt_util.c	/^uintptr_t max_stash_occ=0;\/\/4$/;"	v
+mdlen	ssha3.h	/^    int pt, rsiz, mdlen;                    \/\/ these don't overflow$/;"	m	struct:__anon2
+memalign	tiny-malloc.c	/^memalign (size_t align, size_t sz)$/;"	f
+memcmp	string.c	/^int memcmp(const void* s1, const void* s2, size_t n)$/;"	f
+memcpy	string.c	/^void* memcpy(void* dest, const void* src, size_t len)$/;"	f
+memset	string.c	/^void* memset(void* dest, int byte, size_t len)$/;"	f
+move_lru_to_mru_in_cache	victim_cache.c	/^void move_lru_to_mru_in_cache()$/;"	f
+move_page_to_cache_from_enclave	victim_cache.c	/^void move_page_to_cache_from_enclave(uintptr_t addr)$/;"	f
+move_page_to_enclave_from_cache	victim_cache.c	/^void move_page_to_enclave_from_cache(uintptr_t addr)$/;"	f
+name	rt_util.h	/^  char name[50];$/;"	m	struct:counter_t
+next	malloc.h	/^  struct freelist_entry *next;$/;"	m	struct:freelist_entry	typeref:struct:freelist_entry::freelist_entry
+next	victim_cache.h	/^    struct QNode *prev, *next; $/;"	m	struct:QNode	typeref:struct:QNode::
+no_of_edge_calls	vm.h	/^uintptr_t no_of_edge_calls;$/;"	v
+not_implemented	entry.S	/^not_implemented:$/;"	l
+not_implemented_fatal	rt_util.c	/^void not_implemented_fatal(struct encl_ctx_t* ctx){$/;"	f
+num_free_pages	rt_util.h	/^  int num_free_pages;$/;"	m	struct:enclave_options_t
+ocall_get_page_contents_from_utm	rt_util.c	/^void ocall_get_page_contents_from_utm(edge_data_t* retdata,uintptr_t args){$/;"	f
+ocall_get_page_contents_from_utm_enc_pfh	rt_util.c	/^void ocall_get_page_contents_from_utm_enc_pfh(edge_data_t* retdata,uintptr_t args){$/;"	f
+ocall_store_page_contents_to_utm	rt_util.c	/^void ocall_store_page_contents_to_utm(edge_data_t* retdata,uintptr_t args){\/\/ ocall that will bring a page$/;"	f
+ocall_store_page_contents_to_utm_enc_pfh	rt_util.c	/^void ocall_store_page_contents_to_utm_enc_pfh(edge_data_t* retdata,uintptr_t args){\/\/ ocall that will bring a page$/;"	f
+opam_readbucket_d	opam.c	/^void opam_readbucket_d(int indexoftree,char *ret_buf)$/;"	f
+opam_readbucket_md	opam.c	/^void opam_readbucket_md(int indexoftree)$/;"	f
+opam_write_bucket_d	opam.c	/^void opam_write_bucket_d(int indexoftree)\/\/ change$/;"	f
+opam_write_bucket_md	opam.c	/^void opam_write_bucket_md(int indexoftree)$/;"	f
+opam_writebucket	opam.c	/^void opam_writebucket(int indexoftree)$/;"	f
+oram_acc	rt_util.c	/^uintptr_t oram_acc=0;\/\/6$/;"	v
+oram_init_time	rt_util.c	/^uintptr_t oram_init_time=0;$/;"	v
+out_fct_type	printf.c	/^typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);$/;"	t	file:
+out_fct_wrap_type	printf.c	/^} out_fct_wrap_type;$/;"	t	typeref:struct:__anon1	file:
+p_hash	opam.h	/^    char p_hash[32];\/\/ 32 bytes of hmac is used$/;"	m	struct:Block_Opam_md
+p_hash	oram.h	/^    char p_hash[32];\/\/ 32 bytes of hmac is used$/;"	m	struct:Block
+p_hash	roram.h	/^    char p_hash[32];\/\/ 32 bytes of hmac is used$/;"	m	struct:Block_roram
+p_hash_d	opam.h	/^    char p_hash_d[32];$/;"	m	struct:Block_Opam_md
+p_ivs	vm.h	/^iv_page *p_ivs;$/;"	v
+pageNumber	victim_cache.h	/^    uintptr_t pageNumber; \/\/ the page number stored in this QNode$/;"	m	struct:QNode
+page_addr_tracing	rt_util.h	/^  uint8_t page_addr_tracing;$/;"	m	struct:enclave_options_t
+page_fault_handler	rt_util.h	/^  page_fault_type page_fault_handler;$/;"	m	struct:enclave_options_t
+page_fault_type	rt_util.h	/^       PAGE_FAULT_HANDLER_OPAM=2, PAGE_FAULT_HANDLER_ENC_ADDR=3 }page_fault_type;$/;"	t	typeref:enum:__anon4
+pages	vm.h	/^typedef struct pages$/;"	s
+pages	vm.h	/^}pages;$/;"	t	typeref:struct:pages
+pages_at	vm.h	/^typedef struct pages_at$/;"	s
+pages_at	vm.h	/^}pages_at;$/;"	t	typeref:struct:pages_at
+pages_read	rt_util.c	/^uintptr_t pages_read=0;\/\/0$/;"	v
+pages_written	rt_util.c	/^uintptr_t pages_written=0;\/\/2$/;"	v
+pg_list_t	freemem.h	/^typedef struct pg_list_t$/;"	s
+pg_list_t	freemem.h	/^} pg_list_t;$/;"	t	typeref:struct:pg_list_t
+place_new_page	page_replacement.c	/^uintptr_t place_new_page(uintptr_t item_org_va, uintptr_t item_enc_va)$/;"	f
+pointer	vm.h	/^uintptr_t pointer;$/;"	v
+pop	page_replacement.c	/^uintptr_t pop()$/;"	f
+pop_item	vm.h	/^uintptr_t pop_item[2];$/;"	v
+position	vm.h	/^uintptr_t *position;$/;"	v
+position_map	woram.h	/^    uintptr_t *position_map;                    \/\/ [ VPage -> Address ]$/;"	m	struct:woram
+pow	rt_util.c	/^int pow(uintptr_t a, uintptr_t b)$/;"	f
+ppn	vm.h	/^static inline uintptr_t ppn(uintptr_t pa)$/;"	f
+prev	victim_cache.h	/^    struct QNode *prev, *next; $/;"	m	struct:QNode	typeref:struct:QNode::QNode
+prev_addr	rt_util.c	/^uintptr_t prev_addr=0;$/;"	v
+prev_addr_status	rt_util.c	/^uintptr_t *prev_addr_status=NULL;$/;"	v
+print_details	rt_util.c	/^void print_details()$/;"	f
+print_page	opam.c	/^void print_page(char *a)$/;"	f
+print_stash	opam.c	/^void print_stash()$/;"	f
+print_strace	syscall.h	39;"	d
+print_strace	syscall.h	41;"	d
+printf	printf.c	/^int printf(const char* format, ...)$/;"	f
+program_break	vm.h	/^uintptr_t program_break;$/;"	v
+program_break_rt	vm.h	/^uintptr_t program_break_rt;$/;"	v
+pt	ssha3.h	/^    int pt, rsiz, mdlen;                    \/\/ these don't overflow$/;"	m	struct:__anon2
+ptd_create	vm.h	/^static inline pte_t ptd_create(uintptr_t ppn)$/;"	f
+pte_create	vm.h	/^static inline pte_t pte_create(uintptr_t ppn, int type)$/;"	f
+pte_ppn	vm.h	/^static inline uintptr_t pte_ppn(pte_t pte)$/;"	f
+pte_t	vm.h	/^typedef uintptr_t pte_t;$/;"	t
+ptrs	roram.h	/^    uint8_t ptrs[RORAM_BUCKET_SIZE];$/;"	m	struct:Bucket_roram_md
+push	page_replacement.c	/^uintptr_t push(uintptr_t item_org_va, uintptr_t item_enc_va)$/;"	f
+pvalloc	tiny-malloc.c	/^pvalloc (size_t sz)$/;"	f
+pxget	rt_util.c	/^void  pxget(int leafindex , int Px[ARRAY_SIZE])$/;"	f
+q	ssha3.h	/^        uint64_t q[25];                     \/\/ 64-bit words$/;"	m	union:__anon2::__anon3
+q_front	vm.h	/^int q_front;$/;"	v
+q_rear	vm.h	/^int q_rear;$/;"	v
+ra	regs.h	/^	uintptr_t ra;$/;"	m	struct:regs_t
+rd	roram.c	/^char rd[RISCV_PAGE_SIZE];$/;"	v
+read_bucket_roram	roram.c	/^void read_bucket_roram(int buc_index)$/;"	f
+read_bucket_roram_from_internal	roram.c	/^void read_bucket_roram_from_internal(int buc_index)$/;"	f
+read_current_timer	timex.h	/^static inline int read_current_timer(unsigned long *timer_val)$/;"	f
+read_page_from	rt_util.c	/^void read_page_from(uintptr_t addr, uintptr_t to)$/;"	f
+read_path	roram.c	/^void read_path(int* pl,uintptr_t a,char *retdatas)\/\/algo$/;"	f
+readbucket	oram.c	/^void readbucket(int indexoftree)$/;"	f
+real_pages_read	rt_util.c	/^uintptr_t real_pages_read=0;\/\/1$/;"	v
+real_pages_written	rt_util.c	/^uintptr_t real_pages_written=0;\/\/3$/;"	v
+realloc	tiny-malloc.c	/^realloc (void *block_p, size_t sz)$/;"	f
+rear	index_q.h	/^uintptr_t rear;$/;"	v
+rear	victim_cache.h	/^    QNode *front, *rear; $/;"	m	struct:Queue
+refresh_main_area	woram.c	/^void refresh_main_area()$/;"	f
+regs	regs.h	/^	struct regs_t regs;$/;"	m	struct:encl_ctx_t	typeref:struct:encl_ctx_t::regs_t
+regs_t	regs.h	/^struct regs_t {$/;"	s
+remap_all	opam.c	/^void remap_all()$/;"	f
+remap_kernel_space	boot.c	/^remap_kernel_space(uintptr_t runtime_base,$/;"	f
+remap_physical_page	mm.c	/^remap_physical_page(uintptr_t vpn, uintptr_t ppn, int flags)$/;"	f
+remap_physical_pages	mm.c	/^remap_physical_pages(uintptr_t vpn, uintptr_t ppn, size_t count, int flags)$/;"	f
+remove_lru_from_queue	victim_cache.c	/^uintptr_t remove_lru_from_queue(Queue *q) \/\/remove from front of the Queue$/;"	f
+remove_lru_page_from_cache	victim_cache.c	/^void remove_lru_page_from_cache()$/;"	f
+remove_mru_from_queue	victim_cache.c	/^uintptr_t remove_mru_from_queue(Queue *q) \/\/remove from rear of the Queue$/;"	f
+remove_node_from_queue	victim_cache.c	/^void remove_node_from_queue(QNode *node_to_remove, Queue *q)$/;"	f
+remove_victim_page	page_replacement.c	/^uintptr_t remove_victim_page()$/;"	f
+replacement_algo_queue	vm.h	/^uintptr_t *replacement_algo_queue;$/;"	v
+replacement_algo_queue_map	vm.h	/^uintptr_t *replacement_algo_queue_map;$/;"	v
+return_to_encl	entry.S	/^return_to_encl:$/;"	l
+root_page_table	vm.h	/^pte_t root_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));$/;"	v
+roram_writebucket	roram.c	/^void roram_writebucket(int indexoftree)\/\/this write bucket function is only used during initialization and is not the write function given in the paper$/;"	f
+round	roram.c	/^int round =0;$/;"	v
+rsbox	aess.c	/^static const uint8_t rsbox[256] = {$/;"	v	file:
+rsiz	ssha3.h	/^    int pt, rsiz, mdlen;                    \/\/ these don't overflow$/;"	m	struct:__anon2
+rt_handle_sbrk	rt_util.c	/^uintptr_t rt_handle_sbrk(size_t bytes)$/;"	f
+rt_handle_sbrk_rt	rt_util.c	/^uintptr_t rt_handle_sbrk_rt(size_t bytes)$/;"	f
+rt_page_fault	page_fault.c	/^void rt_page_fault(struct encl_ctx_t* ctx)$/;"	f
+rt_page_fault	rt_util.c	/^void rt_page_fault(struct encl_ctx_t* ctx)$/;"	f
+rt_trap_table	entry.S	/^rt_trap_table:$/;"	l
+rt_util_getrandom	rt_util.c	/^size_t rt_util_getrandom(void* vaddr, size_t buflen){$/;"	f
+rt_util_misc_fatal	rt_util.c	/^void rt_util_misc_fatal(){$/;"	f
+runtime_va_start	vm.h	/^uintptr_t runtime_va_start;$/;"	v
+s0	regs.h	/^	uintptr_t s0;$/;"	m	struct:regs_t
+s1	regs.h	/^	uintptr_t s1;$/;"	m	struct:regs_t
+s10	regs.h	/^	uintptr_t s10;$/;"	m	struct:regs_t
+s11	regs.h	/^	uintptr_t s11;$/;"	m	struct:regs_t
+s2	regs.h	/^	uintptr_t s2;$/;"	m	struct:regs_t
+s3	regs.h	/^	uintptr_t s3;$/;"	m	struct:regs_t
+s4	regs.h	/^	uintptr_t s4;$/;"	m	struct:regs_t
+s5	regs.h	/^	uintptr_t s5;$/;"	m	struct:regs_t
+s6	regs.h	/^	uintptr_t s6;$/;"	m	struct:regs_t
+s7	regs.h	/^	uintptr_t s7;$/;"	m	struct:regs_t
+s8	regs.h	/^	uintptr_t s8;$/;"	m	struct:regs_t
+s9	regs.h	/^	uintptr_t s9;$/;"	m	struct:regs_t
+sanity_check	woram.c	/^void sanity_check()$/;"	f
+satp_new	vm.h	/^static inline uintptr_t satp_new(uintptr_t pa)$/;"	f
+sbadaddr	regs.h	/^	uintptr_t sbadaddr;\/\/33$/;"	m	struct:encl_ctx_t
+sbi_exit_enclave	sbi.h	/^static inline void sbi_exit_enclave(uint64_t retval)$/;"	f
+sbi_print_hello_world	sbi.h	/^static inline void sbi_print_hello_world()\/\/ ADDED BY ME$/;"	f
+sbi_random	sbi.h	/^static inline uintptr_t sbi_random()$/;"	f
+sbi_set_timer	sbi.h	/^static inline void sbi_set_timer(uint64_t stime_value){$/;"	f
+sbi_stop_enclave	sbi.h	/^static inline void sbi_stop_enclave(uint64_t request)$/;"	f
+sbox	aess.c	/^static const uint8_t sbox[256] = {$/;"	v	file:
+scause	regs.h	/^	uintptr_t scause;\/\/34$/;"	m	struct:encl_ctx_t
+search_in_stash	roram.c	/^void search_in_stash(int a,char* retdata)$/;"	f
+sepc	regs.h	/^	uintptr_t sepc; \/\/ use this slot as sepc$/;"	m	struct:regs_t
+set_pos	woram.c	/^void set_pos(uintptr_t addr, uintptr_t new_addr_index)$/;"	f
+set_program_break	mm.c	/^void set_program_break(uintptr_t new_break){$/;"	f
+set_program_break_rt	mm.c	/^void set_program_break_rt(uintptr_t new_break){$/;"	f
+setup_key_utilities	woram.c	/^void setup_key_utilities(uint8_t *key_chacha_, uint8_t *key_aes_, uint8_t *iv_aes_, uint8_t *Key_hmac_, $/;"	f
+setup_keys_and_buffer	rt_util.c	/^void setup_keys_and_buffer()$/;"	f
+setup_page_fault_handler	rt_util.c	/^void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)$/;"	f
+setup_start	env.c	/^void* setup_start(void* _sp){$/;"	f
+sha3	ssha3.c	/^void *sha3(const void *in, size_t inlen, void *md, int mdlen)$/;"	f
+sha3_ctx_t	ssha3.h	/^} sha3_ctx_t;$/;"	t	typeref:struct:__anon2
+sha3_final	ssha3.c	/^int sha3_final(void *md, sha3_ctx_t *c)$/;"	f
+sha3_init	ssha3.c	/^int sha3_init(sha3_ctx_t *c, int mdlen)$/;"	f
+sha3_keccakf	ssha3.c	/^void sha3_keccakf(uint64_t st[25])$/;"	f
+sha3_update	ssha3.c	/^int sha3_update(sha3_ctx_t *c, const void *data, size_t len)$/;"	f
+shared_buffer	vm.h	/^uintptr_t shared_buffer;$/;"	v
+shared_buffer_size	vm.h	/^uintptr_t shared_buffer_size;$/;"	v
+show_queue_contents	page_replacement.c	/^void show_queue_contents()$/;"	f
+simplepaging	rt_util.c	/^void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){$/;"	f
+size	malloc.h	/^  size_t size;$/;"	m	struct:freelist_entry
+snprintf	printf.c	/^int snprintf(char* buffer, size_t count, const char* format, ...)$/;"	f
+sourcet	rt_util.c	/^char sourcet[4096];$/;"	v
+sp	regs.h	/^	uintptr_t sp;$/;"	m	struct:regs_t
+spa_available	freemem.c	/^spa_available(){$/;"	f
+spa_free_pages	freemem.c	/^static pg_list_t spa_free_pages;$/;"	v	file:
+spa_get	freemem.c	/^spa_get(void)$/;"	f
+spa_init	freemem.c	/^spa_init(uintptr_t base, size_t size)$/;"	f
+spa_put	freemem.c	/^spa_put(uintptr_t page_addr)$/;"	f
+sprintf	printf.c	/^int sprintf(char* buffer, const char* format, ...)$/;"	f
+sss	rt_util.c	/^char sss[30];$/;"	v
+sstatus	regs.h	/^	uintptr_t sstatus;\/\/32$/;"	m	struct:encl_ctx_t
+st	ssha3.h	/^    } st;$/;"	m	struct:__anon2	typeref:union:__anon2::__anon3
+stash_index	opam.h	/^    uintptr_t stash_index;$/;"	m	struct:Block_Opam_md
+stash_loc	vm.h	/^int *stash_loc;$/;"	v
+state_t	aess.c	/^typedef uint8_t state_t[4][4];$/;"	t	file:
+store_victim_page_to_woram	woram.c	/^void store_victim_page_to_woram(uintptr_t victim_page_enclave_va, uintptr_t victim_page_runtime_va,$/;"	f
+strcat	string.c	/^void strcat(char *s1, char *s2)$/;"	f
+strcmp	string.c	/^int strcmp(char *s1, char *s2)$/;"	f
+strcpy	string.c	/^void strcpy(char *s1, char *s2)$/;"	f
+strlen	string.c	/^int strlen(char *s)$/;"	f
+sum_stash_occ	rt_util.c	/^uintptr_t sum_stash_occ=0;\/\/5$/;"	v
+syscall_brk	linux_wrap.c	/^uintptr_t syscall_brk(void* addr){$/;"	f
+syscall_mmap	linux_wrap.c	/^uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,$/;"	f
+syscall_munmap	linux_wrap.c	/^uintptr_t syscall_munmap(void *addr, size_t length){$/;"	f
+t0	regs.h	/^	uintptr_t t0;$/;"	m	struct:regs_t
+t1	regs.h	/^	uintptr_t t1;$/;"	m	struct:regs_t
+t2	regs.h	/^	uintptr_t t2;$/;"	m	struct:regs_t
+t3	regs.h	/^	uintptr_t t3;$/;"	m	struct:regs_t
+t4	regs.h	/^	uintptr_t t4;$/;"	m	struct:regs_t
+t5	regs.h	/^	uintptr_t t5;$/;"	m	struct:regs_t
+t6	regs.h	/^	uintptr_t t6;$/;"	m	struct:regs_t
+tail	freemem.h	/^	uintptr_t tail;$/;"	m	struct:pg_list_t
+test_dec	rt_util.c	/^char test_dec[4096];$/;"	v
+test_enc	rt_util.c	/^char test_enc[4096];$/;"	v
+test_org	rt_util.c	/^char test_org[4096];$/;"	v
+test_va_range	mm.c	/^test_va_range(uintptr_t vpn, size_t count){$/;"	f
+testing	woram.c	/^void testing()$/;"	f
+testing_cache	victim_cache.c	/^void testing_cache()$/;"	f
+testing_que	page_replacement.c	/^void testing_que()$/;"	f
+time_block_copy_r	rt_util.c	/^uintptr_t time_block_copy_r=0;$/;"	v
+time_block_copy_w	rt_util.c	/^uintptr_t time_block_copy_w=0;$/;"	v
+time_dblocks_process_r	rt_util.c	/^uintptr_t time_dblocks_process_r=0;$/;"	v
+time_dblocks_process_w	rt_util.c	/^uintptr_t time_dblocks_process_w=0;$/;"	v
+time_rblocks_process_r	rt_util.c	/^uintptr_t time_rblocks_process_r=0;$/;"	v
+time_rblocks_process_w	rt_util.c	/^uintptr_t time_rblocks_process_w=0;$/;"	v
+tmp_buc_d	roram.c	/^Bucket_roram *tmp_buc_d;$/;"	v
+total_trace_buff_cnt	rt_util.c	/^uintptr_t total_trace_buff_cnt=0;$/;"	v
+tp	regs.h	/^	uintptr_t tp;$/;"	m	struct:regs_t
+trace_buff	rt_util.c	/^uintptr_t* trace_buff;$/;"	v
+trace_buff_cnt	rt_util.c	/^uintptr_t trace_buff_cnt=0;$/;"	v
+tracing	rt_util.c	/^int tracing =0;$/;"	v
+translate	mm.c	/^translate(uintptr_t va)$/;"	f
+tree_exc	rt_util.h	/^  uint8_t tree_exc;$/;"	m	struct:enclave_options_t
+tree_index	opam.h	/^    uintptr_t tree_index;$/;"	m	struct:Block_Opam_md
+tree_po_md	oram.c	/^Bucket_md *tree_po_md;$/;"	v
+tree_roram_md	roram.c	/^Bucket_roram_md *tree_roram_md;$/;"	v
+tree_roram_md	roram.h	/^Bucket_roram_md *tree_roram_md;$/;"	v
+tree_roram_tree_top	roram.h	/^Bucket_roram *tree_roram_tree_top;$/;"	v
+treearray_len	oram.c	/^int treearray_len=0;$/;"	v
+treearray_opam_len	opam.c	/^int treearray_opam_len;$/;"	v
+treearray_opam_md_len	opam.c	/^int treearray_opam_md_len=0;$/;"	v
+unplaced_pages_count	rt_util.c	/^uintptr_t unplaced_pages_count=0;$/;"	v
+update_hashmap	victim_cache.c	/^void update_hashmap(uintptr_t addr, QNode *position)$/;"	f
+update_max_stash_occ	roram.c	/^void update_max_stash_occ()$/;"	f
+used_cache_pages	victim_cache.h	/^    unsigned long long used_cache_pages; \/\/= 0;$/;"	m	struct:victim_cache
+utm_base	boot.c	/^uintptr_t utm_base;$/;"	v
+utm_size	boot.c	/^size_t utm_size;$/;"	v
+v_cache	rt_util.c	/^int v_cache=0;$/;"	v
+validate_access	woram.c	/^void validate_access(uintptr_t index)$/;"	f
+valids	roram.h	/^    char valids[RORAM_BUCKET_SIZE];$/;"	m	struct:Bucket_roram_md
+valloc	tiny-malloc.c	/^valloc (size_t sz)$/;"	f
+ver_num	vm.h	/^  uintptr_t ver_num;$/;"	m	struct:pages
+version	opam.h	/^    uintptr_t version;$/;"	m	struct:Block_Opam_md
+version	oram.h	/^    uintptr_t version;$/;"	m	struct:Block
+version	roram.h	/^    uintptr_t version;$/;"	m	struct:Block_roram
+version_numbers	ssha3.h	/^uintptr_t *version_numbers;$/;"	v
+vic_page	rt_util.c	/^pages vic_page;$/;"	v
+vic_page_at	rt_util.c	/^pages_at vic_page_at;$/;"	v
+victim_cache	rt_util.h	/^  uint8_t victim_cache;$/;"	m	struct:enclave_options_t
+victim_cache	victim_cache.h	/^struct victim_cache$/;"	s
+victim_cache	victim_cache.h	/^} victim_cache;$/;"	v	typeref:struct:victim_cache
+vpn	vm.h	/^static inline uintptr_t vpn(uintptr_t va)$/;"	f
+vsnprintf	printf.c	/^int vsnprintf(char* buffer, size_t count, const char* format, va_list va)$/;"	f
+woram	woram.h	/^struct woram {$/;"	s
+woram	woram.h	/^} woram;$/;"	v	typeref:struct:woram
+woram_array	woram.h	/^    uintptr_t woram_array;$/;"	m	struct:woram
+woram_array_size	woram.h	/^    uintptr_t woram_array_size;$/;"	m	struct:woram
+woram_read_access	woram.c	/^void woram_read_access(uintptr_t page_va, pages* returned_page)$/;"	f
+woram_write_access	woram.c	/^void woram_write_access(pages victim_page)$/;"	f
+write_access_counter	woram.h	/^    unsigned long long write_access_counter;$/;"	m	struct:woram
+write_bucket_roram	roram.c	/^void write_bucket_roram(int buc_index,int level)$/;"	f
+write_page_at_address	rt_util.c	/^void write_page_at_address(uintptr_t addr, uintptr_t from){$/;"	f
+write_to_holding_area	woram.c	/^uintptr_t write_to_holding_area(pages data)$/;"	f
+write_to_victim_cache_handle_full	rt_util.c	/^void write_to_victim_cache_handle_full(uintptr_t addr, uintptr_t req_addr) $/;"	f
+writebucket	oram.c	/^void writebucket(int indexoftree)$/;"	f
+xor_op	ssha3.c	/^void xor_op(char *a, char *b, char *c, size_t len)$/;"	f
+xtime	aess.c	/^static uint8_t xtime(uint8_t x)$/;"	f	file:
+z1	rt_util.c	/^uint8_t z1[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+z1	woram.h	/^    uint8_t *z1;$/;"	m	struct:key_utilities
+z2	rt_util.c	/^uint8_t z2[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+z2	woram.h	/^    uint8_t *z2;$/;"	m	struct:key_utilities
+z_1	rt_util.c	/^uint8_t z_1[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+z_1	woram.h	/^    uint8_t *z_1;$/;"	m	struct:key_utilities
+z_2	rt_util.c	/^uint8_t z_2[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };$/;"	v
+z_2	woram.h	/^    uint8_t *z_2;$/;"	m	struct:key_utilities
+zero_out_shared_buffer	syscall.c	/^void zero_out_shared_buffer()$/;"	f

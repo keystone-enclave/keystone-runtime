@@ -29,9 +29,9 @@ void initialize_position_map(void)
 
 void display_position_map()
 {
-//    printf("[woram] Displaying Position Map Contents of WORAM with size %zd\n", woram.main_area_size);
-//    for(uintptr_t addr = 0; addr < woram.main_area_size; addr ++ )
-//        printf("[woram] Logical Address : 0x%zx , Physical Address : 0x%zx\n", addr, woram.position_map[addr]);
+    printf("[woram] Displaying Position Map Contents of WORAM with size %zd\n", woram.main_area_size);
+    for(uintptr_t addr = 0; addr < woram.main_area_size; addr ++ )
+    printf("[woram] Logical Address : 0x%zx , Physical Address : 0x%zx\n", addr, woram.position_map[addr]);
     
 }
 

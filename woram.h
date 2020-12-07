@@ -4,7 +4,7 @@
 #include "vm.h"
 
 #define UTM_ARRAY_STARTING_OFFSET 1048*1048 //Leave the first 1MB for ocall operations
-#define WORAM_SIZE 3000  
+#define WORAM_SIZE 3000
 #define SCALING_FACTOR 2/3.0  // main area : total oram ratio SHOULD BE FLOAT
 
 struct woram {

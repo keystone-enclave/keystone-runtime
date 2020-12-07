@@ -26,7 +26,7 @@
 
 uintptr_t prev_addr=0;
 uintptr_t *prev_addr_status=NULL;
-
+int spa, frep;
 int fcc=0;
 
 
@@ -754,8 +754,11 @@ void write_to_victim_cache_handle_full(uintptr_t addr, uintptr_t req_addr)
 
   //printf("Freed page 0x%zx\n", page_out);
   // Step 4 - Free the page (Cache has 1 free page now)
-  free_page(vpn(page_out));
+  // printf("AVAILABLE IS %d PAGE OUT IS 0x%zx\n",spa_available(), page_out);
 
+  free_page(vpn(page_out));
+  
+//  printf("AVAILABLE IS %d\n",spa_available());
   // Step 5 - Add replaced page to cache 
   move_page_to_cache_from_enclave(addr);
 }
@@ -1140,7 +1143,9 @@ void kick_victim(uintptr_t addr, uintptr_t *faultingPagePTE){
 			}
 			
 			*victimPTE = (*victimPTE) & ~PTE_V;
-		       	return;
+		       	//printf("AVAILABLE IS %d\n",spa_available());
+
+			return;
 		}
 
 		//vicPageVA=__va(((*victimPTE)>>PTE_PPN_SHIFT)<<RISCV_PAGE_BITS);
@@ -1149,6 +1154,8 @@ void kick_victim(uintptr_t addr, uintptr_t *faultingPagePTE){
 		store_victim_page_to_woram(vicPageEnc, vicPageVA, confidentiality, authentication);
 //		printf("[RUNTIME]: Copied victim [{enclave addr %llx} {runtime addr %llx}] to UTM\n", victim_page_enc,victim_page_org);
 		free_page(vpn(vicPageEnc));	//free the page, so that sp_get() has free pages to work with.
+//		frep++;
+//		printf("AVAILABLE IS %d\n",spa_available());
 		*victimPTE  = (*victimPTE) & ~PTE_V;
 	}
 	else{
@@ -1205,8 +1212,8 @@ void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
 
 		return;
 	}
+//	printf("AVAILABLE IS %d\n",spa_available());
 	uintptr_t newpage = spa_get();
-	
 	if(place_new_page(  newpage,vpn(addr)<<RISCV_PAGE_BITS    )!=ENQUE_SUCCESS){
   		printf("[runtime] Page replacement queue full. Can't handle. \n" );
 	 	sbi_exit_enclave(-1);
@@ -1229,12 +1236,14 @@ void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
 
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
+// printf("[runntimeX] Handle Page Fault called for addr 0x%zx\n", addr);
+
   simplepaging(addr,status_find_address);
 //  printf("______XXXXXXXXXXXXXXXXXXXXXX__________________%d_____XXXXXXXXXXXXXXXXXXXXXXX__________________________\n",v_cache);
   //THIS RETURN ENSURES THAT THE OLD CODE DOES NOT EXECUTE
   return;
   
-  printf("[runtime] Handle Page Fault called for addr 0x%zx\n", addr);
+  printf("[RUNTIME] Handle Page Fault called for addr 0x%zx\n", addr);
   if(first_fault)
   {
     setup_page_fault_handler(addr, status_find_address);
@@ -1403,6 +1412,7 @@ ff:            success=access_opam('w',vpn(victim_page_enc),(char*)__va(  ( (*st
                 {
                    int is_full = is_victim_cache_full();
                    printf("[runtime] Cache full? %d\n", is_full);
+		   
                    if(is_full)
                      write_to_victim_cache_handle_full(victim_page_enc, addr); 
                    else 
