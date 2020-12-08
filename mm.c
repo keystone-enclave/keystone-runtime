@@ -4,9 +4,8 @@
 #include "freemem.h"
 #include "vm.h"
 int ff=1;
-
 /* Page table utilities */
-
+int victimized =0;
 
 /* Hacky storage of current u-mode break */
 static uintptr_t current_program_break;
@@ -162,7 +161,7 @@ free_page(uintptr_t vpn){
 
   // No such PTE, or invalid
 
-  if(!pte){// || !(*pte & PTE_V)){// uncomment these two lines for full tracing
+  if(!victimized && (!pte || !(*pte & PTE_V))){// uncomment these two lines for full tracing
 
 	  return;
   }

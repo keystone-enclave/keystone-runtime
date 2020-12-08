@@ -840,6 +840,9 @@ void setup_page_fault_handler(uintptr_t addr, uintptr_t *status_find_address)
   //display_test_params();
   //printf("[RUNTIME] fault limit %d \n",fault_lim );
   //sbi_exit_enclave(-1);
+  
+  //free_pages works differently with and without v_cache.
+  victimized = v_cache;
 
   strcpy(counters[PAGES_READ].name,"PAGES_READ");
   strcpy(counters[PAGES_WRITTEN].name,"PAGES_WRITTEN");
@@ -1236,7 +1239,7 @@ void simplepaging(uintptr_t addr, uintptr_t *faultingPagePTE){
 
 void handle_page_fault(uintptr_t addr, uintptr_t *status_find_address)
 {
-// printf("[runntimeX] Handle Page Fault called for addr 0x%zx\n", addr);
+// printf("[RUNTIME] Handle Page Fault called for addr 0x%zx\n", addr);
 
   simplepaging(addr,status_find_address);
 //  printf("______XXXXXXXXXXXXXXXXXXXXXX__________________%d_____XXXXXXXXXXXXXXXXXXXXXXX__________________________\n",v_cache);
