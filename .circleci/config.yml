@@ -108,24 +108,24 @@ workflows:
   build-and-test:
     jobs:
       - default-build
-      - use-freemem
+      - use-freemem:
           requires:
             - default-build
-      - use-freemem
+      - use-freemem:
           requires:
             - default-build
-      - use_linux_syscall_use_freemem
+      - use_linux_syscall_use_freemem:
           requires:
             - default-build
-      - use_package_crypto
+      - use_package_crypto:
           requires:
             - default-build
-      - use_page_hash
+      - use_page_hash:
           requires:
             - default-build
-      - use_page_crypto_use_page_hash
+      - use_page_crypto_use_page_hash:
           requires:
             - default-build
-      - test
+      - test:
           requires:
             - default-build
