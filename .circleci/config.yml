@@ -39,11 +39,100 @@ jobs:
           command: |
               ./build.sh freemem
           no_output_timeout: 120m
+  use_linux_syscall_use_freemem:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "USE_LINUX_SYSCALL + USE_FREEMEM"
+          command: |
+              ./build.sh linux_syscall freemem
+          no_output_timeout: 120m
+  use_paging:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "USE_PAGING"
+          command: |
+              ./build.sh paging
+          no_output_timeout: 120m
+  use_package_crypto:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "USE_PAGE_CRYPTO"
+          command: |
+              ./build.sh paging page_crypto
+          no_output_timeout: 120m
+  use_page_hash:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "USE_PAGE_HASH"
+          command: |
+              ./build.sh paging page_hash
+          no_output_timeout: 120m
+  use_page_crypto_use_page_hash:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "USE_PAGE_CRYPTO + USE_PAGE_HASH"
+          command: |
+              ./build.sh paging page_crypto page_hash
+          no_output_timeout: 120m
+  test:
+    executor: setup-rv64gc
+    working_directory: /keystone-runtime/
+    steps:
+      - checkout
+      - update-riscv-toolchain-path
+      - run:
+          name: "test"
+          command: |
+              mkdir -p obj/test
+              pushd obj/test
+              cmake ../../test
+              make
+              ctest -VV || ( cat obj/test/Testing/Temporary/LastTest.log && false )
+              popd
+          no_output_timeout: 120m
 
 workflows:
   build-and-test:
     jobs:
       - default-build
       - use-freemem
+          requires:
+            - default-build
+      - use-freemem
+          requires:
+            - default-build
+      - use_linux_syscall_use_freemem
+          requires:
+            - default-build
+      - use_package_crypto
+          requires:
+            - default-build
+      - use_page_hash
+          requires:
+            - default-build
+      - use_page_crypto_use_page_hash
+          requires:
+            - default-build
+      - test
           requires:
             - default-build
