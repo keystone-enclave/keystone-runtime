@@ -19,7 +19,6 @@ commands:
 jobs:
   default-build:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -30,7 +29,6 @@ jobs:
           no_output_timeout: 120m
   use-freemem:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -41,7 +39,6 @@ jobs:
           no_output_timeout: 120m
   use_linux_syscall_use_freemem:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -52,7 +49,6 @@ jobs:
           no_output_timeout: 120m
   use_paging:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -63,7 +59,6 @@ jobs:
           no_output_timeout: 120m
   use_package_crypto:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -74,7 +69,6 @@ jobs:
           no_output_timeout: 120m
   use_page_hash:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -85,7 +79,6 @@ jobs:
           no_output_timeout: 120m
   use_page_crypto_use_page_hash:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
@@ -96,7 +89,6 @@ jobs:
           no_output_timeout: 120m
   test:
     executor: setup-rv64gc
-    working_directory: /keystone-runtime/
     steps:
       - checkout
       - update-riscv-toolchain-path
