@@ -16,9 +16,6 @@ commands:
   update-riscv-toolchain-path:
     steps:
       - run: echo 'export PATH=/keystone/riscv64/bin:/keystone/riscv32/bin:$PATH' >> $BASH_ENV
-  set-sdk-path:
-    steps:
-      - run: echo 'export $KEYSTONE_SDK_DIR=/keystone/sdk' >> $BASH_ENV
 
 jobs:
   default-build:
@@ -26,11 +23,11 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "Default build"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
-              export $KEYSTONE_SDK_DIR="/keystone/sdk"
               ./build.sh
           no_output_timeout: 120m
   use-freemem:
@@ -38,9 +35,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_FREEMEM"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh freemem
           no_output_timeout: 120m
@@ -49,9 +47,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_LINUX_SYSCALL + USE_FREEMEM"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh linux_syscall freemem
           no_output_timeout: 120m
@@ -60,9 +59,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_PAGING"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh paging
           no_output_timeout: 120m
@@ -71,9 +71,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_PAGE_CRYPTO"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh paging page_crypto
           no_output_timeout: 120m
@@ -82,9 +83,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_PAGE_HASH"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh paging page_hash
           no_output_timeout: 120m
@@ -93,9 +95,10 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
-      - set-sdk-path
       - run:
           name: "USE_PAGE_CRYPTO + USE_PAGE_HASH"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               ./build.sh paging page_crypto page_hash
           no_output_timeout: 120m
@@ -107,6 +110,8 @@ jobs:
       - set-sdk-path
       - run:
           name: "test"
+          environment:
+            KEYSTONE_SDK_DIR=: /keystone/sdk
           command: |
               mkdir -p obj/test
               pushd obj/test
