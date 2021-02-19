@@ -22,7 +22,7 @@ commands:
           cd /keystone/sdk
           mkdir build
           cd build
-          cmake ..
+          KEYSTONE_SDK_DIR=$(pwd) cmake ..
           make install
 
 jobs:
