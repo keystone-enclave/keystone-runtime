@@ -16,6 +16,9 @@ commands:
   update-riscv-toolchain-path:
     steps:
       - run: echo 'export PATH=/keystone/riscv64/bin:/keystone/riscv32/bin:$PATH' >> $BASH_ENV
+  set-sdk-path:
+    steps:
+      - run: echo 'export $KEYSTONE_SDK_DIR=/keystone/sdk' >> $BASH_ENV
 
 jobs:
   default-build:
@@ -23,6 +26,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "Default build"
           command: |
@@ -33,6 +37,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_FREEMEM"
           command: |
@@ -43,6 +48,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_LINUX_SYSCALL + USE_FREEMEM"
           command: |
@@ -53,6 +59,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_PAGING"
           command: |
@@ -63,6 +70,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_PAGE_CRYPTO"
           command: |
@@ -73,6 +81,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_PAGE_HASH"
           command: |
@@ -83,6 +92,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "USE_PAGE_CRYPTO + USE_PAGE_HASH"
           command: |
@@ -93,6 +103,7 @@ jobs:
     steps:
       - checkout
       - update-riscv-toolchain-path
+      - set-sdk-path
       - run:
           name: "test"
           command: |
