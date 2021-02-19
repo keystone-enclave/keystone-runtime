@@ -18,15 +18,11 @@ commands:
       - run: echo 'export PATH=/keystone/riscv/bin:/keystone/riscv64/bin:/keystone/riscv32/bin:$PATH' >> $BASH_ENV
   build-sdk:
     steps:
-      - run:
-        environment:
-          KEYSTONE_SDK_DIR: /keystone/sdk/build
-        command: |
-            cd /keystone/sdk
-            mkdir build
-            cd build
-            cmake ..
-            make install
+      - run: cd /keystone/sdk
+      - run: mkdir build
+      - run: cd build
+      - run: cmake ..
+      - run: make install
 
 jobs:
   default-build:
