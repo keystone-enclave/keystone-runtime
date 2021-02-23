@@ -68,6 +68,12 @@ test:
 	$(MAKE) -C obj/test
 	$(MAKE) -C obj/test test
 
+format:
+	FORMAT_COMMIT_START=$(echo $(TRAVIS_COMMIT_RANGE) | cut -d. -f1)
+	echo "Formatting from $(FORMAT_COMMIT_START)"
+	git clang-format --diff $(FORMAT_COMMIT_START) | tee .format-diff
+	\[ "$(cat .format-diff)" = "no modified files to format" \] || \[ "$(cat .format-diff)" = "clang-format did not modify any files" \]
+
 clean:
 	rm -rf $(RUNTIME) obj
 	$(MAKE) -C tmplib clean
