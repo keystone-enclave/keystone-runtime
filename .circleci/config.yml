@@ -166,7 +166,7 @@ workflows:
   build-and-test:
     jobs:
       - default-build
-      - use-freemem:
+      - format:
           requires:
             - default-build
       - use-freemem:
