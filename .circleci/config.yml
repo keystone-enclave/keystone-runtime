@@ -31,6 +31,19 @@ commands:
           git submodule update --init
 
 jobs:
+  format:
+    executor: setup-rv64gc
+    steps:
+      - checkout
+      - checkout-runtime
+      - update-riscv-toolchain-path
+      - run:
+          name: "test"
+          environment:
+            KEYSTONE_SDK_DIR: /keystone/sdk/build
+          command: |
+              make format
+          no_output_timeout: 120m
   default-build:
     executor: setup-rv64gc
     steps:
