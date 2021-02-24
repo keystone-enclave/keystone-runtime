@@ -37,7 +37,7 @@ jobs:
       - checkout
       - checkout-runtime
       - update-riscv-toolchain-path
-      - run: sudo apt-get install clang-format
+      - run: apt-get install clang-format -y
       - run:
           name: "test"
           environment:
