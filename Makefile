@@ -69,8 +69,9 @@ test:
 	$(MAKE) -C obj/test test
 
 format:
-	git clang-format | tee .format-diff
-	@\[ "$(cat .format-diff)" = "no modified files to format" \] || \[ "$(cat .format-diff)" = "clang-format did not modify any files" \]
+	# This is an attempt to get the clang-format command in git.
+	git $(shell git help -a | grep clang-format) | tee .format-diff
+	\[ "$(shell cat .format-diff)" = "no modified files to format" \] || \[ "$(shell cat .format-diff)" = "clang-format did not modify any files" \]
 
 clean:
 	rm -rf $(RUNTIME) obj
