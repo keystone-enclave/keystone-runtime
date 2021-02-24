@@ -69,7 +69,7 @@ test:
 	$(MAKE) -C obj/test test
 
 format:
-	clang-format -style=file -i *.c *.h *.S | tee .format-diff
+	git clang-format | tee .format-diff
 	@\[ "$(cat .format-diff)" = "no modified files to format" \] || \[ "$(cat .format-diff)" = "clang-format did not modify any files" \]
 
 clean:
