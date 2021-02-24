@@ -42,7 +42,7 @@ jobs:
           environment:
             KEYSTONE_SDK_DIR: /keystone/sdk/build
           command: |
-              sudo apt install clang-format -y
+              apt install clang-format -y
               make format
           no_output_timeout: 120m
   default-build:
