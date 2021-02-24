@@ -68,11 +68,11 @@ test:
 	$(MAKE) -C obj/test
 	$(MAKE) -C obj/test test
 
-format:
+clang-format:
 	# This is an attempt to get the clang-format command in git.
 	git $(shell git help -a | grep clang-format) | tee .format-diff
 
-format-check: format
+fomrat: clang-format
 	\[ "$(shell cat .format-diff)" = "no modified files to format" \] || \[ "$(shell cat .format-diff)" = "clang-format did not modify any files" \]
 
 clean:
