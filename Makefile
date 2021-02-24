@@ -72,7 +72,7 @@ clang-format:
 	# This is an attempt to get the clang-format command in git.
 	git $(shell git help -a | grep clang-format) | tee .format-diff
 
-fomrat: clang-format
+format: clang-format
 	\[ "$(shell cat .format-diff)" = "no modified files to format" \] || \[ "$(shell cat .format-diff)" = "clang-format did not modify any files" \]
 
 clean:
