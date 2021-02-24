@@ -37,12 +37,12 @@ jobs:
       - checkout
       - checkout-runtime
       - update-riscv-toolchain-path
+      - run: sudo apt-get install clang-format
       - run:
           name: "test"
           environment:
             KEYSTONE_SDK_DIR: /keystone/sdk/build
           command: |
-              apt install clang-format -y
               make format
           no_output_timeout: 120m
   default-build:
