@@ -73,7 +73,8 @@ clang-format:
 	git $(shell git help -a | grep clang-format) | tee .format-diff
 
 format: clang-format
-	\[ "$(shell cat .format-diff)" = "no modified files to format" \] || \[ "$(shell cat .format-diff)" = "clang-format did not modify any files" \]
+	$(eval FORMAT_DIF := "$(shell cat .format-diff)")
+	@\[ $(FORMAT_DIF) = "no modified files to format" \] || \[ $(FORMAT_DIF) = "clang-format did not modify any files" \]
 
 clean:
 	rm -rf $(RUNTIME) obj
