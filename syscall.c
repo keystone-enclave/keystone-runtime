@@ -169,7 +169,7 @@ void handle_syscall(struct encl_ctx* ctx)
   case(RUNTIME_SYSCALL_SHAREDCOPY):
     ret = handle_copy_from_shared((void*)arg0, arg1, arg2);
     break;
-  case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):;
+  case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):
     copy_from_user((void*)rt_copy_buffer_2, (void*)arg1, arg2);
 
     ret = sbi_attest_enclave(rt_copy_buffer_1, rt_copy_buffer_2, arg2);
