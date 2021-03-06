@@ -78,6 +78,6 @@ sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len) {
 }
 
 uintptr_t
-sbi_snapshot(){
-  return SBI_CALL_0(SBI_SM_SNAPSHOT);
+sbi_snapshot() {
+  return SBI_CALL_0(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_SNAPSHOT);
 }
