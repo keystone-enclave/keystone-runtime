@@ -15,11 +15,13 @@
 #define SBI_SM_DESTROY_ENCLAVE   2002
 #define SBI_SM_RUN_ENCLAVE       2003
 #define SBI_SM_RESUME_ENCLAVE    2005
+#define SBI_SM_CLONE_ENCLAVE     2006
 #define SBI_SM_RANDOM            3001
 #define SBI_SM_ATTEST_ENCLAVE    3002
 #define SBI_SM_GET_SEALING_KEY   3003
 #define SBI_SM_STOP_ENCLAVE      3004
 #define SBI_SM_EXIT_ENCLAVE      3006
+#define SBI_SM_SNAPSHOT          3007
 #define SBI_SM_CALL_PLUGIN       4000
 
 /* Plugin IDs and Call IDs */

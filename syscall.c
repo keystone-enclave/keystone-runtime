@@ -178,7 +178,7 @@ void handle_syscall(struct encl_ctx* ctx)
     copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, 2048);
     //print_strace("[ATTEST] p1 0x%p->0x%p p2 0x%p->0x%p sz %lx = %lu\r\n",arg0,arg0_trans,arg1,arg1_trans,arg2,ret);
     break;
-  case(RUNTIME_SYSCALL_GET_SEALING_KEY):;
+  case(RUNTIME_SYSCALL_GET_SEALING_KEY):
     /* Stores the key receive structure */
     uintptr_t buffer_1_pa = kernel_va_to_pa(rt_copy_buffer_1);
 
@@ -203,6 +203,10 @@ void handle_syscall(struct encl_ctx* ctx)
     memset(rt_copy_buffer_1, 0x00, sizeof(rt_copy_buffer_1));
 
     break;
+  case(SYSCALL_SNAPSHOT):
+    ret = sbi_snapshot();
+    break;
+  
 
 
 #ifdef LINUX_SYSCALL_WRAPPING
