@@ -166,10 +166,10 @@ void handle_syscall(struct encl_ctx* ctx)
   case(RUNTIME_SYSCALL_OCALL):
     ret = dispatch_edgecall_ocall(arg0, (void*)arg1, arg2, (void*)arg3, arg4);
     break;
-  case(RUNTIME_SYSCALL_SHAREDCOPY):
+  case(RUNTIME_SYSCALL_SHAREDCOPY):;
     ret = handle_copy_from_shared((void*)arg0, arg1, arg2);
     break;
-  case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):
+  case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):;
     copy_from_user((void*)rt_copy_buffer_2, (void*)arg1, arg2);
 
     ret = sbi_attest_enclave(rt_copy_buffer_1, rt_copy_buffer_2, arg2);
@@ -203,9 +203,9 @@ void handle_syscall(struct encl_ctx* ctx)
     memset(rt_copy_buffer_1, 0x00, sizeof(rt_copy_buffer_1));
 
     break;
-  case(SYSCALL_SNAPSHOT):
+  case(SYSCALL_SNAPSHOT):;
     print_strace("[runtime] snapshot \r\n");
-    ret = sbisnapshot();
+    ret = sbi_snapshot();
     break;
   
 
