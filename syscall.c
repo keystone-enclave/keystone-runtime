@@ -205,7 +205,7 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   case(SYSCALL_SNAPSHOT):
     print_strace("[runtime] snapshot \r\n");
-    ret = sbi_snapshot();
+    ret = sbisnapshot();
     break;
   
 
