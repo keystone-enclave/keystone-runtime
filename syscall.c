@@ -166,7 +166,7 @@ void handle_syscall(struct encl_ctx* ctx)
   case(RUNTIME_SYSCALL_OCALL):
     ret = dispatch_edgecall_ocall(arg0, (void*)arg1, arg2, (void*)arg3, arg4);
     break;
-  case(RUNTIME_SYSCALL_SHAREDCOPY):;
+  case(RUNTIME_SYSCALL_SHAREDCOPY):
     ret = handle_copy_from_shared((void*)arg0, arg1, arg2);
     break;
   case(RUNTIME_SYSCALL_ATTEST_ENCLAVE):;
@@ -178,7 +178,7 @@ void handle_syscall(struct encl_ctx* ctx)
     copy_to_user((void*)arg0, (void*)rt_copy_buffer_1, 2048);
     //print_strace("[ATTEST] p1 0x%p->0x%p p2 0x%p->0x%p sz %lx = %lu\r\n",arg0,arg0_trans,arg1,arg1_trans,arg2,ret);
     break;
-  case(RUNTIME_SYSCALL_GET_SEALING_KEY):
+  case(RUNTIME_SYSCALL_GET_SEALING_KEY):;
     /* Stores the key receive structure */
     uintptr_t buffer_1_pa = kernel_va_to_pa(rt_copy_buffer_1);
 
