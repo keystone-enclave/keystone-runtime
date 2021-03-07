@@ -203,10 +203,10 @@ void handle_syscall(struct encl_ctx* ctx)
     memset(rt_copy_buffer_1, 0x00, sizeof(rt_copy_buffer_1));
 
     break;
-  case(SYSCALL_SNAPSHOT):;
-    print_strace("[runtime] snapshot \r\n");
-    ret = sbi_snapshot();
-    break;
+  // case(SYSCALL_SNAPSHOT):;
+  //   print_strace("[runtime] snapshot \r\n");
+  //   ret = sbi_snapshot();
+  //   break;
   
 
 
