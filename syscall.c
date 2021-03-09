@@ -206,12 +206,19 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYSCALL_SNAPSHOT):;
     print_strace("[runtime] snapshot \r\n");
     struct sbi_snapshot_ret snapshot_ret; 
-    ret = sbi_snapshot(&snapshot_ret);
-    printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
-    shared_buffer, shared_buffer_size);
+    uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret); 
 
-    pte* p = pte_of_va(shared_buffer); 
-    *p = pte_create(ppn(snapshot_ret.utm_paddr), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+    ret = sbi_snapshot(pa_snapshot_ret);
+    // printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
+    // shared_buffer, shared_buffer_size);
+
+    pte *p; 
+
+    //Remaps UTM to new UTM
+    for(int i = 0; i < PAGE_UP(snapshot_ret.utm_size)/RISCV_PAGE_SIZE; i++){
+        p = pte_of_va(shared_buffer + i * RISCV_PAGE_SIZE); 
+        *p = pte_create(ppn(snapshot_ret.utm_paddr + i * RISCV_PAGE_SIZE), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+    }
     
 
     break;
