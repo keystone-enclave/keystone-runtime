@@ -29,7 +29,7 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_
   // Syscall data should already be at the edge_call_data section
   /* For now we assume by convention that the start of the buffer is
    * the right place to put calls */
-  struct edge_call* edge_call = (struct edge_call*)shared_buffer;
+  struct edge_call* edge_call = (struct edge_call*) shared_buffer;
 
   edge_call->call_id = EDGECALL_SYSCALL;
 
@@ -79,6 +79,8 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
    * dispatch the ocall to host */
 
   edge_call->call_id = call_id;
+
+  printf("edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
 
   if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
@@ -213,8 +215,8 @@ void handle_syscall(struct encl_ctx* ctx)
     uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret); 
 
     ret = sbi_snapshot(pa_snapshot_ret);
-    // printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
-    // shared_buffer, shared_buffer_size);
+    printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
+    shared_buffer, shared_buffer_size);
 
     pte *p; 
 
