@@ -205,7 +205,15 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   case(SYSCALL_SNAPSHOT):;
     print_strace("[runtime] snapshot \r\n");
-    ret = sbi_snapshot();
+    struct sbi_snapshot_ret snapshot_ret; 
+    ret = sbi_snapshot(&snapshot_ret);
+    printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
+    shared_buffer, shared_buffer_size);
+
+    pte* p = pte_of_va(shared_buffer); 
+    *p = pte_create(ppn(snapshot_ret.utm_paddr), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+    
+
     break;
   
 

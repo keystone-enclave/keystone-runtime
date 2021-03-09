@@ -288,4 +288,47 @@ map_with_reserved_page_table(uintptr_t dram_base,
   #endif
 }
 
+uintptr_t
+enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr) {
+  int pte_flags = PTE_W | PTE_D | PTE_R | PTE_U | PTE_A;
+
+  // Find a continuous VA space that will fit the req. size
+  int req_pages = vpn(PAGE_UP(base_size));
+
+  if (test_va_range(vpn(ptr), req_pages) != req_pages) {
+    return 0;
+  }
+
+  if (map_pages(vpn(ptr), ppn(base_addr), req_pages, pte_flags) != req_pages) {
+    return 0;
+  }
+
+  return ptr;
+}
+
+uintptr_t
+map_page(uintptr_t vpn, uintptr_t phys_ppn, int flags) {
+  pte* pte = __walk_create(root_page_table, vpn << RISCV_PAGE_BITS);
+  assert(flags & PTE_U);
+  if (!pte) return 0;
+
+  if (*pte & PTE_V) return __va(*pte << RISCV_PAGE_BITS);
+
+  *pte = pte_create(phys_ppn, flags | PTE_V);
+#ifdef USE_PAGING
+  paging_inc_user_page();
+#endif
+  return phys_ppn << RISCV_PAGE_BITS;
+}
+
+size_t
+map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags) {
+  unsigned int i;
+  for (i = 0; i < count; i++) {
+    if (!map_page(vpn + i, phys_ppn + i, flags)) break;
+  }
+
+  return i;
+}
+
 #endif /* USE_FREEMEM */

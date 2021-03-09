@@ -29,6 +29,11 @@
 #define SM_MULTIMEM_CALL_GET_SIZE 0x01
 #define SM_MULTIMEM_CALL_GET_ADDR 0x02
 
+struct sbi_snapshot_ret {
+    uintptr_t utm_paddr;
+    uintptr_t utm_size; 
+};
+
 void
 sbi_putchar(char c);
 void
