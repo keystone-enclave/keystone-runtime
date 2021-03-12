@@ -1,4 +1,5 @@
 #include "string.h"
+#include "printf.h"
 
 /* TODO This is a temporary place to put libc functionality until we
  * decide on a lib to provide such functionality to the runtime */
@@ -11,9 +12,13 @@ void* memcpy(void* dest, const void* src, size_t len)
   const char* s = src;
   char *d = dest;
 
+  printf("%p, %p\n", d, s); 
+
   if ((((uintptr_t)dest | (uintptr_t)src) & (sizeof(uintptr_t)-1)) == 0) {
     while ((void*)d < (dest + len - (sizeof(uintptr_t)-1))) {
+      printf("%d, %d\n", *d, *s); 
       *(uintptr_t*)d = *(const uintptr_t*)s;
+      printf("%d, %d\n", *d, *s); 
       d += sizeof(uintptr_t);
       s += sizeof(uintptr_t);
     }

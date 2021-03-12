@@ -60,6 +60,7 @@
 #define PTE_G 0x020  // Global
 #define PTE_A 0x040  // Accessed
 #define PTE_D 0x080  // Dirty
+#define PTE_C 0x100  // Copy bit 
 #define PTE_FLAG_MASK 0x3ff
 #define PTE_PPN_SHIFT 10
 

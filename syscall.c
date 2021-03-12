@@ -83,6 +83,8 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
   printf("edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
 
+  printf("[runtime] buffer_data_start %p\n", buffer_data_start);
+
   if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
     goto ocall_error;
   }
@@ -215,16 +217,20 @@ void handle_syscall(struct encl_ctx* ctx)
     uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret); 
 
     ret = sbi_snapshot(pa_snapshot_ret);
+
+    //0xffffffffc0009018
+    load_pa_child_start = snapshot_ret.dram_base; 
+
     printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
     shared_buffer, shared_buffer_size);
 
-    pte *p; 
+    // pte *p; 
 
-    //Remaps UTM to new UTM
-    for(int i = 0; i < PAGE_UP(snapshot_ret.utm_size)/RISCV_PAGE_SIZE; i++){
-        p = pte_of_va(shared_buffer + i * RISCV_PAGE_SIZE); 
-        *p = pte_create(ppn(snapshot_ret.utm_paddr + i * RISCV_PAGE_SIZE), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
-    }
+    // //Remaps UTM to new UTM
+    // for(int i = 0; i < PAGE_UP(snapshot_ret.utm_size)/RISCV_PAGE_SIZE; i++){
+    //     p = pte_of_va(shared_buffer + i * RISCV_PAGE_SIZE); 
+    //     *p = pte_create(ppn(snapshot_ret.utm_paddr + i * RISCV_PAGE_SIZE), PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
+    // }
     
 
     break;
