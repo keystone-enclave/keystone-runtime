@@ -74,6 +74,9 @@ extern pte kernel_l3_page_table[];
 /* page tables for loading physical memory */
 extern pte load_l2_page_table[];
 extern pte load_l3_page_table[];
+/* page tables for UTM */
+extern pte utm_l2_page_table[];
+extern pte utm_l3_page_table[];
 
 /* Program break */
 extern uintptr_t program_break;

@@ -49,10 +49,30 @@ remap_kernel_space(uintptr_t runtime_base,
   assert(runtime_size <= RISCV_GET_LVL_PGSIZE(2));
   #elif __riscv_xlen == 32
   assert(runtime_size <= RISCV_GET_LVL_PGSIZE(1));
-  #endif 
+  #endif
 
   map_with_reserved_page_table(runtime_base, runtime_size,
      runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);
+}
+
+void
+map_untrusted_memory(uintptr_t base,
+                     uintptr_t size)
+{
+  uintptr_t ptr = EYRIE_UNTRUSTED_START;
+
+  /* untrusted memory is smaller than a megapage (2 MB in RV64, 4MB in RV32) */
+  #if __riscv_xlen == 64
+  assert(size <= RISCV_GET_LVL_PGSIZE(2));
+  #elif __riscv_xlen == 32
+  assert(size <= RISCV_GET_LVL_PGSIZE(1));
+  #endif
+
+  map_with_reserved_page_table(base, size,
+      ptr, utm_l2_page_table, utm_l3_page_table);
+
+  shared_buffer = ptr;
+  shared_buffer_size = size;
 }
 
 void
@@ -114,18 +134,16 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t runtime_paddr,
            uintptr_t user_paddr,
            uintptr_t free_paddr,
-           uintptr_t utm_vaddr,
+           uintptr_t utm_paddr,
            uintptr_t utm_size)
 {
   /* set initial values */
   load_pa_start = dram_base;
-  load_pa_child_start = dram_base; 
-  shared_buffer = utm_vaddr;
-  shared_buffer_size = utm_size;
+  load_pa_child_start = dram_base;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
 
-  debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
+  debug("UTM : 0x%lx-0x%lx (%u KB)", utm_paddr, utm_paddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);
@@ -142,6 +160,8 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* copy valid entries from the old page table */
   copy_root_page_table();
+
+  map_untrusted_memory(utm_paddr, utm_size);
 
   /* initialize free memory */
   init_freemem();
