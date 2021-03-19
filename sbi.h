@@ -29,11 +29,15 @@
 #define SM_MULTIMEM_CALL_GET_SIZE 0x01
 #define SM_MULTIMEM_CALL_GET_ADDR 0x02
 
+#define SBI_STOP_REQ_INTERRUPTED  0
+#define SBI_STOP_REQ_EDGE_CALL    1
+#define SBI_STOP_REQ_CLONE        2
+
 struct sbi_snapshot_ret {
     uintptr_t utm_paddr;
-    uintptr_t utm_size; 
+    uintptr_t utm_size;
     uintptr_t dram_base;
-    uintptr_t dram_size; 
+    uintptr_t dram_size;
 };
 
 void
