@@ -33,8 +33,8 @@ snapshot_trampoline:
   csrw stvec, t0
 
   // call snapshot() sbi
-  li a6, SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE
-  li a0, SBI_SM_SNAPSHOT
+  li a7, SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE
+  li a6, SBI_SM_SNAPSHOT
   ecall
 
   // return from snapshot().
