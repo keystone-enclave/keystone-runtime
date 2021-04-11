@@ -11,6 +11,8 @@
 #define SBI_CONSOLE_PUTCHAR 1
 #define SBI_CONSOLE_GETCHAR 2
 
+#define SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE 0x08424b45
+
 #define SBI_SM_CREATE_ENCLAVE    2001
 #define SBI_SM_DESTROY_ENCLAVE   2002
 #define SBI_SM_RUN_ENCLAVE       2003
@@ -58,7 +60,6 @@ uintptr_t
 sbi_attest_enclave(void* report, void* buf, uintptr_t len);
 uintptr_t
 sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len);
-uintptr_t
-sbi_snapshot();
+extern void sbi_snapshot();
 
 #endif

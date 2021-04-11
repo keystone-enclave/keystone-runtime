@@ -2,7 +2,6 @@
 
 #include "vm_defs.h"
 
-#define SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE 0x08424b45
 
 #define SBI_CALL(___ext, ___which, ___arg0, ___arg1, ___arg2)    \
   ({                                                             \
@@ -77,7 +76,4 @@ sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len) {
   return SBI_CALL_3(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_GET_SEALING_KEY, key_struct, key_ident, len);
 }
 
-uintptr_t
-sbi_snapshot(struct sbi_snapshot_ret *snapshot_ret) {
-  return SBI_CALL_1(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_SNAPSHOT, snapshot_ret);
-}
+

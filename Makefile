@@ -9,7 +9,7 @@ endif
 
 CFLAGS = -Wall -Werror -fPIC -fno-builtin -std=c11 -g $(OPTIONS_FLAGS)
 SRCS = aes.c sha256.c boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c rt_util.c mm.c env.c freemem.c paging.c sbi.c merkle.c page_swap.c vm.c
-ASM_SRCS = entry.S
+ASM_SRCS = entry.S trampoline.S
 RUNTIME = eyrie-rt
 LINK = $(CROSS_COMPILE)ld
 LDFLAGS = -static -nostdlib $(shell $(CC) --print-file-name=libgcc.a)
@@ -25,7 +25,7 @@ DISK_IMAGE = ../busybear-linux/busybear.bin
 MOUNT_DIR = ./tmp_busybear
 
 OBJS = $(patsubst %.c,obj/%.o,$(SRCS))
-ASM_OBJS = $(patsubst %.S,obj/%.o,$(ASM_SRCS))
+ASM_OBJS = $(patsubst %.S,obj/%.S.o,$(ASM_SRCS))
 OBJ_DIR_EXISTS = obj/.exists
 
 TMPLIB = uaccess.o
@@ -52,7 +52,7 @@ $(RUNTIME): $(ASM_OBJS) $(OBJS) $(SDK_EDGE_LIB) $(TMPLIB)
 	$(LINK) -o $@ $^ -T runtime.lds $(LDFLAGS)
 	$(OBJCOPY) --add-section .options_log=.options_log --set-section-flags .options_log=noload,readonly $(RUNTIME)
 
-$(ASM_OBJS): $(ASM_SRCS) $(OBJ_DIR_EXISTS)
+obj/%.S.o: %.S $(OBJ_DIR_EXISTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR_EXISTS):

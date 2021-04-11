@@ -213,16 +213,16 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   case(SYSCALL_SNAPSHOT):;
     print_strace("[runtime] snapshot \r\n");
-    struct sbi_snapshot_ret snapshot_ret;
-    uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret);
+    // struct sbi_snapshot_ret snapshot_ret;
+    //uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret);
 
-    ret = sbi_snapshot(pa_snapshot_ret);
+    sbi_snapshot();
 
     //0xffffffffc0009018
-    load_pa_child_start = snapshot_ret.dram_base;
+    //load_pa_child_start = snapshot_ret.dram_base;
 
-    printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
-    shared_buffer, shared_buffer_size);
+    //printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
+    //shared_buffer, shared_buffer_size);
 
     // pte *p;
 
