@@ -2,6 +2,7 @@
 
 #define SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE 0x08424b45
 #define SBI_SM_SNAPSHOT          3007
+#define SBI_SM_EXIT_ENCLAVE      3006
 
 #if __riscv_xlen == 64
 #define STORE sd
@@ -43,5 +44,8 @@ snapshot_trampoline:
 
 // caution: this should not touch stack
 first_access_fault:
-
+  // let's just exit for now
+  li a7, SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE
+  li a6, SBI_SM_EXIT_ENCLAVE
+  ecall
 
