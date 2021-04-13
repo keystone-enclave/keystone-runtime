@@ -10,7 +10,7 @@
 #define LOAD lw
 #define LOG_REGBYTES  2
 #define WORD .word
-#endif 
+#endif
 
 #define LWU lwu
 #define REGBYTES (1<<LOG_REGBYTES)
@@ -233,7 +233,7 @@ rt_trap_table:
   WORD not_implemented_fatal //9
   WORD not_implemented_fatal //10
   WORD not_implemented_fatal //11
-  WORD not_implemented_fatal //12: fetch page fault - code always presents in memory
+  WORD rt_page_fault //12: fetch page fault - code always presents in memory
   WORD rt_page_fault //13: load page fault - stack/heap access
   WORD not_implemented_fatal //14
   WORD rt_page_fault //15: store page fault - stack/heap access

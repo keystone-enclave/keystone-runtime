@@ -1,6 +1,7 @@
 #include "sbi.h"
 
 #include "vm_defs.h"
+#include "vm.h"
 
 
 #define SBI_CALL(___ext, ___which, ___arg0, ___arg1, ___arg2)    \
@@ -76,4 +77,12 @@ sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len) {
   return SBI_CALL_3(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_GET_SEALING_KEY, key_struct, key_ident, len);
 }
 
-
+extern void rtbreakpoint();
+uintptr_t
+sbi_snapshot()
+{
+  uintptr_t pc = kernel_va_to_pa(&boot_cloned_enclave);
+  uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
+  if(resume_va);
+  return snapshot_trampoline(pc);
+}

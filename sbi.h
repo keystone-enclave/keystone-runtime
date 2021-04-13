@@ -60,6 +60,7 @@ uintptr_t
 sbi_attest_enclave(void* report, void* buf, uintptr_t len);
 uintptr_t
 sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len);
-extern void sbi_snapshot();
-
+uintptr_t sbi_snapshot();
+extern uintptr_t snapshot_trampoline(uintptr_t boot_pc);
+extern void boot_cloned_enclave();
 #endif
