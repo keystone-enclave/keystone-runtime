@@ -84,5 +84,6 @@ sbi_snapshot()
   uintptr_t pc = kernel_va_to_pa(&boot_cloned_enclave);
   uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
   if(resume_va);
+  //trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t)
   return snapshot_trampoline(pc);
 }

@@ -3,6 +3,7 @@
 #define SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE 0x08424b45
 #define SBI_SM_SNAPSHOT          3007
 #define SBI_SM_EXIT_ENCLAVE      3006
+#define PTE_PPN_SHIFT 10
 
 #if __riscv_xlen == 64
 #define STORE sd
@@ -22,6 +23,7 @@
 #define HOST_CONTEXT_SIZE (REGBYTES*32)
 #define PAGE_SHIFT  12
 #define PAGE_SIZE (1<<PAGE_SHIFT)
+
 snapshot_trampoline:
   .global snapshot_trampoline
   addi sp, sp, (-13*REGBYTES)
@@ -60,46 +62,185 @@ boot_cloned_enclave:
   // a1: dram size --> s1
   // a2: utm base --> s2
   // a3: utm size --> s3
-  // store all of them to saved registers (s0 is already there)
+  // store all of them to saved registers (s4 is already there)
+  // s6: current free list
+
   add s0, a0, x0
   add s1, a1, x0
   add s2, a2, x0
   add s3, a3, x0
+  mv s6, s0
 
   // copy root page table
   // (s4 << PAGE_SHIFT) to get original root page table PA
-  slli a1, s4, PAGE_SHIFT
+  slli a7, s4, PAGE_SHIFT
+  jal ra, copy_page_a7 /* uses t0, t1, t2, t3 */
 
-  /* copy_page(a0, a1) */
-  jal ra, copy_page
+  // remap stack
+  // start: kernel_stack_start
+  // end: kernel_stack_end
+  la t5, kernel_stack_start
+  li t6, 0x8 // # of pages for stack
+  li s11, 0x0 // # of stack pages mapped
+__map_stack_page:
+  beq t6, s11, snapshot_trampoline_exit
+  slli a0, s11, PAGE_SHIFT
+  add a0, t5, a0
+  j relocate_virtual_page_a0
+__ra_relocate_virtual_page_a0:
+  addi s11, s11, 1
+  j __map_stack_page
+
+/*******************************/
+/* uses: t0-t4 */
+relocate_virtual_page_a0:
+  // a0: virtual page address to relocate
+  // t0 = L1 page table (dram base)
+  mv t0, s0
+
+  // t1 = L1 index * 8
+  mv t1, a0
+  srli t1, t1, 30
+  li t4, 0x1ff
+  and t1, t1, t4
+  slli t1, t1, 3
+
+  // s9 = L1 PTE
+  // s10 = pointer to the PTE
+  add s10, t0, t1
+  LOAD s9, 0(s10)
+
+  // see if PTE is already pointing to EPM
+  // t0 = (PTE >> 10) << 12
+  srli t0, s9, PTE_PPN_SHIFT
+  slli t0, t0, PAGE_SHIFT
+  blt t0, s0, __not_in_epm_l1
+  add t1, s0, s1
+  bge t0, t1, __not_in_epm_l1
+  // otherwise just go to next level with t0 set
+  j __relocate_virtual_page_l2
+__not_in_epm_l1:
 
 rtbreakpoint:
   .global rtbreakpoint
-  // update satp (retain mode)
-  srli s4, s4, 44
-  slli s4, s4, 44
-  srli s0, s0, PAGE_SHIFT
-  or s4, s4, s0
-  sfence.vma
-  csrw satp, s4
 
-copy_page:
-  // a0: dst PA
-  // a1: src PA
+  mv a7, t0
+  /* uses t0, t1, t2, t3 */
+  jal ra, copy_page_a7
+  // a7 now contains new page address
+  andi s9, s9, 0x3ff
+
+  // t0 = L2 page table
+  mv t0, a7
+  srli a7, a7, 12
+  slli a7, a7, 10
+  or a7, a7, s9
+  // a7 = new PTE
+  STORE a7, 0(s10)
+
+__relocate_virtual_page_l2:
+  // t0 = L2 page table (^ previous)
+  // t1 = L2 index * 8
+  mv t1, a0
+  srli t1, t1, 21
+  li t4, 0x1ff
+  and t1, t1, t4
+  slli t1, t1, 3
+
+  // s9 = L2 PTE
+  // s10 = pointer to the PTE
+  add s10, t0, t1
+  LOAD s9, 0(s10)
+
+  // see if PTE is a mega page
+  and t4, s9, 0xE // RWX mask
+  bne t4, x0, l2_is_megapage // RWX != 0 means it's megapage
+
+  // see if PTE is already pointing to EPM
+  // t0 = (PTE >> 10) << 12
+  srli t0, s9, PTE_PPN_SHIFT
+  slli t0, t0, PAGE_SHIFT
+  blt t0, s0, __not_in_epm_l2
+  add t1, s0, s1
+  bge t0, t1, __not_in_epm_l2
+  // otherwise just go to next level with t0 set
+  j __relocate_virtual_page_l3
+__not_in_epm_l2:
+  mv a7, t0
+  /* uses t0, t1, t2, t3 */
+  jal ra, copy_page_a7
+  mv t0, a7
+  andi s9, s9, 0x3ff
+  srli a7, a7, 12
+  slli a7, a7, 10
+  or a7, a7, s9
+  STORE a7, 0(s10)
+
+__relocate_virtual_page_l3:
+  // t0 = L3 page table (^ previous)
+  // t1 = L3 index * 8
+  mv t1, a0
+  srli t1, t1, 12
+  li t4, 0x1ff
+  and t1, t1, t4
+  slli t1, t1, 3
+
+  // s9 = L3 PTE
+  // s10 = pointer to the PTE
+  add s10, t0, t1
+  LOAD s9, 0(s10)
+
+  srli t0, s9, PTE_PPN_SHIFT
+  slli t0, t0, PAGE_SHIFT
+
+  mv a7, t0
+  jal ra, copy_page_a7
+  andi s9, s9, 0x3ff
+  srli a7, a7, 12
+  slli a7, a7, 10
+  or a7, a7, s9
+  STORE a7, 0(s10)
+  j __ra_relocate_virtual_page_a0
+
+l2_is_megapage:
+  //TODO
+  li a0, -1234
+  li a7, SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE
+  li a6, SBI_SM_EXIT_ENCLAVE
+  ecall
+
+/* relocate virtual page end */
+
+/* copy a page from a7 into s6 and increment s6 by 4K */
+/* uses t0, t1, t2, t3 */
+copy_page_a7:
+  // s6: dst PA
+  // a7: src PA
   li t0, PAGE_SIZE
   mv t1, x0
-copy_page_loop:
-  bge t1, t0, copy_page_done
-  add t2, a1, t1
+__copy_page_loop:
+  bge t1, t0, __copy_page_done
+  add t2, a7, t1
   LOAD t3, 0(t2)
-  add t2, a0, t1
+  add t2, s6, t1
   STORE t3, 0(t2)
   addi t1, t1, REGBYTES
-  j copy_page_loop
-copy_page_done:
+  j __copy_page_loop
+__copy_page_done:
+  mv a7, s6
+  add s6, s6, t0
   jalr x0, ra, 0
 
 snapshot_trampoline_exit:
+  // update satp (retain mode)
+  srli t1, s4, 44
+  slli t1, t1, 44
+  srli t0, s0, PAGE_SHIFT
+  or t1, t1, t0
+  sfence.vma
+  csrw satp, t1
+resume_with_virtual_address:
+
   LOAD s0, 0*REGBYTES(sp)
   LOAD s1, 1*REGBYTES(sp)
   LOAD s2, 2*REGBYTES(sp)
@@ -116,16 +257,7 @@ snapshot_trampoline_exit:
   addi sp, sp, (13*REGBYTES)
 
 /* first fault handler after switching SATP */
-
-resume_with_virtual_address:
-  // let's just exit for now
-  li a7, SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE
-  li a6, SBI_SM_EXIT_ENCLAVE
-  ecall
-
 first_page_fault:
-  la t0, encl_trap_handler
-  csrw stvec, t0
+  //la t0, encl_trap_handler
+  //csrw stvec, t0
   jalr x0, s5, 0
-
-

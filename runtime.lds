@@ -19,6 +19,7 @@ SECTIONS
   .bss : { *(.bss) }
   . = ALIGN(0x1000);
   .kernel_stack : {
+    PROVIDE(kernel_stack_start = .);
     . += 0x8000;
     PROVIDE(kernel_stack_end = .);
   }
