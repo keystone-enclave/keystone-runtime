@@ -24,6 +24,10 @@ size_t
 map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags);
 uintptr_t
 enclave_map(uintptr_t base_addr, size_t base_size, uintptr_t ptr);
+void copy_root_page_table();
+void remap_kernel_space(uintptr_t runtime_base, uintptr_t runtime_size);
+void map_untrusted_memory(uintptr_t base, uintptr_t size);
 #endif /* USE_FREEMEM */
+
 
 #endif /* _MM_H_ */

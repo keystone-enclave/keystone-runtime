@@ -2,8 +2,8 @@
 
 #include "vm_defs.h"
 #include "vm.h"
-
-
+#include "mm.h"
+#include "freemem.h"
 #define SBI_CALL(___ext, ___which, ___arg0, ___arg1, ___arg2)    \
   ({                                                             \
     register uintptr_t a0 __asm__("a0") = (uintptr_t)(___arg0);  \
@@ -82,8 +82,53 @@ uintptr_t
 sbi_snapshot()
 {
   uintptr_t pc = kernel_va_to_pa(&boot_cloned_enclave);
-  uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
-  if(resume_va);
-  //trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t)
-  return snapshot_trampoline(pc);
+  //uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
+  //if(resume_va);
+  //trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t) handle_copy_write;
+  snapshot_trampoline(pc);
+  register uintptr_t a0 __asm__ ("a0"); /* dram base */
+  register uintptr_t a1 __asm__ ("a1"); /* dram size */
+  register uintptr_t a2 __asm__ ("a2"); /* next free page */
+
+  uintptr_t dram_base, dram_size, next_free;
+
+  dram_base = a0;
+  dram_size = a1;
+  next_free = a2;
+  debug("dram_base: %lx\n", dram_base);
+  debug("dram_size: %lx\n", dram_size);
+  debug("next_free: %lx\n", next_free);
+
+  uintptr_t runtime_paddr = dram_base + 3*(1<<RISCV_PAGE_BITS);
+
+  freemem_va_start = EYRIE_LOAD_START + (next_free - dram_base);
+  freemem_size = (dram_base + dram_size) - next_free;
+  debug("freemem start = %lx", freemem_va_start);
+  debug("freemem size = %d", freemem_size);
+
+  /* remap kernel */
+  //remap_kernel_space(runtime_paddr, 0x1a000);
+
+  /* update parameters */
+  load_pa_start = dram_base;
+  kernel_offset = runtime_va_start - runtime_paddr;
+
+  /* remap physical memory */
+  remap_kernel_space(runtime_paddr, 0x1a000);
+  map_with_reserved_page_table(dram_base, dram_size, EYRIE_LOAD_START, load_l2_page_table, load_l3_page_table);
+
+  csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
+
+  /* copy root page table */
+  copy_root_page_table();
+
+  debug("runtime_paddr = %lx", kernel_va_to_pa(&rt_base));
+  debug("runtime_paddr(walk) = %lx", translate((uintptr_t)&rt_base));
+  debug("free_pa = %lx", __pa(freemem_va_start));
+  debug("free_pa(walk) = %lx", translate(freemem_va_start));
+
+
+  /* re-init freemem */
+  spa_init(freemem_va_start, freemem_size);
+  return 0;
 }

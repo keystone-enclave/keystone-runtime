@@ -39,57 +39,7 @@ map_physical_memory(uintptr_t dram_base,
       ptr, load_l2_page_table, load_l3_page_table);
 }
 
-void
-remap_kernel_space(uintptr_t runtime_base,
-                   uintptr_t runtime_size)
-{
-  /* eyrie runtime is supposed to be smaller than a megapage */
 
-  #if __riscv_xlen == 64
-  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(2));
-  #elif __riscv_xlen == 32
-  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(1));
-  #endif
-
-  map_with_reserved_page_table(runtime_base, runtime_size,
-     runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);
-}
-
-void
-map_untrusted_memory(uintptr_t base,
-                     uintptr_t size)
-{
-  uintptr_t ptr = EYRIE_UNTRUSTED_START;
-
-  /* untrusted memory is smaller than a megapage (2 MB in RV64, 4MB in RV32) */
-  #if __riscv_xlen == 64
-  assert(size <= RISCV_GET_LVL_PGSIZE(2));
-  #elif __riscv_xlen == 32
-  assert(size <= RISCV_GET_LVL_PGSIZE(1));
-  #endif
-
-  map_with_reserved_page_table(base, size,
-      ptr, utm_l2_page_table, utm_l3_page_table);
-
-  shared_buffer = ptr;
-  shared_buffer_size = size;
-}
-
-void
-copy_root_page_table()
-{
-  /* the old table lives in the first page */
-  pte* old_root_page_table = (pte*) EYRIE_LOAD_START;
-  int i;
-
-  /* copy all valid entries of the old root page table */
-  for (i = 0; i < BIT(RISCV_PT_INDEX_BITS); i++) {
-    if (old_root_page_table[i] & PTE_V &&
-        !(root_page_table[i] & PTE_V)) {
-      root_page_table[i] = old_root_page_table[i];
-    }
-  }
-}
 
 /* initialize free memory with a simple page allocator*/
 void
@@ -139,7 +89,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 {
   /* set initial values */
   load_pa_start = dram_base;
-  load_pa_child_start = dram_base;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
 

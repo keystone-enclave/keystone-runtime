@@ -203,7 +203,7 @@ __map_with_reserved_page_table_32(uintptr_t dram_base,
   if (!l2_pt) {
     leaf_level = 1;
     leaf_pt = root_page_table;
-    dram_max = -1UL; 
+    dram_max = -1UL;
   }
 
   assert(dram_size <= dram_max);
@@ -329,6 +329,58 @@ map_pages(uintptr_t vpn, uintptr_t phys_ppn, size_t count, int flags) {
   }
 
   return i;
+}
+
+void
+map_untrusted_memory(uintptr_t base,
+                     uintptr_t size)
+{
+  uintptr_t ptr = EYRIE_UNTRUSTED_START;
+
+  /* untrusted memory is smaller than a megapage (2 MB in RV64, 4MB in RV32) */
+  #if __riscv_xlen == 64
+  assert(size <= RISCV_GET_LVL_PGSIZE(2));
+  #elif __riscv_xlen == 32
+  assert(size <= RISCV_GET_LVL_PGSIZE(1));
+  #endif
+
+  map_with_reserved_page_table(base, size,
+      ptr, utm_l2_page_table, utm_l3_page_table);
+
+  shared_buffer = ptr;
+  shared_buffer_size = size;
+}
+
+void
+copy_root_page_table()
+{
+  /* the old table lives in the first page */
+  pte* old_root_page_table = (pte*) EYRIE_LOAD_START;
+  int i;
+
+  /* copy all valid entries of the old root page table */
+  for (i = 0; i < BIT(RISCV_PT_INDEX_BITS); i++) {
+    if (old_root_page_table[i] & PTE_V &&
+        !(root_page_table[i] & PTE_V)) {
+      root_page_table[i] = old_root_page_table[i];
+    }
+  }
+}
+
+void
+remap_kernel_space(uintptr_t runtime_base,
+                   uintptr_t runtime_size)
+{
+  /* eyrie runtime is supposed to be smaller than a megapage */
+
+  #if __riscv_xlen == 64
+  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(2));
+  #elif __riscv_xlen == 32
+  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(1));
+  #endif
+
+  map_with_reserved_page_table(runtime_base, runtime_size,
+     runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);
 }
 
 #endif /* USE_FREEMEM */

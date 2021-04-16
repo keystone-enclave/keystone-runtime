@@ -26,7 +26,7 @@
 
 snapshot_trampoline:
   .global snapshot_trampoline
-  addi sp, sp, (-13*REGBYTES)
+  addi sp, sp, (-14*REGBYTES)
   STORE s0, 0*REGBYTES(sp)
   STORE s1, 1*REGBYTES(sp)
   STORE s2, 2*REGBYTES(sp)
@@ -40,6 +40,9 @@ snapshot_trampoline:
   STORE s10, 10*REGBYTES(sp)
   STORE s11, 11*REGBYTES(sp)
   STORE ra, 12*REGBYTES(sp)
+  // also store sstatus
+  csrr t0, sstatus
+  STORE t0, 13*REGBYTES(sp)
 
   // change stvec to the dummy access fault handler
   la t0, first_page_fault
@@ -76,11 +79,13 @@ boot_cloned_enclave:
   slli a7, s4, PAGE_SHIFT
   jal ra, copy_page_a7 /* uses t0, t1, t2, t3 */
 
-  // remap stack
-  // start: kernel_stack_start
+  // remap kernel
+  // start: rt_base
   // end: kernel_stack_end
-  la t5, kernel_stack_start
-  li t6, 0x8 // # of pages for stack
+  la t5, rt_base
+  la t6, kernel_stack_end // # of pages for the kernel
+  sub t6, t6, t5
+  srli t6, t6, PAGE_SHIFT
   li s11, 0x0 // # of stack pages mapped
 __map_stack_page:
   beq t6, s11, snapshot_trampoline_exit
@@ -120,9 +125,6 @@ relocate_virtual_page_a0:
   // otherwise just go to next level with t0 set
   j __relocate_virtual_page_l2
 __not_in_epm_l1:
-
-rtbreakpoint:
-  .global rtbreakpoint
 
   mv a7, t0
   /* uses t0, t1, t2, t3 */
@@ -240,7 +242,9 @@ snapshot_trampoline_exit:
   sfence.vma
   csrw satp, t1
 resume_with_virtual_address:
-
+  mv a0, s0 /* dram base */
+  mv a1, s1 /* dram size */
+  mv a2, s6 /* free page start */
   LOAD s0, 0*REGBYTES(sp)
   LOAD s1, 1*REGBYTES(sp)
   LOAD s2, 2*REGBYTES(sp)
@@ -254,10 +258,16 @@ resume_with_virtual_address:
   LOAD s10, 10*REGBYTES(sp)
   LOAD s11, 11*REGBYTES(sp)
   LOAD ra, 12*REGBYTES(sp)
-  addi sp, sp, (13*REGBYTES)
+  LOAD t0, 13*REGBYTES(sp)
+  // also restore sstatus
+  csrw sstatus, t0
+  addi sp, sp, (14*REGBYTES)
+  ret
 
 /* first fault handler after switching SATP */
+.align 3
 first_page_fault:
-  //la t0, encl_trap_handler
-  //csrw stvec, t0
+  la t0, encl_trap_handler
+  csrw stvec, t0
   jalr x0, s5, 0
+

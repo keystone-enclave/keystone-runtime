@@ -3,7 +3,6 @@
 uintptr_t runtime_va_start;
 uintptr_t kernel_offset;
 uintptr_t load_pa_start;
-uintptr_t load_pa_child_start;
 
 #ifdef USE_FREEMEM
 /* root page table */
