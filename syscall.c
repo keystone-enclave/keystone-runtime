@@ -10,6 +10,7 @@
 #include "uaccess.h"
 #include "mm.h"
 #include "rt_util.h"
+#include "process_snapshot.h"
 
 #include "syscall_nums.h"
 
@@ -130,6 +131,44 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
   return 1;
 }
 
+uintptr_t dispatch_fork_ocall(void* data, size_t data_len){
+
+  /* For now we assume by convention that the start of the buffer is
+   * the right place to put calls */
+  struct edge_call* edge_call = (struct edge_call*)shared_buffer;
+
+  /* We encode the call id, copy the argument data into the shared
+   * region, calculate the offsets to the argument data, and then
+   * dispatch the ocall to host */
+
+  //OCALL_HANDLE_FORK 5
+  edge_call->call_id = 5;
+
+  printf("[[fork] edge_call->call_id: %d\n", edge_call->call_id);
+  uintptr_t buffer_data_start = edge_call_data_ptr();
+
+  printf("[fork] buffer_data_start %p\n", buffer_data_start);
+
+  if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
+    goto ocall_error;
+  }
+  //TODO safety check on source
+  memcpy((void*)buffer_data_start, (void*)data, data_len);
+
+  if(edge_call_setup_call(edge_call, (void*)buffer_data_start, data_len) != 0){
+    goto ocall_error;
+  }
+
+  printf("[runtime-fork-ocall] Success\n");
+
+  return 0; 
+
+  ocall_error:
+    return 1; 
+
+}
+
+
 uintptr_t handle_copy_from_shared(void* dst, uintptr_t offset, size_t size){
 
   /* This is where we would handle cache side channels for a given
@@ -234,6 +273,26 @@ void handle_syscall(struct encl_ctx* ctx)
 
 
     break;
+  case(SYSCALL_FORK):
+    print_strace("[runtime] fork \r\n");
+
+    struct proc_snapshot snapshot;
+    // struct sbi_fork_ret *fork_ret;
+    //Copy user context to snapshot 
+    memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx)); 
+
+    //Place the snapshot in the untrusted buffer 
+    dispatch_fork_ocall(&snapshot, sizeof(struct proc_snapshot) + snapshot.size);
+
+    printf("[runtime-fork-syscall] ocall dispatched\n");
+    ret = sbi_fork(SBI_STOP_REQ_FORK);
+
+    //Return child eid 
+    // ret = fork_ret->eid; 
+
+    /* Remap page table */
+    break;
+
 
 
 

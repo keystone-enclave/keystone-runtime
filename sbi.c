@@ -81,3 +81,8 @@ uintptr_t
 sbi_snapshot(struct sbi_snapshot_ret *snapshot_ret) {
   return SBI_CALL_1(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_SNAPSHOT, snapshot_ret);
 }
+
+uintptr_t
+sbi_fork() {
+  return SBI_CALL_0(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_FORK);
+}

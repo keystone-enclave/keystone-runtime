@@ -22,6 +22,7 @@
 #define SBI_SM_STOP_ENCLAVE      3004
 #define SBI_SM_EXIT_ENCLAVE      3006
 #define SBI_SM_SNAPSHOT          3007
+#define SBI_SM_FORK              3008
 #define SBI_SM_CALL_PLUGIN       4000
 
 /* Plugin IDs and Call IDs */
@@ -32,10 +33,18 @@
 #define SBI_STOP_REQ_INTERRUPTED  0
 #define SBI_STOP_REQ_EDGE_CALL    1
 #define SBI_STOP_REQ_CLONE        2
+#define SBI_STOP_REQ_FORK         3 
 
 struct sbi_snapshot_ret {
     uintptr_t utm_paddr;
     uintptr_t utm_size;
+    uintptr_t dram_base;
+    uintptr_t dram_size;
+};
+
+struct sbi_fork_ret {
+    uintptr_t eid; //Eid of the child enclave 
+    uintptr_t utm_paddr;
     uintptr_t dram_base;
     uintptr_t dram_size;
 };
@@ -60,5 +69,7 @@ uintptr_t
 sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len);
 uintptr_t
 sbi_snapshot();
+uintptr_t
+sbi_fork();
 
 #endif
