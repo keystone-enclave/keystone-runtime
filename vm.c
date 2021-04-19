@@ -1,8 +1,10 @@
 #include "vm.h"
 
 uintptr_t runtime_va_start;
+uintptr_t runtime_size;
 uintptr_t kernel_offset;
 uintptr_t load_pa_start;
+uintptr_t load_pa_size;
 
 #ifdef USE_FREEMEM
 /* root page table */

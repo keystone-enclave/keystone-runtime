@@ -245,6 +245,8 @@ resume_with_virtual_address:
   mv a0, s0 /* dram base */
   mv a1, s1 /* dram size */
   mv a2, s6 /* free page start */
+  mv a3, s2 /* utm base */
+  mv a4, s3 /* utm size */
   LOAD s0, 0*REGBYTES(sp)
   LOAD s1, 1*REGBYTES(sp)
   LOAD s2, 2*REGBYTES(sp)
@@ -263,6 +265,74 @@ resume_with_virtual_address:
   csrw sstatus, t0
   addi sp, sp, (14*REGBYTES)
   ret
+
+
+copy_physical_page:
+  .global copy_physical_page
+  // a0: dst (pa)
+  // a1: src (pa)
+  // a2: __copy_physical_page_switch_to_pa (pa)
+
+  /* VA */
+  addi sp, sp, -(4*REGBYTES)
+  STORE s0, 0*REGBYTES(sp)
+  STORE s5, 1*REGBYTES(sp)
+  csrr t0, sstatus
+  STORE t0, 2*REGBYTES(sp)
+  STORE ra, 3*REGBYTES(sp)
+
+  // s0 = original satp
+  csrr s0, satp
+
+  // s5 = __copy_phyiscal_page_switch_to_va (va)
+  la s5, __copy_physical_page_switch_to_va
+
+  // switch stvec
+  csrw stvec, a2
+
+  sfence.vma
+  csrw satp, x0
+
+  /* PA */
+.align 2
+__copy_physical_page_switch_to_pa:
+  .global __copy_physical_page_switch_to_pa
+  // change stvec to the dummy access fault handler
+
+  jal ra, copy_page_pa
+
+  la t0, first_page_fault
+  csrw stvec, t0
+  sfence.vma
+  csrw satp, s0
+
+__copy_physical_page_switch_to_va:
+  LOAD ra, 3*REGBYTES(sp)
+  LOAD t0, 2*REGBYTES(sp)
+  csrw sstatus, t0
+  LOAD s5, 1*REGBYTES(sp)
+  LOAD s0, 0*REGBYTES(sp)
+  addi sp, sp, (4*REGBYTES)
+  ret
+
+/* copy a page from a1 into a0 (PA) */
+copy_page_pa:
+/* uses t0, t1, t2, t3 */
+  // a0: dst PA
+  // a1: src PA
+  li t0, PAGE_SIZE
+  mv t1, x0
+__copy_page_pa_loop:
+  bge t1, t0, __copy_page_pa_done
+  add t2, a1, t1
+  LOAD t3, 0(t2)
+  add t2, a0, t1
+  STORE t3, 0(t2)
+  addi t1, t1, REGBYTES
+  j __copy_page_pa_loop
+__copy_page_pa_done:
+  jalr x0, ra, 0
+
 
 /* first fault handler after switching SATP */
 .align 3

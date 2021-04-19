@@ -10,8 +10,10 @@
 extern void* rt_base;
 
 extern uintptr_t runtime_va_start;
+extern uintptr_t runtime_size;
 extern uintptr_t kernel_offset;
 extern uintptr_t load_pa_start;
+extern uintptr_t load_pa_size;
 
 /* Eyrie is for Sv39 */
 static inline uintptr_t satp_new(uintptr_t pa)

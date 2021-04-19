@@ -1,5 +1,5 @@
 #include "sbi.h"
-
+#include "rt_util.h"
 #include "vm_defs.h"
 #include "vm.h"
 #include "mm.h"
@@ -78,26 +78,35 @@ sbi_get_sealing_key(uintptr_t key_struct, uintptr_t key_ident, uintptr_t len) {
 }
 
 extern void rtbreakpoint();
+
+
+extern uintptr_t rt_trap_table;
 uintptr_t
 sbi_snapshot()
 {
   uintptr_t pc = kernel_va_to_pa(&boot_cloned_enclave);
+  uintptr_t* trap_table = &rt_trap_table;
   //uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
   //if(resume_va);
-  //trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t) handle_copy_write;
+  trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t) handle_copy_on_write;
   snapshot_trampoline(pc);
   register uintptr_t a0 __asm__ ("a0"); /* dram base */
   register uintptr_t a1 __asm__ ("a1"); /* dram size */
   register uintptr_t a2 __asm__ ("a2"); /* next free page */
+  register uintptr_t a3 __asm__ ("a3"); /* utm base */
+  register uintptr_t a4 __asm__ ("a4"); /* utm size */
 
-  uintptr_t dram_base, dram_size, next_free;
+  uintptr_t dram_base, dram_size, next_free, utm_base, utm_size;
 
   dram_base = a0;
   dram_size = a1;
   next_free = a2;
-  debug("dram_base: %lx\n", dram_base);
-  debug("dram_size: %lx\n", dram_size);
-  debug("next_free: %lx\n", next_free);
+  utm_base = a3;
+  utm_size = a4;
+
+  debug("dram_base: %lx", dram_base);
+  debug("dram_size: %lx", dram_size);
+  debug("next_free: %lx", next_free);
 
   uintptr_t runtime_paddr = dram_base + 3*(1<<RISCV_PAGE_BITS);
 
@@ -111,22 +120,26 @@ sbi_snapshot()
 
   /* update parameters */
   load_pa_start = dram_base;
+  load_pa_size = dram_size;
   kernel_offset = runtime_va_start - runtime_paddr;
 
   /* remap physical memory */
-  remap_kernel_space(runtime_paddr, 0x1a000);
+  remap_kernel_space(runtime_paddr, runtime_size);
   map_with_reserved_page_table(dram_base, dram_size, EYRIE_LOAD_START, load_l2_page_table, load_l3_page_table);
 
   csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
 
-  /* copy root page table */
-  copy_root_page_table();
+  tlb_flush();
+
+  debug("root_page_table (walk) = %lx", translate((uintptr_t)root_page_table));
 
   debug("runtime_paddr = %lx", kernel_va_to_pa(&rt_base));
   debug("runtime_paddr(walk) = %lx", translate((uintptr_t)&rt_base));
   debug("free_pa = %lx", __pa(freemem_va_start));
   debug("free_pa(walk) = %lx", translate(freemem_va_start));
+  debug("load start (pa) = %lx", translate(EYRIE_LOAD_START));
 
+  map_untrusted_memory(utm_base, utm_size);
 
   /* re-init freemem */
   spa_init(freemem_va_start, freemem_size);

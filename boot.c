@@ -89,7 +89,9 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 {
   /* set initial values */
   load_pa_start = dram_base;
+  load_pa_size = dram_size;
   runtime_va_start = (uintptr_t) &rt_base;
+  runtime_size = user_paddr - runtime_paddr;
   kernel_offset = runtime_va_start - runtime_paddr;
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_paddr, utm_paddr+utm_size, utm_size/1024);
@@ -101,7 +103,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   debug("FREE: 0x%lx-0x%lx (%u KB), va 0x%lx", free_paddr, dram_base + dram_size, freemem_size/1024, freemem_va_start);
 
   /* remap kernel VA */
-  remap_kernel_space(runtime_paddr, user_paddr - runtime_paddr);
+  remap_kernel_space(runtime_paddr, runtime_size);
   map_physical_memory(dram_base, dram_size);
 
   /* switch to the new page table */
