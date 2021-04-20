@@ -10,10 +10,14 @@
 #include "mm.h"
 #include "env.h"
 #include "paging.h"
+#include "process_snapshot.h"
+#include "malloc.h"
+#include "uaccess.h"
 
 /* defined in vm.h */
 extern uintptr_t shared_buffer;
 extern uintptr_t shared_buffer_size;
+extern uintptr_t utm_paddr_start; 
 
 /* initial memory layout */
 uintptr_t utm_base;
@@ -21,6 +25,9 @@ size_t utm_size;
 
 /* defined in entry.S */
 extern void* encl_trap_handler;
+
+/* Snapshot of user processs*/
+struct proc_snapshot snapshot;
 
 #ifdef USE_FREEMEM
 
@@ -127,7 +134,27 @@ init_user_stack_and_env()
   csr_write(sscratch, user_sp);
 }
 
-void
+struct proc_snapshot * 
+handle_fork(void* buffer, struct proc_snapshot *ret){
+  struct edge_call* edge_call = (struct edge_call*)buffer;
+
+  uintptr_t call_args;
+  size_t args_len;
+
+  if(!edge_call->call_id){
+    return NULL; 
+  }
+
+  if (edge_call_args_ptr(edge_call, &call_args, &args_len) != 0) {
+    edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
+    return NULL;
+  }
+
+  memcpy(ret, (void *) call_args, sizeof(struct proc_snapshot));
+  return (struct proc_snapshot *) ret;
+}
+
+uintptr_t
 eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t dram_base,
            uintptr_t dram_size,
@@ -142,6 +169,10 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   load_pa_child_start = dram_base;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
+  user_paddr_start = user_paddr;
+  user_paddr_end = free_paddr;
+  utm_paddr_start = utm_paddr; 
+
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_paddr, utm_paddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
@@ -190,7 +221,16 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* Enable the FPU */
   csr_write(sstatus, csr_read(sstatus) | 0x6000);
 
+  if(handle_fork((void *) shared_buffer, &snapshot)){
+    //This will be non-zero in the cases of fork() 
+    csr_write(sepc, snapshot.ctx.regs.sepc + 4);
+    //Set return value of fork() to be 0 (indicates child)
+    snapshot.ctx.regs.a0 = 0; 
+  }
+  
   debug("eyrie boot finished. drop to the user land ...");
   /* booting all finished, droping to the user land */
-  return;
+
+  uintptr_t ret = (uintptr_t) &snapshot.ctx.regs;
+  return ret;
 }

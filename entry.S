@@ -135,6 +135,48 @@ _start:
   jal eyrie_boot
 
   /* start running enclave */
+
+  LOAD t0, 0(a0)
+  beqz t0, ret_fast
+  
+  csrrw sp, sscratch, sp
+  mv sp, a0 
+  LOAD ra, 1*REGBYTES(sp)
+  LOAD gp, 3*REGBYTES(sp)
+  LOAD tp, 4*REGBYTES(sp)
+  LOAD t0, 5*REGBYTES(sp)
+  LOAD t1, 6*REGBYTES(sp)
+  LOAD t2, 7*REGBYTES(sp)
+  LOAD s0, 8*REGBYTES(sp)
+  LOAD s1, 9*REGBYTES(sp)
+  LOAD a0, 10*REGBYTES(sp)
+  LOAD a1, 11*REGBYTES(sp)
+  LOAD a2, 12*REGBYTES(sp)
+  LOAD a3, 13*REGBYTES(sp)
+  LOAD a4, 14*REGBYTES(sp)
+  LOAD a5, 15*REGBYTES(sp)
+  LOAD a6, 16*REGBYTES(sp)
+  LOAD a7, 17*REGBYTES(sp)
+  LOAD s2, 18*REGBYTES(sp)
+  LOAD s3, 19*REGBYTES(sp)
+  LOAD s4, 20*REGBYTES(sp)
+  LOAD s5, 21*REGBYTES(sp)
+  LOAD s6, 22*REGBYTES(sp)
+  LOAD s7, 23*REGBYTES(sp)
+  LOAD s8, 24*REGBYTES(sp)
+  LOAD s9, 25*REGBYTES(sp)
+  LOAD s10, 26*REGBYTES(sp)
+  LOAD s11, 27*REGBYTES(sp)
+  LOAD t3, 28*REGBYTES(sp)
+  LOAD t4, 29*REGBYTES(sp)
+  LOAD t5, 30*REGBYTES(sp)
+  LOAD t6, 31*REGBYTES(sp)
+
+  #Load sp last 
+  LOAD sp, 2*REGBYTES(sp)
+  sret 
+
+ret_fast:
   csrrw sp, sscratch, sp
   sret
 

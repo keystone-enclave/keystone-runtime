@@ -11,6 +11,8 @@
 #include "mm.h"
 #include "rt_util.h"
 #include "process_snapshot.h"
+#include "vm.h"
+#include "freemem.h"
 
 #include "syscall_nums.h"
 
@@ -21,6 +23,8 @@
 #ifdef LINUX_SYSCALL_WRAPPING
 #include "linux_wrap.h"
 #endif /* LINUX_SYSCALL_WRAPPING */
+
+extern uintptr_t utm_paddr_start; 
 
 extern void exit_enclave(uintptr_t arg0);
 
@@ -131,7 +135,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
   return 1;
 }
 
-uintptr_t dispatch_fork_ocall(void* data, size_t data_len){
+uintptr_t dispatch_fork_ocall(struct proc_snapshot* snapshot, size_t data_len){
 
   /* For now we assume by convention that the start of the buffer is
    * the right place to put calls */
@@ -142,18 +146,44 @@ uintptr_t dispatch_fork_ocall(void* data, size_t data_len){
    * dispatch the ocall to host */
 
   //OCALL_HANDLE_FORK 5
-  edge_call->call_id = 5;
+  edge_call->call_id = 3208;
 
-  printf("[[fork] edge_call->call_id: %d\n", edge_call->call_id);
+  // printf("[rt-dispatch_fork_ocall] edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
-
-  printf("[fork] buffer_data_start %p\n", buffer_data_start);
+  // printf("[rt-dispatch_fork_ocall] buffer_data_start %p\n", buffer_data_start);
 
   if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
     goto ocall_error;
   }
-  //TODO safety check on source
-  memcpy((void*)buffer_data_start, (void*)data, data_len);
+
+  // printf("\n[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start + sizeof(struct proc_snapshot)));
+  // printf("[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start));
+
+  memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
+
+  
+
+  uintptr_t eapp_size = user_paddr_end - user_paddr_start;
+  uintptr_t edge_off = buffer_data_start - shared_buffer;
+  uintptr_t call_args_pa = utm_paddr_start + edge_off; // physical address of buffer_data_start
+
+
+  for(uintptr_t offset=0; offset < eapp_size; offset+= RISCV_PAGE_SIZE){
+
+    // printf("Copying from %p to : %p\n", user_paddr_start + offset, call_args_pa + sizeof(struct proc_snapshot) + offset);
+    memcpy_pa((void*) (call_args_pa + sizeof(struct proc_snapshot) + offset),
+          (void *) (user_paddr_start + offset),
+          RISCV_PAGE_SIZE);
+  }
+
+  printf("[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start));
+  printf("[sdk-dispatch_fork_ocall] check :%x\n\n", *(uintptr_t *) (buffer_data_start + sizeof(struct proc_snapshot)));
+
+
+  // for(uintptr_t offset; offset < eapp_size; offset+= RISCV_PAGE_SIZE){
+  //   memcpy((void*)buffer_data_start + sizeof(struct proc_snapshot) + offset,
+  //       (void *) __va(user_paddr_start + offset), RISCV_PAGE_SIZE);
+  // }
 
   if(edge_call_setup_call(edge_call, (void*)buffer_data_start, data_len) != 0){
     goto ocall_error;
@@ -280,9 +310,14 @@ void handle_syscall(struct encl_ctx* ctx)
     // struct sbi_fork_ret *fork_ret;
     //Copy user context to snapshot 
     memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx)); 
+    snapshot.ctx.regs.sepc = csr_read(sepc);
+
+    snapshot.size = (__pa(spa_get_head()) - user_paddr_start) + sizeof(struct proc_snapshot);
+    printf("size: %x\n", snapshot.size);
+
 
     //Place the snapshot in the untrusted buffer 
-    dispatch_fork_ocall(&snapshot, sizeof(struct proc_snapshot) + snapshot.size);
+    dispatch_fork_ocall(&snapshot, snapshot.size);
 
     printf("[runtime-fork-syscall] ocall dispatched\n");
     ret = sbi_fork(SBI_STOP_REQ_FORK);

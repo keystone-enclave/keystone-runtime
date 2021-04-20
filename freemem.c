@@ -18,6 +18,13 @@
 
 static struct pg_list spa_free_pages;
 
+uintptr_t
+spa_get_head()
+{
+  return spa_free_pages.head; 
+}
+
+
 /* get a free page from the simple page allocator */
 uintptr_t
 __spa_get(bool zero)

@@ -19,5 +19,6 @@ uintptr_t spa_get(void);
 uintptr_t spa_get_zero(void);
 void spa_put(uintptr_t page);
 unsigned int spa_available();
+uintptr_t spa_get_head();
 #endif
 #endif
