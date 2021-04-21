@@ -25,6 +25,7 @@
 #endif /* LINUX_SYSCALL_WRAPPING */
 
 extern uintptr_t utm_paddr_start; 
+extern uintptr_t freemem_paddr_start;
 
 extern void exit_enclave(uintptr_t arg0);
 
@@ -291,6 +292,9 @@ void handle_syscall(struct encl_ctx* ctx)
     //Copy user context to snapshot 
     memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx)); 
     snapshot.ctx.regs.sepc = csr_read(sepc);
+    snapshot.user_pa_start = user_paddr_start;
+    snapshot.freemem_pa_start = load_pa_start;
+    snapshot.freemem_pa_end = __pa(spa_get_head());
 
     snapshot.size = (__pa(spa_get_head()) - user_paddr_start) + sizeof(struct proc_snapshot);
 

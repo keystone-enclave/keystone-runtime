@@ -8,6 +8,7 @@ uintptr_t user_paddr_start;
 uintptr_t user_paddr_end;
 
 uintptr_t utm_paddr_start;
+uintptr_t freemem_paddr_start;
 
 #ifdef USE_FREEMEM
 /* root page table */
