@@ -85,10 +85,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 
   edge_call->call_id = call_id;
 
-  printf("edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
-
-  printf("[runtime] buffer_data_start %p\n", buffer_data_start);
 
   if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
     goto ocall_error;
@@ -156,12 +153,7 @@ uintptr_t dispatch_fork_ocall(struct proc_snapshot* snapshot, size_t data_len){
     goto ocall_error;
   }
 
-  // printf("\n[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start + sizeof(struct proc_snapshot)));
-  // printf("[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start));
-
   memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
-
-  
 
   uintptr_t eapp_size = user_paddr_end - user_paddr_start;
   uintptr_t edge_off = buffer_data_start - shared_buffer;
@@ -170,26 +162,14 @@ uintptr_t dispatch_fork_ocall(struct proc_snapshot* snapshot, size_t data_len){
 
   for(uintptr_t offset=0; offset < eapp_size; offset+= RISCV_PAGE_SIZE){
 
-    // printf("Copying from %p to : %p\n", user_paddr_start + offset, call_args_pa + sizeof(struct proc_snapshot) + offset);
     memcpy_pa((void*) (call_args_pa + sizeof(struct proc_snapshot) + offset),
           (void *) (user_paddr_start + offset),
           RISCV_PAGE_SIZE);
   }
 
-  printf("[sdk-dispatch_fork_ocall] check :%x\n", *(uintptr_t *) (buffer_data_start));
-  printf("[sdk-dispatch_fork_ocall] check :%x\n\n", *(uintptr_t *) (buffer_data_start + sizeof(struct proc_snapshot)));
-
-
-  // for(uintptr_t offset; offset < eapp_size; offset+= RISCV_PAGE_SIZE){
-  //   memcpy((void*)buffer_data_start + sizeof(struct proc_snapshot) + offset,
-  //       (void *) __va(user_paddr_start + offset), RISCV_PAGE_SIZE);
-  // }
-
   if(edge_call_setup_call(edge_call, (void*)buffer_data_start, data_len) != 0){
     goto ocall_error;
   }
-
-  printf("[runtime-fork-ocall] Success\n");
 
   return 0; 
 
@@ -307,19 +287,16 @@ void handle_syscall(struct encl_ctx* ctx)
     print_strace("[runtime] fork \r\n");
 
     struct proc_snapshot snapshot;
-    // struct sbi_fork_ret *fork_ret;
+
     //Copy user context to snapshot 
     memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx)); 
     snapshot.ctx.regs.sepc = csr_read(sepc);
 
     snapshot.size = (__pa(spa_get_head()) - user_paddr_start) + sizeof(struct proc_snapshot);
-    printf("size: %x\n", snapshot.size);
-
 
     //Place the snapshot in the untrusted buffer 
     dispatch_fork_ocall(&snapshot, snapshot.size);
 
-    printf("[runtime-fork-syscall] ocall dispatched\n");
     ret = sbi_fork(SBI_STOP_REQ_FORK);
 
     //Return child eid 
