@@ -4,12 +4,28 @@
 #define MASK(n) (BIT(n) - 1ul)
 #define IS_ALIGNED(n, b) (!((n)&MASK(b)))
 
+#if __riscv_xlen == 32
+#define VA_BITS 32
+#define RISCV_PGLEVEL_BITS 10
+#else  // __riscv_xlen == 64 or x86 test
+#define VA_BITS 39
+#define RISCV_PGLEVEL_BITS 9
+#endif
+
 #if __riscv_xlen == 64
 #define RISCV_PT_INDEX_BITS 9
 #define RISCV_PT_LEVELS 3
 #elif __riscv_xlen == 32
 #define RISCV_PT_INDEX_BITS 10
 #define RISCV_PT_LEVELS 2
+#endif
+
+#if __riscv_xlen == 64
+#define RISCV_PGLEVEL_MASK 0x1ff
+#define RISCV_PGTABLE_HIGHEST_BIT 0x100
+#else
+#define RISCV_PGLEVEL_MASK 0x3ff
+#define RISCV_PGTABLE_HIGHEST_BIT 0x300
 #endif
 
 #define RISCV_PAGE_BITS 12
@@ -65,3 +81,6 @@
 #define PTE_PPN_SHIFT 10
 
 typedef uintptr_t pte;
+
+#define RISCV_PGLEVEL_TOP ((VA_BITS - RISCV_PAGE_BITS) / RISCV_PGLEVEL_BITS)
+

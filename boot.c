@@ -109,11 +109,12 @@ init_freemem()
 
 /* initialize user stack */
 void
-init_user_stack_and_env()
+init_user_stack_and_env(bool is_fork)
 {
   void* user_sp = (void*) EYRIE_USER_STACK_START;
 
 #ifdef USE_FREEMEM
+if(!is_fork){
   size_t count;
   uintptr_t stack_end = EYRIE_USER_STACK_END;
   size_t stack_count = EYRIE_USER_STACK_SIZE >> RISCV_PAGE_BITS;
@@ -124,6 +125,7 @@ init_user_stack_and_env()
       PTE_R | PTE_W | PTE_D | PTE_A | PTE_U);
 
   assert(count == stack_count);
+}
 
 #endif // USE_FREEMEM
 
@@ -134,8 +136,58 @@ init_user_stack_and_env()
   csr_write(sscratch, user_sp);
 }
 
+int remap_freemem(struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t vaddr) {
+  pte* walk;
+  int i;
+  uintptr_t parent_freemem_start = snapshot->freemem_pa_start;
+  uintptr_t parent_freemem_end = snapshot->freemem_pa_end;
+
+  /* iterate over PTEs */
+  for (walk = tb, i = 0; walk < tb + (RISCV_PAGE_SIZE / sizeof(pte));
+       walk += 1, i++) {
+
+    if ((*walk) == 0) {
+      continue;
+    }
+
+    uintptr_t vpn;
+    uintptr_t phys_addr = ((*walk) >> PTE_PPN_SHIFT) << RISCV_PAGE_BITS;
+
+    /* propagate the highest bit of the VA */
+    if (level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT)
+      vpn = ((-1UL << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+    else
+      vpn = ((vaddr << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+
+    // uintptr_t va_start = vpn << RISCV_PAGE_BITS;
+
+    if (level == 1) {
+      /* if PTE is leaf, extend hash for the page */
+      int in_freemem =
+                ((phys_addr < parent_freemem_end) && (phys_addr >= parent_freemem_start));
+
+      if(in_freemem){
+          uintptr_t new_phys_addr = load_pa_start + (phys_addr - parent_freemem_start);
+          *walk = pte_create(new_phys_addr >> RISCV_PAGE_BITS, (*walk) & PTE_FLAG_MASK); 
+      }
+      
+      // printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PAGE_BITS, phys_addr);
+
+
+    } else {
+      /* otherwise, recurse on a lower level */
+      pte* mapped_paddr = (pte *) __va(phys_addr);
+      remap_freemem(snapshot, level - 1, mapped_paddr, vpn);
+    }
+  }
+  return 0;
+}
+
 struct proc_snapshot * 
 handle_fork(void* buffer, struct proc_snapshot *ret){
+
+  uintptr_t *user_va =(uintptr_t *) __va(user_paddr_start);
+  
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
   uintptr_t call_args;
@@ -151,6 +203,18 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
   }
 
   memcpy(ret, (void *) call_args, sizeof(struct proc_snapshot));
+
+  uintptr_t snapshot_payload = (uintptr_t) call_args;
+  snapshot_payload += sizeof(struct proc_snapshot); 
+  memcpy(user_va, (void *) snapshot_payload, args_len - sizeof(struct proc_snapshot));
+
+  remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
+
+  printf("check :%x, %x\n", *user_va, *(uintptr_t *)snapshot_payload);
+
+  //Clear out the snapshot after use
+  // memset((vodcall_args, 0, args_len);
+
   return (struct proc_snapshot *) ret;
 }
 
@@ -173,9 +237,12 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   user_paddr_end = free_paddr;
   utm_paddr_start = utm_paddr; 
 
+  shared_buffer = EYRIE_UNTRUSTED_START;
+  shared_buffer_size = utm_size; 
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_paddr, utm_paddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
+
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);
   freemem_size = dram_base + dram_size - free_paddr;
@@ -206,14 +273,16 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   #endif /* USE_PAGING */
 #endif /* USE_FREEMEM */
 
+  /* prepare edge & system calls */
+  init_edge_internals();
+
+  bool is_fork = handle_fork((void *) shared_buffer, &snapshot); 
+
   /* initialize user stack */
-  init_user_stack_and_env();
+  init_user_stack_and_env(is_fork);
 
   /* set trap vector */
   csr_write(stvec, &encl_trap_handler);
-
-  /* prepare edge & system calls */
-  init_edge_internals();
 
   /* set timer */
   init_timer();
@@ -221,7 +290,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* Enable the FPU */
   csr_write(sstatus, csr_read(sstatus) | 0x6000);
 
-  if(handle_fork((void *) shared_buffer, &snapshot)){
+  if(is_fork){
     //This will be non-zero in the cases of fork() 
     csr_write(sepc, snapshot.ctx.regs.sepc + 4);
     //Set return value of fork() to be 0 (indicates child)
