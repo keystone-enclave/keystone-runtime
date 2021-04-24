@@ -212,7 +212,6 @@ struct proc_snapshot *
 handle_fork(void* buffer, struct proc_snapshot *ret){
   mbedtls_gcm_context ctx; 
   mbedtls_cipher_id_t cipher = MBEDTLS_CIPHER_ID_AES;
-  unsigned char tag_buf[16];
 
   mbedtls_gcm_init( &ctx );
   mbedtls_gcm_setkey( &ctx, cipher, key, 128 );
@@ -238,15 +237,15 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
 
   //Decrypt snapshot register state 
   struct proc_snapshot *snapshot = (struct proc_snapshot *) call_args;
-  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) ret, 16, tag_buf);
+  memcpy((void *) snapshot->initial_value, initial_value, 12);
+
+  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), snapshot->initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &ret->ctx, 16, snapshot->tag_buf);
 
   uintptr_t snapshot_payload = (uintptr_t) call_args;
   snapshot_payload += sizeof(struct proc_snapshot); 
-  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, tag_buf);
+  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), snapshot->initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, snapshot->tag_buf);
 
   remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
-
-  printf("check :%x, %x\n", *user_va, *(uintptr_t *)snapshot_payload);
 
   //Clear out the snapshot after use
   memset((void *) call_args, 0, args_len);

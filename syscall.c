@@ -176,7 +176,7 @@ uintptr_t dispatch_fork_ocall(struct proc_snapshot* snapshot, size_t data_len){
   ret = mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, sizeof(struct encl_ctx), initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &snapshot->ctx, 16, tag_buf);
   memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
 
-  ret = mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, data_len - sizeof(struct proc_snapshot), initial_value, 12, additional, 0, (const unsigned char *) user_va, (unsigned char *) buffer_payload, 16, tag_buf);
+  ret = mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, data_len - sizeof(struct proc_snapshot), initial_value, 12, additional, 0, (const unsigned char *) user_va, (unsigned char *) buffer_payload, 16, snapshot->tag_buf);
   mbedtls_gcm_free( &ctx );
 
   printf("[runtime] ret: %d\n", ret);
