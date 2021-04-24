@@ -13,6 +13,8 @@
 #include "process_snapshot.h"
 #include "vm.h"
 #include "freemem.h"
+#include "aes_gcm.h"
+#include "gcm.h"
 
 #include "syscall_nums.h"
 
@@ -28,6 +30,12 @@ extern uintptr_t utm_paddr_start;
 extern uintptr_t freemem_paddr_start;
 
 extern void exit_enclave(uintptr_t arg0);
+
+extern const unsigned char key[32];
+extern unsigned char plaintext[1024];
+extern unsigned char expected_ciphertext[64];
+extern const unsigned char initial_value[12];
+extern const unsigned char additional[];
 
 uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_t data_len){
   int ret;
@@ -154,19 +162,24 @@ uintptr_t dispatch_fork_ocall(struct proc_snapshot* snapshot, size_t data_len){
     goto ocall_error;
   }
 
+  mbedtls_gcm_context ctx; 
+  mbedtls_cipher_id_t cipher = MBEDTLS_CIPHER_ID_AES;
+  unsigned char tag_buf[16];
+  int ret;
+  uintptr_t buffer_payload = buffer_data_start + sizeof(struct proc_snapshot);
+  uintptr_t *user_va =(uintptr_t *) __va(user_paddr_start);
+
+  mbedtls_gcm_init( &ctx );
+  ret = mbedtls_gcm_setkey( &ctx, cipher, key, 128 );
+
+  //Encrypt register state of process 
+  ret = mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, sizeof(struct encl_ctx), initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &snapshot->ctx, 16, tag_buf);
   memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
 
-  uintptr_t eapp_size = user_paddr_end - user_paddr_start;
-  uintptr_t edge_off = buffer_data_start - shared_buffer;
-  uintptr_t call_args_pa = utm_paddr_start + edge_off; // physical address of buffer_data_start
+  ret = mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, data_len - sizeof(struct proc_snapshot), initial_value, 12, additional, 0, (const unsigned char *) user_va, (unsigned char *) buffer_payload, 16, tag_buf);
+  mbedtls_gcm_free( &ctx );
 
-
-  for(uintptr_t offset=0; offset < eapp_size; offset+= RISCV_PAGE_SIZE){
-
-    memcpy_pa((void*) (call_args_pa + sizeof(struct proc_snapshot) + offset),
-          (void *) (user_paddr_start + offset),
-          RISCV_PAGE_SIZE);
-  }
+  printf("[runtime] ret: %d\n", ret);
 
   if(edge_call_setup_call(edge_call, (void*)buffer_data_start, data_len) != 0){
     goto ocall_error;
