@@ -18,6 +18,7 @@
 #define SYSCALL_SNAPSHOT                    1005
 #define SYSCALL_CLONE                       1006
 #define SYSCALL_FORK                        1007
+#define SYSCALL_GET_FREEMEM                 1008
 #define RUNTIME_SYSCALL_EXIT                1101
 
 void handle_syscall(struct encl_ctx* ctx);

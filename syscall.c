@@ -11,6 +11,7 @@
 #include "mm.h"
 #include "rt_util.h"
 #include "process_snapshot.h"
+#include "freemem.h"
 
 #include "syscall_nums.h"
 
@@ -292,8 +293,10 @@ void handle_syscall(struct encl_ctx* ctx)
 
     /* Remap page table */
     break;
-
-
+  case(SYSCALL_GET_FREEMEM): 
+    ret = spa_available(); 
+    printf("[runtime-get-freemem] available pages: %d\n", ret);
+    break;
 
 
 #ifdef LINUX_SYSCALL_WRAPPING
