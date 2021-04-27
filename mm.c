@@ -245,7 +245,6 @@ __map_with_reserved_page_table_64(uintptr_t dram_base,
   if (!l3_pt) {
     leaf_level = 2;
     leaf_pt = l2_pt;
-    debug("using meagapages ...");
   }
   assert(dram_size <= RISCV_GET_LVL_PGSIZE(leaf_level - 1));
   assert(IS_ALIGNED(dram_base, RISCV_GET_LVL_PGSIZE_BITS(leaf_level)));
@@ -266,7 +265,6 @@ __map_with_reserved_page_table_64(uintptr_t dram_base,
        offset < dram_size;
        offset += RISCV_GET_LVL_PGSIZE(leaf_level))
   {
-    debug("mapping VA [%lx] --> PA [%lx]", ptr + offset, dram_base + offset);
     leaf_pt[RISCV_GET_PT_INDEX(ptr + offset, leaf_level)] =
       pte_create(ppn(dram_base + offset),
           PTE_R | PTE_W | PTE_X | PTE_A | PTE_D);
