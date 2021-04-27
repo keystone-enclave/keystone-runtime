@@ -33,20 +33,15 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_
 
   edge_call->call_id = EDGECALL_SYSCALL;
 
-  printf("In edge call\n");
   if(edge_call_setup_call(edge_call, (void*)syscall_data_ptr, data_len) != 0){
     return -1;
   }
-
-  printf("After setup\n");
 
   ret = sbi_stop_enclave(SBI_STOP_REQ_EDGE_CALL);
 
   if (ret != 0) {
     return -1;
   }
-
-  printf("After stop\n");
 
   if(edge_call->return_data.call_status != CALL_STATUS_OK){
     return -1;
@@ -80,10 +75,7 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 
   edge_call->call_id = call_id;
 
-  printf("edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
-
-  printf("[runtime] buffer_data_start %p\n", buffer_data_start);
 
   if(data_len > (shared_buffer_size - (buffer_data_start - shared_buffer))){
     goto ocall_error;
