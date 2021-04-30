@@ -246,7 +246,7 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
 
   int recv_bytes = 0; 
 
-  uintptr_t *test = (uintptr_t * ) __va(0xC122FFE8);
+  // uintptr_t *test = (uintptr_t * ) __va(0xC122FFE8);
 
   while(recv_bytes < ret->size){
 
@@ -257,7 +257,7 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
 
     memcpy(user_va + recv_bytes, (void *) call_args , args_len);
     recv_bytes += args_len;
-    printf("[child handle_fork] memcpy bytes: %d, recv_bytes: %d, test: %p\n", args_len, recv_bytes, *test);
+    printf("[child handle_fork] memcpy bytes: %d, recv_bytes: %d\n", args_len, recv_bytes);
 
     if(recv_bytes >= ret->size){
       //No need to signal parent if we finished consumingg payload size
