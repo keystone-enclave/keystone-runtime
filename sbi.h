@@ -34,6 +34,8 @@
 #define SBI_STOP_REQ_EDGE_CALL    1
 #define SBI_STOP_REQ_CLONE        2
 #define SBI_STOP_REQ_FORK         3 
+#define SBI_STOP_REQ_FORK_MORE    4
+#define SBI_STOP_REQ_FORK_DONE    5
 
 struct sbi_snapshot_ret {
     uintptr_t utm_paddr;

@@ -210,15 +210,14 @@ int remap_freemem(struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t 
 
 struct proc_snapshot * 
 handle_fork(void* buffer, struct proc_snapshot *ret){
+  printf("[child handle_fork] start\n");
   mbedtls_gcm_context ctx; 
   mbedtls_cipher_id_t cipher = MBEDTLS_CIPHER_ID_AES;
-
   mbedtls_gcm_init( &ctx );
   mbedtls_gcm_setkey( &ctx, cipher, key, 128 );
   
 
   uintptr_t *user_va =(uintptr_t *) __va(user_paddr_start);
-  
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
   uintptr_t call_args;
@@ -232,8 +231,7 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
     edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
     return NULL;
   }
-
-  memcpy(ret, (void *) call_args, sizeof(struct proc_snapshot));
+  memcpy(ret, (void *) call_args, args_len);
 
   //Decrypt snapshot register state 
   struct proc_snapshot *snapshot = (struct proc_snapshot *) call_args;
@@ -241,10 +239,38 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
 
   mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), snapshot->initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &ret->ctx, 16, snapshot->tag_buf);
 
-  uintptr_t snapshot_payload = (uintptr_t) call_args;
-  snapshot_payload += sizeof(struct proc_snapshot); 
-  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), snapshot->initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, snapshot->tag_buf);
+  // printf("[child handle_fork] Register state unloaded: snapshot->size: %d, args_len: %d\n", ret->size, args_len);
+  sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE); 
 
+  printf("[handle_fork] Receieved ret->size: %d \n", ret->size);
+
+  int recv_bytes = 0; 
+
+  uintptr_t *test = (uintptr_t * ) __va(0xC122FFE8);
+
+  while(recv_bytes < ret->size){
+
+    if (edge_call_args_ptr(edge_call, &call_args, &args_len) != 0) {
+      edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
+      return NULL;
+    }
+
+    memcpy(user_va + recv_bytes, (void *) call_args , args_len);
+    recv_bytes += args_len;
+    printf("[child handle_fork] memcpy bytes: %d, recv_bytes: %d, test: %p\n", args_len, recv_bytes, *test);
+
+    if(recv_bytes >= ret->size){
+      //No need to signal parent if we finished consumingg payload size
+      break;
+    }
+    sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE);
+  }
+
+  // uintptr_t snapshot_payload = (uintptr_t) call_args;
+  // snapshot_payload += sizeof(struct proc_snapshot); 
+  // mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), snapshot->initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, snapshot->tag_buf);
+
+  remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
   remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
 
   //Clear out the snapshot after use
