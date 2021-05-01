@@ -223,53 +223,6 @@ if(!is_fork){
   csr_write(sscratch, user_sp);
 }
 
-int remap_freemem(struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t vaddr) {
-  pte* walk;
-  int i;
-  uintptr_t parent_freemem_start = snapshot->freemem_pa_start;
-  uintptr_t parent_freemem_end = snapshot->freemem_pa_end;
-
-  /* iterate over PTEs */
-  for (walk = tb, i = 0; walk < tb + (RISCV_PAGE_SIZE / sizeof(pte));
-       walk += 1, i++) {
-
-    if ((*walk) == 0) {
-      continue;
-    }
-
-    uintptr_t vpn;
-    uintptr_t phys_addr = ((*walk) >> PTE_PPN_SHIFT) << RISCV_PAGE_BITS;
-
-    /* propagate the highest bit of the VA */
-    if (level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT)
-      vpn = ((-1UL << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
-    else
-      vpn = ((vaddr << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
-
-    // uintptr_t va_start = vpn << RISCV_PAGE_BITS;
-
-    if (level == 1) {
-      /* if PTE is leaf, extend hash for the page */
-      int in_freemem =
-                ((phys_addr < parent_freemem_end) && (phys_addr >= parent_freemem_start));
-
-      if(in_freemem){
-          uintptr_t new_phys_addr = load_pa_start + (phys_addr - parent_freemem_start);
-          *walk = pte_create(new_phys_addr >> RISCV_PAGE_BITS, (*walk) & PTE_FLAG_MASK); 
-      }
-      
-      // printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PAGE_BITS, phys_addr);
-
-
-    } else {
-      /* otherwise, recurse on a lower level */
-      pte* mapped_paddr = (pte *) __va(phys_addr);
-      remap_freemem(snapshot, level - 1, mapped_paddr, vpn);
-    }
-  }
-  return 0;
-}
-
 struct proc_snapshot * 
 handle_fork(void* buffer, struct proc_snapshot *ret){
   mbedtls_gcm_context ctx; 
@@ -295,26 +248,22 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
 
   memcpy(ret, (void *) call_args, sizeof(struct proc_snapshot));
 
-  pte tmp_root_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
-  memcpy(tmp_root_page_table, (void *) (call_args + sizeof(struct proc_snapshot)), RISCV_PAGE_SIZE);
-
-  // print_page_table(RISCV_PT_LEVELS, tmp_root_page_table, 0);
-
   //Decrypt snapshot register state 
   struct proc_snapshot *snapshot = (struct proc_snapshot *) call_args;
 
-  memcpy((void *) snapshot->initial_value, initial_value, 12);
+  memcpy((void *) snapshot->initial_value_ctx, initial_value, 12);
+  memcpy((void *) snapshot->initial_value_root_pt, initial_value, 12);
 
-  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), snapshot->initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &ret->ctx, 16, snapshot->tag_buf);
+  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), snapshot->initial_value_ctx, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &ret->ctx, 16, snapshot->tag_buf_ctx);
+    
 
-  // printf("[child handle_fork] Register state unloaded: snapshot->size: %d, args_len: %d\n", ret->size, args_len);
+  pte tmp_root_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
+  mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, RISCV_PAGE_SIZE, snapshot->initial_value_root_pt, 12, additional, 0, (const unsigned char *) (call_args + sizeof(struct proc_snapshot)), (unsigned char *) tmp_root_page_table, 16, snapshot->tag_buf_root_pt);
+
   sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE); 
 
-  printf("[handle_fork] Receieved ret->size: %d \n", ret->size);
-
   int recv_bytes = 0; 
-
-  // uintptr_t *test = (uintptr_t * ) __va(0xC122FFE8);
+  struct proc_snapshot_payload payload_header; 
 
   while(recv_bytes < ret->size){
 
@@ -323,9 +272,11 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
       return NULL;
     }
 
-    memcpy((void *) (user_va + recv_bytes), (void *) call_args , args_len);
+    memcpy(&payload_header, (void *) call_args, sizeof(struct proc_snapshot_payload));
+    mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot_payload), payload_header.initial_value_payload, 12, additional, 0, (const unsigned char *) call_args + sizeof(struct proc_snapshot_payload), (unsigned char *) (user_va + recv_bytes), 16, payload_header.tag_buf_payload);
+
     recv_bytes += args_len;
-    printf("[child handle_fork] memcpy bytes: %d, recv_bytes: %d\n", args_len, recv_bytes);
+    printf("Received %d from parent, copied %d / %d so far.\n", args_len, recv_bytes, ret->size);
 
     if(recv_bytes >= ret->size){
       //No need to signal parent if we finished consumingg payload size
@@ -335,13 +286,6 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
   }
 
   remap_additional(ret, RISCV_PT_LEVELS, tmp_root_page_table, 0);
-  // uintptr_t snapshot_payload = (uintptr_t) call_args;
-  // snapshot_payload += sizeof(struct proc_snapshot); 
-  // mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), snapshot->initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, snapshot->tag_buf);
-
-  remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
-
-  // print_page_table(RISCV_PT_LEVELS, root_page_table, 0);
 
   //Clear out the snapshot after use
   memset((void *) call_args, 0, args_len);
