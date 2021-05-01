@@ -13,6 +13,7 @@ extern uintptr_t runtime_va_start;
 extern uintptr_t kernel_offset;
 extern uintptr_t load_pa_start;
 extern uintptr_t load_pa_child_start;
+extern uintptr_t load_pa_end; 
 
 extern uintptr_t user_paddr_start;
 extern uintptr_t user_paddr_end;

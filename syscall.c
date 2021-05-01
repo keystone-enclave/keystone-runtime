@@ -37,6 +37,54 @@ extern unsigned char expected_ciphertext[64];
 extern const unsigned char initial_value[12];
 extern const unsigned char additional[];
 
+int print_page_table(int level, pte* tb, uintptr_t vaddr) {
+  pte* walk;
+  int i;
+
+  /* iterate over PTEs */
+  for (walk = tb, i = 0; walk < tb + (RISCV_PAGE_SIZE / sizeof(pte));
+       walk += 1, i++) {
+
+    if ((*walk) == 0) {
+      continue;
+    }
+
+    uintptr_t vpn;
+    uintptr_t phys_addr = ((*walk) >> PTE_PPN_SHIFT) << RISCV_PAGE_BITS;
+
+    /* propagate the highest bit of the VA */
+    if (level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT)
+      vpn = ((-1UL << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+    else
+      vpn = ((vaddr << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+
+    uintptr_t va_start = vpn << RISCV_PAGE_BITS;
+    if(va_start != 0x81000 && level == 3){
+      continue;
+    }
+
+
+    // uintptr_t va_start = vpn << RISCV_PAGE_BITS;
+    printf("lvl: %d, user PAGE hashed: 0x%lx (pa: 0x%lx)\n", level, vpn << RISCV_PAGE_BITS, phys_addr);
+
+    if (level == 1) {
+      /* if PTE is leaf, extend hash for the page */
+      
+      printf("lvl: %d, user PAGE hashed: 0x%lx (pa: 0x%lx)\n", level, vpn << RISCV_PAGE_BITS, phys_addr);
+
+
+    } else {
+      // continue;
+      /* otherwise, recurse on a lower level */
+      pte* mapped_paddr = (pte *) __va(phys_addr);
+      printf("lvl: %d, user recurse pa: 0x%lx (0x:%lx), vpn: %p\n", level, mapped_paddr, phys_addr, (void *) (vpn << RISCV_PAGE_BITS));
+      print_page_table(level - 1, mapped_paddr, vpn);
+    }
+  }
+  return 0;
+}
+
+
 uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_t data_len){
   int ret;
 
@@ -47,12 +95,12 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_
 
   edge_call->call_id = EDGECALL_SYSCALL;
 
-  printf("In edge call\n");
+  // printf("In edge call\n");
   if(edge_call_setup_call(edge_call, (void*)syscall_data_ptr, data_len) != 0){
     return -1;
   }
 
-  printf("After setup\n");
+  // printf("After setup\n");
 
   ret = sbi_stop_enclave(SBI_STOP_REQ_EDGE_CALL);
 
@@ -60,7 +108,7 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_
     return -1;
   }
 
-  printf("After stop\n");
+  // printf("After stop\n");
 
   if(edge_call->return_data.call_status != CALL_STATUS_OK){
     return -1;
@@ -143,6 +191,8 @@ uintptr_t dispatch_edgecall_ocall( unsigned long call_id,
 
 uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot){
 
+  // print_page_table(RISCV_PT_LEVELS, root_page_table, 0);
+
   /* For now we assume by convention that the start of the buffer is
    * the right place to put calls */
   struct edge_call* edge_call = (struct edge_call*)shared_buffer;
@@ -163,7 +213,7 @@ uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot){
     goto ocall_error;
   }
 
-  if(edge_call_setup_call(edge_call, (void*)buffer_data_start, sizeof(struct proc_snapshot) ) != 0){
+  if(edge_call_setup_call(edge_call, (void*)buffer_data_start, RISCV_PAGE_SIZE + sizeof(struct proc_snapshot) ) != 0){
     goto ocall_error;
   }
 
@@ -177,6 +227,7 @@ uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot){
   //Encrypt register state of process 
   mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_ENCRYPT, sizeof(struct encl_ctx), initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &snapshot->ctx, 16, tag_buf);
   memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
+  memcpy((void *) buffer_data_start + sizeof(struct proc_snapshot), (void *) root_page_table, RISCV_PAGE_SIZE); 
 
   return 0; 
   ocall_error:
@@ -186,13 +237,13 @@ uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot){
 
 uintptr_t dispatch_fork_snapshot_payload_ocall(size_t user_mem_size) {
   
-    uintptr_t *user_va =(uintptr_t *) __va(user_paddr_start);
+    uintptr_t user_va =(uintptr_t) __va(user_paddr_start);
     struct edge_call* edge_call = (struct edge_call*)shared_buffer;
     edge_call->call_id = 3208;
 
     uintptr_t buffer_data_start = edge_call_data_ptr();
     uintptr_t max_untrusted_size = shared_buffer_size - (buffer_data_start - shared_buffer); 
-
+    // printf("hi\n");
     printf("[parent dispatch_fork_snapshot_payload_ocall] Sending payload\n");
     //Child enclave should have received register state and now waiting on payload
     int sent_bytes = 0; 
@@ -204,7 +255,7 @@ uintptr_t dispatch_fork_snapshot_payload_ocall(size_t user_mem_size) {
       }
 
       // printf("[parent dispatch_fork_snapshot_payload_ocall] send_size %d, sent_bytes: %d\n", send_size, sent_bytes); 
-      memcpy((void *) buffer_data_start, user_va + sent_bytes, send_size); 
+      memcpy((void *) buffer_data_start, (void *) user_va + sent_bytes, send_size); 
       sent_bytes += send_size; 
       sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE); 
     }

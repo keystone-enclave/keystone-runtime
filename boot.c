@@ -132,6 +132,68 @@ init_freemem()
 
 #endif // USE_FREEMEM
 
+
+int remap_additional(struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t vaddr) {
+  pte* walk;
+  int i;
+  uintptr_t parent_freemem_start = snapshot->freemem_pa_start;
+  // uintptr_t parent_freemem_end = snapshot->freemem_pa_end;
+
+  /* iterate over PTEs */
+  for (walk = tb, i = 0; walk < tb + (RISCV_PAGE_SIZE / sizeof(pte));
+       walk += 1, i++) {
+
+    if ((*walk) == 0) {
+      continue;
+    }
+
+    uintptr_t vpn;
+    uintptr_t phys_addr = ((*walk) >> PTE_PPN_SHIFT) << RISCV_PAGE_BITS;
+
+    /* propagate the highest bit of the VA */
+    if (level == RISCV_PGLEVEL_TOP && i & RISCV_PGTABLE_HIGHEST_BIT)
+      vpn = ((-1UL << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+    else
+      vpn = ((vaddr << RISCV_PT_INDEX_BITS) | (i & PTE_FLAG_MASK));
+
+    uintptr_t va_start = vpn << RISCV_PAGE_BITS;
+
+    if(va_start >= EYRIE_LOAD_START){
+      continue;
+    }
+
+    if (level == 1) {
+      /* if PTE is leaf, extend hash for the page */
+      
+      // printf("user PAGE hashed: 0x%lx (pa: 0x%lx)\n", vpn << RISCV_PAGE_BITS, phys_addr);
+      if(phys_addr < load_pa_start || phys_addr >= load_pa_end){
+        uintptr_t new_phys_addr = load_pa_start + (phys_addr - parent_freemem_start);
+        *walk = pte_create(new_phys_addr >> RISCV_PAGE_BITS, (*walk) & PTE_FLAG_MASK); 
+      }
+
+    } else {
+      /* otherwise, recurse on a lower level */
+
+      pte* mapped_paddr;
+      uintptr_t new_phys_addr = 0; 
+
+      if(phys_addr < load_pa_start || phys_addr >= load_pa_end){
+        new_phys_addr = load_pa_start + (phys_addr - parent_freemem_start);
+        mapped_paddr = (pte *) __va(new_phys_addr);
+        *walk = (ppn(new_phys_addr) << PTE_PPN_SHIFT) | (*walk & PTE_FLAG_MASK);
+      } else {
+        mapped_paddr = (pte *) __va(phys_addr);
+      }
+
+      if(level == 3){
+        root_page_table[i] = *walk; 
+      }
+      remap_additional(snapshot, level - 1, mapped_paddr, vpn);      
+    }
+  }
+  return 0;
+}
+
 /* initialize user stack */
 void
 init_user_stack_and_env(bool is_fork)
@@ -210,14 +272,13 @@ int remap_freemem(struct proc_snapshot *snapshot, int level, pte* tb, uintptr_t 
 
 struct proc_snapshot * 
 handle_fork(void* buffer, struct proc_snapshot *ret){
-  printf("[child handle_fork] start\n");
   mbedtls_gcm_context ctx; 
   mbedtls_cipher_id_t cipher = MBEDTLS_CIPHER_ID_AES;
   mbedtls_gcm_init( &ctx );
   mbedtls_gcm_setkey( &ctx, cipher, key, 128 );
   
 
-  uintptr_t *user_va =(uintptr_t *) __va(user_paddr_start);
+  uintptr_t user_va = (uintptr_t) __va(user_paddr_start);
   struct edge_call* edge_call = (struct edge_call*)buffer;
 
   uintptr_t call_args;
@@ -231,10 +292,17 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
     edge_call->return_data.call_status = CALL_STATUS_BAD_OFFSET;
     return NULL;
   }
-  memcpy(ret, (void *) call_args, args_len);
+
+  memcpy(ret, (void *) call_args, sizeof(struct proc_snapshot));
+
+  pte tmp_root_page_table[BIT(RISCV_PT_INDEX_BITS)] __attribute__((aligned(RISCV_PAGE_SIZE)));
+  memcpy(tmp_root_page_table, (void *) (call_args + sizeof(struct proc_snapshot)), RISCV_PAGE_SIZE);
+
+  // print_page_table(RISCV_PT_LEVELS, tmp_root_page_table, 0);
 
   //Decrypt snapshot register state 
   struct proc_snapshot *snapshot = (struct proc_snapshot *) call_args;
+
   memcpy((void *) snapshot->initial_value, initial_value, 12);
 
   mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, sizeof(struct encl_ctx), snapshot->initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &ret->ctx, 16, snapshot->tag_buf);
@@ -255,7 +323,7 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
       return NULL;
     }
 
-    memcpy(user_va + recv_bytes, (void *) call_args , args_len);
+    memcpy((void *) (user_va + recv_bytes), (void *) call_args , args_len);
     recv_bytes += args_len;
     printf("[child handle_fork] memcpy bytes: %d, recv_bytes: %d\n", args_len, recv_bytes);
 
@@ -266,12 +334,14 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
     sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE);
   }
 
+  remap_additional(ret, RISCV_PT_LEVELS, tmp_root_page_table, 0);
   // uintptr_t snapshot_payload = (uintptr_t) call_args;
   // snapshot_payload += sizeof(struct proc_snapshot); 
   // mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot), snapshot->initial_value, 12, additional, 0, (const unsigned char *) snapshot_payload, (unsigned char *) user_va, 16, snapshot->tag_buf);
 
   remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
-  remap_freemem(ret, RISCV_PT_LEVELS, root_page_table, 0);
+
+  // print_page_table(RISCV_PT_LEVELS, root_page_table, 0);
 
   //Clear out the snapshot after use
   memset((void *) call_args, 0, args_len);
@@ -291,6 +361,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 {
   /* set initial values */
   load_pa_start = dram_base;
+  load_pa_end = dram_base + dram_size;
   load_pa_child_start = dram_base;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
@@ -303,6 +374,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_paddr, utm_paddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
+  debug("USER : 0x%lx-0x%lx (%u KB)", user_paddr_start, user_paddr_end, (user_paddr_end - user_paddr_start)/1024);
 
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);

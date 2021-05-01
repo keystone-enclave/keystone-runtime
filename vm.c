@@ -3,6 +3,7 @@
 uintptr_t runtime_va_start;
 uintptr_t kernel_offset;
 uintptr_t load_pa_start;
+uintptr_t load_pa_end; 
 uintptr_t load_pa_child_start;
 uintptr_t user_paddr_start;
 uintptr_t user_paddr_end;

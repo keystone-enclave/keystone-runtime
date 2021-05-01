@@ -24,6 +24,7 @@ void handle_syscall(struct encl_ctx* ctx);
 void init_edge_internals(void);
 uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr,
                                     size_t data_len);
+int print_page_table(int level, pte* tb, uintptr_t vaddr);
 
 // Define this to enable printing of a large amount of syscall information
 //#define INTERNAL_STRACE 1
