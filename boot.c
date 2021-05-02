@@ -275,7 +275,7 @@ handle_fork(void* buffer, struct proc_snapshot *ret){
     memcpy(&payload_header, (void *) call_args, sizeof(struct proc_snapshot_payload));
     mbedtls_gcm_crypt_and_tag(&ctx, MBEDTLS_GCM_DECRYPT, args_len - sizeof(struct proc_snapshot_payload), payload_header.initial_value_payload, 12, additional, 0, (const unsigned char *) call_args + sizeof(struct proc_snapshot_payload), (unsigned char *) (user_va + recv_bytes), 16, payload_header.tag_buf_payload);
 
-    recv_bytes += args_len;
+    recv_bytes += (args_len - sizeof(struct proc_snapshot_payload));
     printf("Received %d from parent, copied %d / %d so far.\n", args_len, recv_bytes, ret->size);
 
     if(recv_bytes >= ret->size){
