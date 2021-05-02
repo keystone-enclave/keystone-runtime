@@ -313,8 +313,25 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
     copy_to_user(statbuf, &args->stats, sizeof(struct stat));
   }
 
- done:
   print_strace("[runtime] proxied fstat = %li\r\n", ret);
+  return ret;
+
+}
+
+uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){ // TODO: optional arg
+  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+  sargs_SYS_fcntl* args = (sargs_SYS_fcntl*)edge_syscall->data;
+  uintptr_t ret = -1;
+
+  edge_syscall->syscall_num = SYS_fcntl;
+  args->fd = fd;
+
+  size_t totalsize = (sizeof(struct edge_syscall) +
+                      sizeof(sargs_SYS_fcntl));
+
+  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+  print_strace("[runtime] proxied fcntl = %li\r\n", ret);
   return ret;
 
 }
