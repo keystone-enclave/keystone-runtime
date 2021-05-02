@@ -26,7 +26,7 @@
 #include "linux_wrap.h"
 #endif /* LINUX_SYSCALL_WRAPPING */
 
-extern uintptr_t utm_paddr_start; 
+extern uintptr_t utm_paddr_start;
 extern uintptr_t freemem_paddr_start;
 
 extern void exit_enclave(uintptr_t arg0);
@@ -69,7 +69,7 @@ int print_page_table(int level, pte* tb, uintptr_t vaddr) {
 
     if (level == 1) {
       /* if PTE is leaf, extend hash for the page */
-      
+
       printf("lvl: %d, user PAGE hashed: 0x%lx (pa: 0x%lx)\n", level, vpn << RISCV_PAGE_BITS, phys_addr);
 
 
@@ -204,7 +204,7 @@ uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot, mbedtls_g
 
   // printf("[rt-dispatch_fork_ocall] edge_call->call_id: %d\n", edge_call->call_id);
   uintptr_t buffer_data_start = edge_call_data_ptr();
-  uintptr_t max_untrusted_size = shared_buffer_size - (buffer_data_start - shared_buffer); 
+  uintptr_t max_untrusted_size = shared_buffer_size - (buffer_data_start - shared_buffer);
   // printf("[rt-dispatch_fork_ocall] buffer_data_start %p\n", buffer_data_start);
 
   if(sizeof(struct proc_snapshot) > max_untrusted_size){
@@ -215,52 +215,52 @@ uintptr_t dispatch_fork_snapshot_ocall(struct proc_snapshot* snapshot, mbedtls_g
     goto ocall_error;
   }
 
-  //Encrypt register state of process 
+  //Encrypt register state of process
   mbedtls_gcm_crypt_and_tag(ctx, MBEDTLS_GCM_ENCRYPT, sizeof(struct encl_ctx), initial_value, 12, additional, 0, (const unsigned char *) &snapshot->ctx, (unsigned char *) &snapshot->ctx, 16, snapshot->tag_buf_ctx);
   memcpy((void*)buffer_data_start, snapshot, sizeof(struct proc_snapshot));
 
   mbedtls_gcm_crypt_and_tag(ctx, MBEDTLS_GCM_ENCRYPT, RISCV_PAGE_SIZE, initial_value, 12, additional, 0, (const unsigned char *) root_page_table, (unsigned char *) buffer_data_start + sizeof(struct proc_snapshot), 16, snapshot->tag_buf_root_pt);
 
-  return 0; 
+  return 0;
   ocall_error:
-    return 1; 
+    return 1;
 
 }
 
 uintptr_t dispatch_fork_snapshot_payload_ocall(size_t user_mem_size, mbedtls_gcm_context *ctx) {
-  
+
     uintptr_t user_va =(uintptr_t) __va(user_paddr_start);
     struct edge_call* edge_call = (struct edge_call*)shared_buffer;
     edge_call->call_id = 3208;
 
     uintptr_t buffer_data_start = edge_call_data_ptr();
-    uintptr_t max_untrusted_size = (shared_buffer_size - (buffer_data_start - shared_buffer)) - sizeof(struct proc_snapshot_payload); 
+    uintptr_t max_untrusted_size = (shared_buffer_size - (buffer_data_start - shared_buffer)) - sizeof(struct proc_snapshot_payload);
 
     //Child enclave should have received register state and now waiting on payload
-    struct proc_snapshot_payload payload_header; 
+    struct proc_snapshot_payload payload_header;
     memcpy((void *) payload_header.initial_value_payload, initial_value, 12);
 
-    int sent_bytes = 0; 
+    int sent_bytes = 0;
     while(sent_bytes < user_mem_size){
-      size_t send_size = (max_untrusted_size < user_mem_size - sent_bytes) ? max_untrusted_size: (user_mem_size - sent_bytes);  
+      size_t send_size = (max_untrusted_size < user_mem_size - sent_bytes) ? max_untrusted_size: (user_mem_size - sent_bytes);
 
       if(edge_call_setup_call(edge_call, (void*)buffer_data_start, send_size + sizeof(struct proc_snapshot_payload)) != 0){
         goto ocall_error;
       }
 
       mbedtls_gcm_crypt_and_tag(ctx, MBEDTLS_GCM_ENCRYPT, send_size, payload_header.initial_value_payload, 12, additional, 0, (const unsigned char *) user_va + sent_bytes, (unsigned char *) buffer_data_start + sizeof(struct proc_snapshot_payload), 16, payload_header.tag_buf_payload);
-      memcpy((void *) buffer_data_start, (void *) &payload_header, sizeof(struct proc_snapshot_payload)); 
+      memcpy((void *) buffer_data_start, (void *) &payload_header, sizeof(struct proc_snapshot_payload));
 
-      sent_bytes += send_size; 
-      sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE); 
+      sent_bytes += send_size;
+      sbi_stop_enclave(SBI_STOP_REQ_FORK_MORE);
     }
-    
+
     //Finally done sending payload, signal the parent to stop polling
     uintptr_t ret = sbi_stop_enclave(SBI_STOP_REQ_FORK_DONE);
 
-    return ret; 
+    return ret;
   ocall_error:
-    return 1; 
+    return 1;
 }
 
 
@@ -355,8 +355,8 @@ void handle_syscall(struct encl_ctx* ctx)
     //0xffffffffc0009018
     load_pa_child_start = snapshot_ret.dram_base;
 
-    printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
-    shared_buffer, shared_buffer_size);
+    //printf("Snapshot: utm_base: %p, size: %d, shared_buffer: %p, shared_buffer_size: %d\n", snapshot_ret.utm_paddr,snapshot_ret.utm_size,
+    //shared_buffer, shared_buffer_size);
 
     // pte *p;
 
@@ -373,8 +373,8 @@ void handle_syscall(struct encl_ctx* ctx)
 
     struct proc_snapshot snapshot;
 
-    //Copy user context to snapshot 
-    memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx)); 
+    //Copy user context to snapshot
+    memcpy(&snapshot.ctx, ctx, sizeof(struct encl_ctx));
     snapshot.ctx.regs.sepc = csr_read(sepc);
     snapshot.user_pa_start = user_paddr_start;
     snapshot.freemem_pa_start = load_pa_start;
@@ -382,13 +382,13 @@ void handle_syscall(struct encl_ctx* ctx)
 
     snapshot.size = (__pa(spa_get_head()) - user_paddr_start);
 
-    mbedtls_gcm_context ctx; 
+    mbedtls_gcm_context ctx;
     mbedtls_cipher_id_t cipher = MBEDTLS_CIPHER_ID_AES;
 
     mbedtls_gcm_init( &ctx );
     mbedtls_gcm_setkey( &ctx, cipher, key, 128 );
 
-    //Place the snapshot in the untrusted buffer 
+    //Place the snapshot in the untrusted buffer
     dispatch_fork_snapshot_ocall(&snapshot, &ctx);
     sbi_fork(SBI_STOP_REQ_FORK);
     ret = dispatch_fork_snapshot_payload_ocall(snapshot.size, &ctx);
