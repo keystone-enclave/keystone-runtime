@@ -507,7 +507,7 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
 
 }
 
-uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){ // TODO: optional arg
+uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){ 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_fcntl* args = (sargs_SYS_fcntl*)edge_syscall->data;
   uintptr_t ret = -1;
@@ -522,6 +522,25 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){ // TODO: optional arg
 
   print_strace("[runtime] proxied fcntl = %li\r\n", ret);
   return ret;
+}
 
+uintptr_t io_syscall_getcwd(char* buf, size_t size){ 
+  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+  sargs_SYS_getcwd* args = (sargs_SYS_getcwd*)edge_syscall->data;
+  uintptr_t ret = -1;
+
+  edge_syscall->syscall_num = SYS_getcwd;
+
+  size_t totalsize = (sizeof(struct edge_syscall) +
+                      sizeof(sargs_SYS_getcwd));
+
+  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+  if(ret == 0){
+    copy_to_user(buf, &args->buf, size);
+  }
+
+  print_strace("[runtime] proxied getcwd = %li\r\n", ret);
+  return ret;
 }
 #endif /* IO_SYSCALL_WRAPPING */
