@@ -6,6 +6,7 @@
 #include "syscall.h"
 #include "string.h"
 #include "edge_syscall.h"
+#include <sys/ioctl.h>
 
 /* Syscalls iozone uses in -i0 mode
 *** Fake these
@@ -325,6 +326,8 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){
 
   edge_syscall->syscall_num = SYS_fcntl;
   args->fd = fd;
+  args->cmd = cmd;
+  args->arg = arg;
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_fcntl));
@@ -357,4 +360,29 @@ uintptr_t io_syscall_getcwd(char* buf, size_t size){
  
   return (uintptr_t) buf;
 }
+
+uintptr_t io_syscall_ioctl(int fd, unsigned long request, char *arg) {
+  // struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+  // sargs_SYS_ioctl* args = (sargs_SYS_ioctl*)edge_syscall->data;
+  // uintptr_t ret = -1;
+
+  // edge_syscall->syscall_num = SYS_ioctl;
+  // args->fd = fd;
+  // args->request = request; 
+  
+
+  // size_t totalsize = (sizeof(struct edge_syscall) +
+  //                     sizeof(sargs_SYS_ioctl));
+
+  // ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+  // print_strace("[runtime] proxied ioctl = %li\r\n", ret);
+  uintptr_t ret = -1; 
+  if (fd == 1 && request == TIOCGWINSZ) {
+    ret = 80;
+  }
+  print_strace("[runtime] mocked ioctl = %li\r\n", ret);
+  return ret;
+}
+
 #endif /* IO_SYSCALL_WRAPPING */
