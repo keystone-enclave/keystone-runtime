@@ -363,7 +363,7 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   }
 
-  /* store the result in the stack */
+
   ctx->regs.a0 = ret;
   return;
 }

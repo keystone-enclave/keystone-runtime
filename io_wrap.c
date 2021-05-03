@@ -527,20 +527,23 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){
 uintptr_t io_syscall_getcwd(char* buf, size_t size){ 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_getcwd* args = (sargs_SYS_getcwd*)edge_syscall->data;
-  uintptr_t ret = -1;
-
+  char* syscall_ret = NULL;
+  
   edge_syscall->syscall_num = SYS_getcwd;
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_getcwd));
 
-  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  syscall_ret = (char *) dispatch_edgecall_syscall(edge_syscall, totalsize);
 
-  if(ret == 0){
+  if(syscall_ret != 0){
     copy_to_user(buf, &args->buf, size);
+    print_strace("[runtime] proxied getcwd\r\n");
+  } else {
+    buf = NULL;
+    print_strace("[runtime] failed to proxy getcwd\n");
   }
-
-  print_strace("[runtime] proxied getcwd = %li\r\n", ret);
-  return ret;
+ 
+  return (uintptr_t) buf;
 }
 #endif /* IO_SYSCALL_WRAPPING */
