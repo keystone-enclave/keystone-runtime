@@ -312,13 +312,13 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = io_syscall_fstat((int)arg0, (struct stat*)arg1); 
     break;
   case(SYS_fcntl): 
-    ret = io_syscall_fcntl((int)arg0, (int)arg1, (int)arg2);
+    ret = io_syscall_fcntl((int)arg0, (int)arg1, (uintptr_t)arg2);
     break;
   case(SYS_getcwd): 
     ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
     break;
   case(SYS_ioctl): 
-    ret = io_syscall_ioctl((int)arg0, (int)arg1, (unsigned long)arg2);
+    ret = io_syscall_ioctl((int)arg0, (int)arg1, (uintptr_t)arg2);
     break;
   case(SYS_lseek):
     ret = io_syscall_lseek((int)arg0, (off_t)arg1, (int)arg2);

@@ -7,6 +7,7 @@
 #include "string.h"
 #include "edge_syscall.h"
 #include <sys/ioctl.h>
+#include <fcntl.h>
 
 /* Syscalls iozone uses in -i0 mode
 *** Fake these
@@ -319,7 +320,7 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
 
 }
 
-uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){ 
+uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg){ 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_fcntl* args = (sargs_SYS_fcntl*)edge_syscall->data;
   uintptr_t ret = -1;
@@ -327,13 +328,32 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, int arg){
   edge_syscall->syscall_num = SYS_fcntl;
   args->fd = fd;
   args->cmd = cmd;
-  args->arg = arg;
 
-  size_t totalsize = (sizeof(struct edge_syscall) +
+  size_t totalsize;
+  if (cmd == F_SETLK || cmd == F_SETLKW || cmd == F_GETLK) {
+    print_strace("F_SETLK, FSETLKW, or FGETLK");
+    if(edge_call_check_ptr_valid((uintptr_t)args->arg, sizeof(struct flock)) != 0){
+      print_strace("Ptr not valid");
+      goto done;
+    }
+    copy_from_user((struct flock *) args->arg, (struct flock *) arg, sizeof(struct flock));
+    args->has_struct = 1;
+
+    totalsize = (sizeof(struct edge_syscall) +
+                      sizeof(sargs_SYS_fcntl) + 
+                      sizeof(struct flock));
+  } else {
+    args->arg[0] = arg;
+    args->has_struct = 0;
+    totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_fcntl));
+  }
+
+  
 
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
+ done: 
   print_strace("[runtime] proxied fcntl = %li\r\n", ret);
   return ret;
 }
@@ -361,7 +381,7 @@ uintptr_t io_syscall_getcwd(char* buf, size_t size){
   return (uintptr_t) buf;
 }
 
-uintptr_t io_syscall_ioctl(int fd, unsigned long request, unsigned long arg) {
+uintptr_t io_syscall_ioctl(int fd, unsigned long request, uintptr_t arg) {
   // struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   // sargs_SYS_ioctl* args = (sargs_SYS_ioctl*)edge_syscall->data;
   // uintptr_t ret = -1;
