@@ -550,7 +550,7 @@ uintptr_t io_syscall_getcwd(char* buf, size_t size){
   return (uintptr_t) buf;
 }
 
-uintptr_t io_syscall_ioctl(int fd, unsigned long request, char *arg) {
+uintptr_t io_syscall_ioctl(int fd, unsigned long request, unsigned long arg) {
   // struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   // sargs_SYS_ioctl* args = (sargs_SYS_ioctl*)edge_syscall->data;
   // uintptr_t ret = -1;
@@ -568,7 +568,10 @@ uintptr_t io_syscall_ioctl(int fd, unsigned long request, char *arg) {
   // print_strace("[runtime] proxied ioctl = %li\r\n", ret);
   uintptr_t ret = -1; 
   if (fd == 1 && request == TIOCGWINSZ) {
-    ret = 80;
+    ret = 0;
+    int arg_val = 80;
+
+    copy_to_user((int*) arg, &arg_val, sizeof(arg_val));
   }
   print_strace("[runtime] mocked ioctl = %li\r\n", ret);
   return ret;
