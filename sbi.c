@@ -129,6 +129,7 @@ sbi_snapshot()
 
   csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
 
+  copy_root_page_table();
   tlb_flush();
 
   debug("root_page_table (walk) = %lx", translate((uintptr_t)root_page_table));

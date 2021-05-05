@@ -33,7 +33,10 @@ __continue_walk_create(pte* root, uintptr_t addr, pte* pte)
   return __walk_create(root, addr);
 }
 
-static pte*
+
+extern void copy_physical_page(uintptr_t dst, uintptr_t src, uintptr_t helper);
+extern void __copy_physical_page_switch_to_pa();
+  static pte*
 __walk_internal(pte* root, uintptr_t addr, int create)
 {
   pte* t = root;
@@ -48,6 +51,21 @@ __walk_internal(pte* root, uintptr_t addr, int create)
     /* mega or giga page */
     if (t[idx] & (PTE_R | PTE_W | PTE_X))
       break;
+
+    uintptr_t pa = pte_ppn(t[idx]) << RISCV_PAGE_BITS;
+    /* if the page is outside of the EPM, relocate */
+    if (pa < load_pa_start || pa >= load_pa_start + load_pa_size)
+    {
+      uintptr_t new_page = spa_get_zero();
+      assert(new_page);
+      debug("PA 0x%lx is outside of EPM! Moving to 0x%lx", pa, __pa(new_page));
+      copy_physical_page(
+          __pa(new_page), pa,
+          kernel_va_to_pa(__copy_physical_page_switch_to_pa));
+
+      unsigned long free_ppn = ppn(__pa(new_page));
+      t[idx] = pte_create(free_ppn, t[idx]);
+    }
 
     t = (pte*) __va(pte_ppn(t[idx]) << RISCV_PAGE_BITS);
   }
@@ -122,7 +140,11 @@ free_page(uintptr_t vpn){
   paging_dec_user_page();
 #endif
   // Return phys page
-  spa_put(__va(ppn << RISCV_PAGE_BITS));
+
+  // if pa is outside of EPM, skip
+  uintptr_t pa = ppn << RISCV_PAGE_BITS;
+  if (pa >= load_pa_start && pa < load_pa_start + load_pa_size)
+    spa_put(__va(ppn << RISCV_PAGE_BITS));
 
   return;
 
