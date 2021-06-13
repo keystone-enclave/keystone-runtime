@@ -21,6 +21,10 @@
 #include "linux_wrap.h"
 #endif /* LINUX_SYSCALL_WRAPPING */
 
+#ifdef NET_SYSCALL_WRAPPING
+#include "net_wrap.h"
+#endif /* NET_SYSCALL_WRAPPING */
+
 extern void exit_enclave(uintptr_t arg0);
 
 uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr, size_t data_len){
@@ -246,6 +250,14 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_munmap):
     ret = syscall_munmap((void*) arg0, (size_t)arg1);
     break;
+  
+  case(SYS_getcwd): 
+    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
+    break;
+
+  case(SYS_pipe2):
+    ret = io_syscall_pipe((int*)arg0);
+    break;
 
   case(SYS_exit):
   case(SYS_exit_group):
@@ -291,12 +303,6 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_close):
     ret = io_syscall_close((int)arg0);
     break;
-  case(SYS_getcwd): 
-    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
-    break;
-  case(SYS_pipe2):
-    ret = io_syscall_pipe((int*)arg0);
-    break;
   case(SYS_epoll_create1):
     ret = io_syscall_epoll_create((int) arg0); 
     break;
@@ -305,21 +311,6 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   case(SYS_epoll_pwait):
     ret = io_syscall_epoll_pwait((int) arg0, (uintptr_t) arg1, (int) arg2, (int) arg3); 
-    break;
-  case(SYS_socket):
-    ret = io_syscall_socket((int) arg0, (int) arg1, (int) arg2); 
-    break; 
-  case(SYS_setsockopt):
-    ret = io_syscall_setsockopt((int) arg0, (int) arg1, (int) arg2, (int *) arg3, (int) arg4); 
-    break; 
-  case (SYS_bind):
-    ret = io_syscall_bind((int) arg0, (uintptr_t) arg1, (int) arg2);
-    break;
-  case (SYS_listen):
-    ret = io_syscall_listen((int) arg0, (uintptr_t) arg1);
-    break;
-  case (SYS_accept):
-    ret = io_syscall_accept((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2);
     break;
   case(SYS_fcntl): 
     ret = io_syscall_fcntl((int)arg0, (int)arg1, (uintptr_t)arg2);
@@ -337,6 +328,24 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = io_syscall_umask((int) arg0);
     break;
 #endif /* IO_SYSCALL_WRAPPING */
+
+#ifdef NET_SYSCALL_WRAPPING
+  case(SYS_socket):
+    ret = io_syscall_socket((int) arg0, (int) arg1, (int) arg2); 
+    break; 
+  case(SYS_setsockopt):
+    ret = io_syscall_setsockopt((int) arg0, (int) arg1, (int) arg2, (int *) arg3, (int) arg4); 
+    break; 
+  case (SYS_bind):
+    ret = io_syscall_bind((int) arg0, (uintptr_t) arg1, (int) arg2);
+    break;
+  case (SYS_listen):
+    ret = io_syscall_listen((int) arg0, (uintptr_t) arg1);
+    break;
+  case (SYS_accept):
+    ret = io_syscall_accept((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2);
+    break;
+#endif /* NET_SYSCALL_WRAPPING */
 
 
   case(RUNTIME_SYSCALL_UNKNOWN):
