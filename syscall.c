@@ -250,14 +250,6 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_munmap):
     ret = syscall_munmap((void*) arg0, (size_t)arg1);
     break;
-  
-  case(SYS_getcwd): 
-    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
-    break;
-
-  case(SYS_pipe2):
-    ret = io_syscall_pipe((int*)arg0);
-    break;
 
   case(SYS_exit):
   case(SYS_exit_group):
@@ -327,6 +319,13 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_umask): 
     ret = io_syscall_umask((int) arg0);
     break;
+  case(SYS_getcwd): 
+    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
+    break;
+  case(SYS_pipe2):
+    ret = io_syscall_pipe((int*)arg0);
+    break;
+
 #endif /* IO_SYSCALL_WRAPPING */
 
 #ifdef NET_SYSCALL_WRAPPING
