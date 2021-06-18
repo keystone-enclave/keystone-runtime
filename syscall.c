@@ -310,9 +310,6 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_chdir): 
     ret = io_syscall_chdir((char *) arg0);
     break;
-  case(SYS_getpeername): 
-    ret = io_syscall_getpeername((int) arg0,  (uintptr_t) arg1, (uintptr_t) arg2);
-    break;
   case(SYS_renameat2): 
     ret = io_syscall_renameat2((int) arg0, (uintptr_t) arg1,  (int) arg2, (uintptr_t) arg3, (int) arg4);
     break;
@@ -343,6 +340,9 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   case (SYS_accept):
     ret = io_syscall_accept((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2);
+    break;
+  case(SYS_getpeername): 
+    ret = io_syscall_getpeername((int) arg0,  (uintptr_t) arg1, (uintptr_t) arg2);
     break;
 #endif /* NET_SYSCALL_WRAPPING */
 

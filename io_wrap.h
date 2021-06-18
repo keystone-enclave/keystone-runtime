@@ -28,7 +28,6 @@ uintptr_t io_syscall_epoll_ctl(int epfd, int op, int fd, uintptr_t event);
 uintptr_t io_syscall_getcwd(char* buf, size_t size);
 uintptr_t io_syscall_chdir(char* path);
 uintptr_t io_syscall_epoll_pwait(int epfd, uintptr_t events, int maxevents, int timeout);
-uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_renameat2(int olddirfd,  uintptr_t oldpath, int newdirfd, uintptr_t newpath, unsigned int flags);
 uintptr_t io_syscall_umask(int mask);
 #endif /* _IO_WRAP_H_ */

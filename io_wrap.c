@@ -405,13 +405,7 @@ uintptr_t io_syscall_getcwd(char* buf, size_t size){
 
   dispatch_edgecall_syscall(edge_syscall, totalsize);
 
-  // if(syscall_ret != 0){
   copy_to_user(buf, &args->buf, size);
-  //   print_strace("[runtime] proxied getcwd\r\n");
-  // } else {
-  //   buf = NULL;
-  //   print_strace("[runtime] failed to proxy getcwd\n");
-  // }
   print_strace("[runtime] proxied getcwd\r\n");
   return (uintptr_t) buf;
 }
@@ -454,27 +448,6 @@ uintptr_t io_syscall_epoll_pwait(int epfd, uintptr_t events, int maxevents, int 
 
   copy_to_user((void *) events, &args->events, sizeof(struct epoll_event));
   print_strace("[runtime] proxied epoll_pwait: epfd: %d, ret: %d\r\n", args->epfd, ret);
-  return ret;
-}
-
-uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
-                       uintptr_t addrlen){
-           uintptr_t ret = -1;
-  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
-  sargs_SYS_getpeername* args = (sargs_SYS_getpeername*) edge_syscall->data;
-
-  edge_syscall->syscall_num = SYS_getpeername;
-
-  args->sockfd = sockfd;
-
-  copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t)); 
-  copy_from_user(&args->addr, (void *) addr, args->addrlen);  
-
-
-  size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_getpeername);
-  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-
-  print_strace("[runtime] proxied getpeername: fd: %d, ret: %d\r\n", args->sockfd, ret);
   return ret;
 }
 
