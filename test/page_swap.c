@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 
 #include "mock.h"
@@ -73,21 +74,23 @@ pfree(uintptr_t page) {
   assert_int_equal(res, 0);
 }
 
-typedef struct {
-  uint8_t dat[32];
-} hash_s;
-static hash_s
+uintptr_t
+spa_get(void) {
+  return palloc();
+}
+
+static hash_t
 hash_page(uintptr_t page) {
-  hash_s out;
+  hash_t out;
   SHA256_CTX sha;
   sha256_init(&sha);
   sha256_update(&sha, (uint8_t*)page, RISCV_PAGE_SIZE);
-  sha256_final(&sha, out.dat);
+  sha256_final(&sha, out.val);
   return out;
 }
 static bool
-hash_eq(hash_s* h1, hash_s* h2) {
-  return !memcmp(h1, h2, sizeof(hash_s));
+hash_eq(hash_t* h1, hash_t* h2) {
+  return !memcmp(h1, h2, sizeof(hash_t));
 }
 
 static double
@@ -142,22 +145,24 @@ test_swap_out_in() {
   uintptr_t front_page = palloc();
   rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
 
-  hash_s back_hash  = hash_page(back_page);
-  hash_s front_hash = hash_page(front_page);
+  hash_t back_hash  = hash_page(back_page);
+  hash_t front_hash = hash_page(front_page);
 
-  page_swap_epm(back_page, front_page, 0);
+  int err = page_swap_epm(back_page, front_page, 0);
+  assert(!err);
 
-  hash_s back_swp_hash  = hash_page(back_page);
-  hash_s front_swp_hash = hash_page(front_page);
+  hash_t back_swp_hash  = hash_page(back_page);
+  hash_t front_swp_hash = hash_page(front_page);
   assert_false(hash_eq(&back_hash, &back_swp_hash));
   assert_true(hash_eq(&front_hash, &front_swp_hash));
 
   // Randomize front_page and then swap back in our old front_page
   rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
-  page_swap_epm(back_page, front_page, back_page);
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(!err);
 
-  hash_s back_swp_hash2  = hash_page(back_page);
-  hash_s front_swp_hash2 = hash_page(front_page);
+  hash_t back_swp_hash2  = hash_page(back_page);
+  hash_t front_swp_hash2 = hash_page(front_page);
   assert_false(hash_eq(&back_hash, &back_swp_hash2));
   assert_false(hash_eq(&back_swp_hash, &back_swp_hash2));
   assert_true(hash_eq(&front_hash, &front_swp_hash2));
@@ -165,11 +170,128 @@ test_swap_out_in() {
   pfree(front_page);
 }
 
+void
+test_corrupt_back_page() {
+  pswap_init();
+
+  uintptr_t back_page  = paging_alloc_backing_page();
+  uintptr_t front_page = palloc();
+  rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
+
+  int err = page_swap_epm(back_page, front_page, 0);
+  assert(!err);
+
+  // Flip a random bit in the page
+  *(uint8_t*)(back_page + rand() % RISCV_PAGE_SIZE) ^= (1 << (rand() % 8));
+
+  // Now we should see an error swapping the page back in
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(err);
+
+  pfree(front_page);
+}
+
+void
+test_corrupt_back_page_hmac() {
+  pswap_init();
+
+  uintptr_t back_page  = paging_alloc_backing_page();
+  uintptr_t front_page = palloc();
+  rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
+
+  int err = page_swap_epm(back_page, front_page, 0);
+  assert(!err);
+
+  // Flip a random bit in the hmac
+  hash_t* hmac = pswap_pageout_hmac(back_page);
+  *(uint8_t*)(back_page + rand() % sizeof(hash_t)) ^= (1 << (rand() % 8));
+
+  // Now we should see an error swapping the page back in
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(err);
+
+  pfree(front_page);
+}
+
+void
+test_replay_back_page() {
+  pswap_init();
+
+  uintptr_t back_page  = paging_alloc_backing_page();
+  uintptr_t front_page = palloc();
+  rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
+
+  uint8_t* back_page_backup = (uint8_t*)palloc();
+  hash_t back_hmac_backup;
+
+  // Swap the page out
+  int err = page_swap_epm(back_page, front_page, 0);
+  assert(!err);
+  memcpy(back_page_backup, (void*)back_page, RISCV_PAGE_SIZE);
+  back_hmac_backup = *pswap_pageout_hmac(back_page);
+
+  // Swap another page
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(!err);
+
+  // Restore the backups
+  memcpy((void*)back_page, back_page_backup, RISCV_PAGE_SIZE);
+  *pswap_pageout_hmac(back_page) = back_hmac_backup;
+
+  // Swapping in should fail
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(err);
+
+  pfree(front_page);
+  pfree((uintptr_t)back_page_backup);
+}
+
+void
+test_invasive_replay() {
+  pswap_init();
+
+  uintptr_t back_page  = paging_alloc_backing_page();
+  uintptr_t front_page = palloc();
+  rt_util_getrandom((void*)front_page, RISCV_PAGE_SIZE);
+
+  uint8_t* back_page_backup = (uint8_t*)palloc();
+  hash_t back_hmac_backup;
+  uint64_t back_ctr_backup;
+
+  // Swap the page out
+  int err = page_swap_epm(back_page, front_page, 0);
+  assert(!err);
+  memcpy(back_page_backup, (void*)back_page, RISCV_PAGE_SIZE);
+  back_hmac_backup = *pswap_pageout_hmac(back_page);
+  back_ctr_backup  = *pswap_pageout_ctr(back_page);
+
+  // Swap another page
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(!err);
+
+  // Restore the backups
+  memcpy((void*)back_page, back_page_backup, RISCV_PAGE_SIZE);
+  *pswap_pageout_hmac(back_page) = back_hmac_backup;
+  *pswap_pageout_ctr(back_page)  = back_ctr_backup;
+
+  // Swapping in should succeed because we somehow restored the page counter
+  // This should not be possible in a real attack
+  err = page_swap_epm(back_page, front_page, back_page);
+  assert(!err);
+
+  pfree(front_page);
+  pfree((uintptr_t)back_page_backup);
+}
+
 int
 main() {
   const struct CMUnitTest tests[] = {
       cmocka_unit_test(test_swapout_randomness),
       cmocka_unit_test(test_swap_out_in),
+      cmocka_unit_test(test_corrupt_back_page),
+      cmocka_unit_test(test_corrupt_back_page_hmac),
+      cmocka_unit_test(test_replay_back_page),
+      cmocka_unit_test(test_invasive_replay),
   };
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

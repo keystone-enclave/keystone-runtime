@@ -208,7 +208,8 @@ uintptr_t paging_evict_and_free_one(uintptr_t swap_va)
   assert(target_pte && (*target_pte & PTE_U));
 
   src_pa = pte_ppn(*target_pte) << RISCV_PAGE_BITS;
-  page_swap_epm(dest_va, __va(src_pa), swap_va);
+  int err = page_swap_epm(dest_va, __va(src_pa), swap_va);
+  assert(!err);
 
   /* invalidate target PTE */
   *target_pte = pte_create_invalid(ppn(__paging_pa(dest_va)),

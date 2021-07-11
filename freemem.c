@@ -1,9 +1,10 @@
 #ifdef USE_FREEMEM
-#include "string.h"
-#include "common.h"
-#include "vm.h"
 #include "freemem.h"
+
+#include "common.h"
 #include "paging.h"
+#include "string.h"
+#include "vm_defs.h"
 
 /* This file implements a simple page allocator (SPA)
  * which stores the pages based on a linked list.
@@ -16,7 +17,16 @@
  * spa_free_pages will only hold the head and the tail pages so that
  * SPA can allocate/free a page in constant time. */
 
+uintptr_t freemem_va_start;
+size_t freemem_size;
+
 static struct pg_list spa_free_pages;
+
+__attribute__((weak)) bool
+spa_page_inbounds(uintptr_t page_addr) {
+  return page_addr >= EYRIE_LOAD_START &&
+         page_addr < (freemem_va_start + freemem_size);
+}
 
 /* get a free page from the simple page allocator */
 uintptr_t
@@ -48,7 +58,7 @@ __spa_get(bool zero)
   spa_free_pages.head = next;
   spa_free_pages.count--;
 
-  assert(free_page > EYRIE_LOAD_START && free_page < (freemem_va_start + freemem_size));
+  assert(spa_page_inbounds(free_page));
 
   if (zero)
     memset((void*)free_page, 0, RISCV_PAGE_SIZE);
@@ -66,7 +76,7 @@ spa_put(uintptr_t page_addr)
   uintptr_t prev;
 
   assert(IS_ALIGNED(page_addr, RISCV_PAGE_BITS));
-  assert(page_addr >= EYRIE_LOAD_START && page_addr < (freemem_va_start  + freemem_size));
+  assert(spa_page_inbounds(page_addr));
 
   if (!LIST_EMPTY(spa_free_pages)) {
     prev = spa_free_pages.tail;
