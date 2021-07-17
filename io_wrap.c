@@ -326,7 +326,6 @@ uintptr_t io_syscall_epoll_create(int size){
   sargs_SYS_epoll_create1 *args = (sargs_SYS_epoll_create1 *) edge_syscall->data;
 
   args->size = size; 
-  printf("epoll-create: %d\n", args->size);
 
   size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_epoll_create1);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
