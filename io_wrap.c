@@ -486,6 +486,7 @@ uintptr_t io_syscall_umask(int mask){
 
   print_strace("[runtime] proxied umask: mask: %d, ret: %d\r\n", args->mask, ret);
   return ret;
+}
   
 uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
@@ -507,67 +508,6 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
   print_strace("[runtime] proxied fstat = %li\r\n", ret);
   return ret;
 
-}
-
-uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg){ 
-  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
-  sargs_SYS_fcntl* args = (sargs_SYS_fcntl*)edge_syscall->data;
-  uintptr_t ret = -1;
-
-  edge_syscall->syscall_num = SYS_fcntl;
-  args->fd = fd;
-  args->cmd = cmd;
-
-  size_t totalsize;
-  if (cmd == F_SETLK || cmd == F_SETLKW || cmd == F_GETLK) {
-    print_strace("F_SETLK, FSETLKW, or FGETLK");
-    if(edge_call_check_ptr_valid((uintptr_t)args->arg, sizeof(struct flock)) != 0){
-      print_strace("Ptr not valid");
-      goto done;
-    }
-    copy_from_user((struct flock *) args->arg, (struct flock *) arg, sizeof(struct flock));
-    args->has_struct = 1;
-
-    totalsize = (sizeof(struct edge_syscall) +
-                      sizeof(sargs_SYS_fcntl) + 
-                      sizeof(struct flock));
-  } else {
-    args->arg[0] = arg;
-    args->has_struct = 0;
-    totalsize = (sizeof(struct edge_syscall) +
-                      sizeof(sargs_SYS_fcntl));
-  }
-
-  
-
-  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-
- done: 
-  print_strace("[runtime] proxied fcntl = %li\r\n", ret);
-  return ret;
-}
-
-uintptr_t io_syscall_getcwd(char* buf, size_t size){ 
-  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
-  sargs_SYS_getcwd* args = (sargs_SYS_getcwd*)edge_syscall->data;
-  char* syscall_ret = NULL;
-  
-  edge_syscall->syscall_num = SYS_getcwd;
-
-  size_t totalsize = (sizeof(struct edge_syscall) +
-                      sizeof(sargs_SYS_getcwd));
-
-  syscall_ret = (char *) dispatch_edgecall_syscall(edge_syscall, totalsize);
-
-  if(syscall_ret != 0){
-    copy_to_user(buf, &args->buf, size);
-    print_strace("[runtime] proxied getcwd\r\n");
-  } else {
-    buf = NULL;
-    print_strace("[runtime] failed to proxy getcwd\n");
-  }
- 
-  return (uintptr_t) buf;
 }
 
 uintptr_t io_syscall_ioctl(int fd, unsigned long request, uintptr_t arg) {

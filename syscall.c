@@ -283,12 +283,6 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_fstat): 
     ret = io_syscall_fstat((int)arg0, (struct stat*)arg1); 
     break;
-  case(SYS_fcntl): 
-    ret = io_syscall_fcntl((int)arg0, (int)arg1, (uintptr_t)arg2);
-    break;
-  case(SYS_getcwd): 
-    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
-    break;
   case(SYS_ioctl): 
     ret = io_syscall_ioctl((int)arg0, (int)arg1, (uintptr_t)arg2);
     break;
@@ -366,7 +360,7 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
   }
 
-
+  /* store the result in the stack */
   ctx->regs.a0 = ret;
   return;
 }
