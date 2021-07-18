@@ -8,8 +8,6 @@
 #include "edge_syscall.h"
 #include <fcntl.h>
 #include <sys/epoll.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
 
 /* Syscalls iozone uses in -i0 mode
 *** Fake these
