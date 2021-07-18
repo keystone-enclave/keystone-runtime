@@ -17,7 +17,6 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
 uintptr_t io_syscall_fstat(int fd, struct stat *statbuf);
 uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg);
 uintptr_t io_syscall_getcwd(char* buf, size_t size);
-uintptr_t io_syscall_ioctl(int fd, unsigned long request, uintptr_t arg);
 uintptr_t io_syscall_unlinkat(int dirfd, char* path,
                               int flags);
 uintptr_t io_syscall_fsync(int fd);

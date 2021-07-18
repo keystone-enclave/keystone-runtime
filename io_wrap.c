@@ -510,31 +510,4 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
 
 }
 
-uintptr_t io_syscall_ioctl(int fd, unsigned long request, uintptr_t arg) {
-  // struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
-  // sargs_SYS_ioctl* args = (sargs_SYS_ioctl*)edge_syscall->data;
-  // uintptr_t ret = -1;
-
-  // edge_syscall->syscall_num = SYS_ioctl;
-  // args->fd = fd;
-  // args->request = request; 
-  
-
-  // size_t totalsize = (sizeof(struct edge_syscall) +
-  //                     sizeof(sargs_SYS_ioctl));
-
-  // ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
-
-  // print_strace("[runtime] proxied ioctl = %li\r\n", ret);
-  uintptr_t ret = -1; 
-  if (fd == 1 && request == TIOCGWINSZ) {
-    ret = 0;
-    int arg_val = 80;
-
-    copy_to_user((int*) arg, &arg_val, sizeof(arg_val));
-  }
-  print_strace("[runtime] mocked ioctl = %li\r\n", ret);
-  return ret;
-}
-
 #endif /* IO_SYSCALL_WRAPPING */

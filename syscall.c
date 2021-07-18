@@ -283,9 +283,6 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_fstat): 
     ret = io_syscall_fstat((int)arg0, (struct stat*)arg1); 
     break;
-  case(SYS_ioctl): 
-    ret = io_syscall_ioctl((int)arg0, (int)arg1, (uintptr_t)arg2);
-    break;
   case(SYS_lseek):
     ret = io_syscall_lseek((int)arg0, (off_t)arg1, (int)arg2);
     break;
