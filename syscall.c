@@ -286,7 +286,8 @@ void handle_syscall(struct encl_ctx* ctx)
 
   case(SYS_clone):
     print_strace("[runtime] clone\r\n");
-    sbi_stop_enclave(SBI_STOP_REQ_CLONE);
+    sbi_snapshot();
+    // sbi_stop_enclave(SBI_STOP_REQ_CLONE);
     break;
 #endif /* LINUX_SYSCALL_WRAPPING */
 
