@@ -95,14 +95,16 @@ sbi_snapshot()
   register uintptr_t a2 __asm__ ("a2"); /* next free page */
   register uintptr_t a3 __asm__ ("a3"); /* utm base */
   register uintptr_t a4 __asm__ ("a4"); /* utm size */
+  register uintptr_t a5 __asm__ ("a5"); /* retval */
 
-  uintptr_t dram_base, dram_size, next_free, utm_base, utm_size;
+  uintptr_t dram_base, dram_size, next_free, utm_base, utm_size, retval;
 
   dram_base = a0;
   dram_size = a1;
   next_free = a2;
   utm_base = a3;
   utm_size = a4;
+  retval = a5;
 
   debug("dram_base: %lx", dram_base);
   debug("dram_size: %lx", dram_size);
@@ -139,10 +141,11 @@ sbi_snapshot()
   debug("free_pa = %lx", __pa(freemem_va_start));
   debug("free_pa(walk) = %lx", translate(freemem_va_start));
   debug("load start (pa) = %lx", translate(EYRIE_LOAD_START));
+  debug("retval = %lx", retval);
 
   map_untrusted_memory(utm_base, utm_size);
 
   /* re-init freemem */
   spa_init(freemem_va_start, freemem_size);
-  return 0;
+  return retval;
 }
