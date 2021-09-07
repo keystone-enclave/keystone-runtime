@@ -215,7 +215,7 @@ void handle_syscall(struct encl_ctx* ctx)
     // struct sbi_snapshot_ret snapshot_ret;
     //uintptr_t pa_snapshot_ret = kernel_va_to_pa(&snapshot_ret);
 
-    sbi_snapshot();
+    ret = sbi_snapshot();
 
     //0xffffffffc0009018
     //load_pa_child_start = snapshot_ret.dram_base;
@@ -286,7 +286,7 @@ void handle_syscall(struct encl_ctx* ctx)
 
   case(SYS_clone):
     print_strace("[runtime] clone\r\n");
-    sbi_snapshot();
+    ret = sbi_snapshot();
     // sbi_stop_enclave(SBI_STOP_REQ_CLONE);
     break;
 #endif /* LINUX_SYSCALL_WRAPPING */
@@ -313,8 +313,8 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_fstatat):
     ret = io_syscall_fstatat((int)arg0, (char*)arg1, (struct stat*)arg2, (int)arg3);
     break;
-  case(SYS_fstat): 
-    ret = io_syscall_fstat((int)arg0, (struct stat*)arg1); 
+  case(SYS_fstat):
+    ret = io_syscall_fstat((int)arg0, (struct stat*)arg1);
     break;
   case(SYS_lseek):
     ret = io_syscall_lseek((int)arg0, (off_t)arg1, (int)arg2);
@@ -332,28 +332,28 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = io_syscall_close((int)arg0);
     break;
   case(SYS_epoll_create1):
-    ret = io_syscall_epoll_create((int) arg0); 
+    ret = io_syscall_epoll_create((int) arg0);
     break;
   case(SYS_epoll_ctl):
-    ret = io_syscall_epoll_ctl((int) arg0, (int) arg1, (int) arg2, (uintptr_t) arg3); 
+    ret = io_syscall_epoll_ctl((int) arg0, (int) arg1, (int) arg2, (uintptr_t) arg3);
     break;
   case(SYS_epoll_pwait):
-    ret = io_syscall_epoll_pwait((int) arg0, (uintptr_t) arg1, (int) arg2, (int) arg3); 
+    ret = io_syscall_epoll_pwait((int) arg0, (uintptr_t) arg1, (int) arg2, (int) arg3);
     break;
-  case(SYS_fcntl): 
+  case(SYS_fcntl):
     ret = io_syscall_fcntl((int)arg0, (int)arg1, (uintptr_t)arg2);
     break;
-  case(SYS_chdir): 
+  case(SYS_chdir):
     ret = io_syscall_chdir((char *) arg0);
     break;
-  case(SYS_renameat2): 
+  case(SYS_renameat2):
     ret = io_syscall_renameat2((int) arg0, (uintptr_t) arg1,  (int) arg2, (uintptr_t) arg3, (int) arg4);
     break;
-  case(SYS_umask): 
+  case(SYS_umask):
     ret = io_syscall_umask((int) arg0);
     break;
-  case(SYS_getcwd): 
-    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1); 
+  case(SYS_getcwd):
+    ret = io_syscall_getcwd((char *)arg0, (size_t)arg1);
     break;
   case(SYS_pipe2):
     ret = io_syscall_pipe((int*)arg0);
@@ -363,11 +363,11 @@ void handle_syscall(struct encl_ctx* ctx)
 
 #ifdef NET_SYSCALL_WRAPPING
   case(SYS_socket):
-    ret = io_syscall_socket((int) arg0, (int) arg1, (int) arg2); 
-    break; 
+    ret = io_syscall_socket((int) arg0, (int) arg1, (int) arg2);
+    break;
   case(SYS_setsockopt):
-    ret = io_syscall_setsockopt((int) arg0, (int) arg1, (int) arg2, (int *) arg3, (int) arg4); 
-    break; 
+    ret = io_syscall_setsockopt((int) arg0, (int) arg1, (int) arg2, (int *) arg3, (int) arg4);
+    break;
   case (SYS_bind):
     ret = io_syscall_bind((int) arg0, (uintptr_t) arg1, (int) arg2);
     break;
@@ -377,7 +377,7 @@ void handle_syscall(struct encl_ctx* ctx)
   case (SYS_accept):
     ret = io_syscall_accept((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2);
     break;
-  case(SYS_getpeername): 
+  case(SYS_getpeername):
     ret = io_syscall_getpeername((int) arg0,  (uintptr_t) arg1, (uintptr_t) arg2);
     break;
 #endif /* NET_SYSCALL_WRAPPING */
