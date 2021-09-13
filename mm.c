@@ -161,6 +161,8 @@ test_va_range(uintptr_t vpn, size_t count){
     pte* pte = __walk_internal(root_page_table, (vpn+i) << RISCV_PAGE_BITS, 0);
     // If the page exists and is valid then we cannot use it
     if(pte && *pte){
+      if (vpn == 0x240000)
+        printf("break %lx %lx\n", pte, *pte);
       break;
     }
   }
@@ -203,7 +205,7 @@ __map_with_reserved_page_table_32(uintptr_t dram_base,
   if (!l2_pt) {
     leaf_level = 1;
     leaf_pt = root_page_table;
-    dram_max = -1UL; 
+    dram_max = -1UL;
   }
 
   assert(dram_size <= dram_max);

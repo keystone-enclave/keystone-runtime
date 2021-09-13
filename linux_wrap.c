@@ -113,7 +113,7 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   int pte_flags = PTE_U | PTE_A;
 
-  if(flags != (MAP_ANONYMOUS | MAP_PRIVATE) || fd != -1){
+  if((flags & ~(MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED)) || fd != -1) {
     // we don't support mmaping any other way yet
     goto done;
   }
@@ -133,29 +133,51 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
 
   // Do we have enough available phys pages?
   if( req_pages > spa_available()){
+    printf("no pages\n");
     goto done;
   }
 
-  // Start looking at EYRIE_ANON_REGION_START for VA space
-  uintptr_t starting_vpn = vpn(EYRIE_ANON_REGION_START);
+  uintptr_t starting_vpn;
   uintptr_t valid_pages;
-  while((starting_vpn + req_pages) <= EYRIE_ANON_REGION_END){
-    valid_pages = test_va_range(starting_vpn, req_pages);
 
-    if(req_pages == valid_pages){
-      // Set a successful value if we allocate
-      // TODO free partial allocation on failure
-      if(alloc_pages(starting_vpn, req_pages, pte_flags) == req_pages){
-        ret = starting_vpn << RISCV_PAGE_BITS;
-      }
-      break;
+  // if MAP_FIXED is set
+  if (flags & MAP_FIXED) {
+    if (addr < (void*)EYRIE_ANON_REGION_START || addr >= (void*)EYRIE_ANON_REGION_END) {
+      printf("addr %lx not in range %lx - %lx\n", addr, EYRIE_ANON_REGION_START, EYRIE_ANON_REGION_END);
+      goto done;
     }
-    else
-      starting_vpn += valid_pages + 1;
+    starting_vpn = (uintptr_t)addr >> RISCV_PAGE_BITS;
+    valid_pages = test_va_range(starting_vpn, req_pages);
+  } else {
+    // Start looking at EYRIE_ANON_REGION_START for VA space
+    starting_vpn = vpn(EYRIE_ANON_REGION_START);
+    while((starting_vpn + req_pages) <= (EYRIE_ANON_REGION_END >> RISCV_PAGE_BITS)){
+      valid_pages = test_va_range(starting_vpn, req_pages);
+
+      if(req_pages == valid_pages) {
+        break;
+      }
+      else
+        starting_vpn += valid_pages + 1;
+    }
+  }
+
+  if (valid_pages != req_pages) {
+    printf("no allocation (%d != %d)\n", valid_pages, req_pages);
+    goto done;
+  }
+
+  //printf("starting_vpn: %d, req_pages: %d\n", starting_vpn, req_pages);
+  // Set a successful value if we allocate
+  // TODO free partial allocation on failure
+  if (alloc_pages(starting_vpn, req_pages, pte_flags) == req_pages) {
+    ret = starting_vpn << RISCV_PAGE_BITS;
   }
 
  done:
-  print_strace("[runtime] [mmap]: addr: 0x%p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%p\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
+  //print_strace("[runtime] [mmap]: addr: 0x%p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%p\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
+  if ((uintptr_t)addr == 0x240000000)
+    printf("[runtime] [mmap]: addr: 0x%p, length %lu, prot 0x%x, flags 0x%x, fd %i, offset %lu (%li pages %x) = 0x%p\r\n", addr, length, prot, flags, fd, offset, req_pages, pte_flags, ret);
 
   // If we get here everything went wrong
   return ret;

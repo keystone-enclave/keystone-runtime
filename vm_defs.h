@@ -36,9 +36,9 @@
 #define EYRIE_LOAD_START 0xffffffff00000000
 #define EYRIE_PAGING_START 0xffffffff40000000
 #define EYRIE_UNTRUSTED_START 0xffffffff80000000
-#define EYRIE_USER_STACK_START 0x0000000040000000
+#define EYRIE_USER_STACK_START EYRIE_LOAD_START
 #define EYRIE_ANON_REGION_START \
-  0x0000002000000000  // Arbitrary VA to start looking for large mappings
+  0x0000000200000000  // Arbitrary VA to start looking for large mappings
 #elif __riscv_xlen == 32
 #define EYRIE_LOAD_START 0xf0000000
 #define EYRIE_PAGING_START 0x40000000
@@ -48,9 +48,9 @@
   0x20000000  // Arbitrary VA to start looking for large mappings
 #endif
 
-#define EYRIE_ANON_REGION_END EYRIE_LOAD_START
-#define EYRIE_USER_STACK_SIZE 0x20000
+#define EYRIE_USER_STACK_SIZE 0x100000
 #define EYRIE_USER_STACK_END (EYRIE_USER_STACK_START - EYRIE_USER_STACK_SIZE)
+#define EYRIE_ANON_REGION_END EYRIE_USER_STACK_END
 
 #define PTE_V 0x001  // Valid
 #define PTE_R 0x002  // Read
