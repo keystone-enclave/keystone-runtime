@@ -35,7 +35,7 @@ __spa_get(bool zero)
     else
 #endif
     {
-      warn("eyrie simple page allocator cannot evict and free pages");
+      warn("eyrie simple page allocator failed to get a free page");
       return 0;
     }
   }

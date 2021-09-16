@@ -106,8 +106,8 @@ sbi_snapshot()
   utm_size = a4;
   retval = a5;
 
-  debug("dram_base: %lx", dram_base);
-  debug("dram_size: %lx", dram_size);
+  debug("returning from snapshot");
+  debug("dram range: %lx - %lx (size: %lx)", dram_base, dram_base + dram_size, dram_size);
   debug("next_free: %lx", next_free);
 
   uintptr_t runtime_paddr = dram_base + 3*(1<<RISCV_PAGE_BITS);
