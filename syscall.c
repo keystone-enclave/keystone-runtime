@@ -142,11 +142,8 @@ uintptr_t handle_copy_from_shared(void* dst, uintptr_t offset, size_t size){
   return copy_to_user(dst, (void*)src_ptr, size);
 }
 
-uintptr_t getSharedBuffer() {return shared_buffer;}
-size_t getSharedBufferSize() {return shared_buffer_size;}
-
 void init_edge_internals(){
-  edge_call_init_internals(getSharedBuffer, getSharedBufferSize);
+  edge_call_init_internals(shared_buffer, shared_buffer_size);
 }
 
 void handle_syscall(struct encl_ctx* ctx)
