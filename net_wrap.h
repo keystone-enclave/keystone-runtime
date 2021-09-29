@@ -1,6 +1,6 @@
-#ifdef IO_NET_SYSCALL_WRAPPING
-#ifndef _IO_NET_WRAP_H_
-#define _IO_NET_WRAP_H_
+#ifdef NET_SYSCALL_WRAPPING
+#ifndef _NET_WRAP_H_
+#define _NET_WRAP_H_
 
 #include <sys/uio.h>
 #include <sys/types.h>
@@ -14,5 +14,5 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_getuid();
 
-#endif /* _IO_NET_WRAP_H_ */
-#endif /* IO_NET_SYSCALL_WRAPPING */
+#endif /* _NET_WRAP_H_ */
+#endif /* NET_SYSCALL_WRAPPING */
