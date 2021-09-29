@@ -1,4 +1,4 @@
-#ifdef IO_NET_SYSCALL_WRAPPING
+#ifdef NET_SYSCALL_WRAPPING
 #include <stdint.h>
 #include "io_wrap.h"
 #include <alloca.h>
@@ -158,4 +158,4 @@ uintptr_t io_syscall_getuid() {
   return ret;
 }
 
-#endif /* IO_NET_SYSCALL_WRAPPING */ 
+#endif /* NET_SYSCALL_WRAPPING */ 
