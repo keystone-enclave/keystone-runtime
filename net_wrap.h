@@ -12,6 +12,7 @@ uintptr_t io_syscall_bind (int sockfd, uintptr_t addr, socklen_t addrlen);
 uintptr_t io_syscall_listen(int sockfd, int backlog);
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen);
+uintptr_t io_syscall_getuid();
 
 #endif /* _IO_NET_WRAP_H_ */
 #endif /* IO_NET_SYSCALL_WRAPPING */
