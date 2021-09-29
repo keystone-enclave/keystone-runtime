@@ -145,4 +145,17 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
   return ret;
 }
 
+uintptr_t io_syscall_getuid() {
+  uintptr_t ret = -1; 
+  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+
+  edge_syscall->syscall_num = SYS_getuid;
+
+  size_t totalsize = (sizeof(struct edge_syscall));
+  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+  print_strace("[runtime] proxied getuid, ret: %d\r\n", ret);
+  return ret;
+}
+
 #endif /* IO_NET_SYSCALL_WRAPPING */ 
