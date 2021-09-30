@@ -244,9 +244,9 @@ snapshot_trampoline_exit:
 resume_with_virtual_address:
   mv a0, s0 /* dram base */
   mv a1, s1 /* dram size */
-  mv a2, s6 /* free page start */
-  mv a3, s2 /* utm base */
-  mv a4, s3 /* utm size */
+  mv a2, s2 /* utm base */
+  mv a3, s3 /* utm size */
+  mv a4, s6 /* free page start */
   LOAD s0, 0*REGBYTES(sp)
   LOAD s1, 1*REGBYTES(sp)
   LOAD s2, 2*REGBYTES(sp)

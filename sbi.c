@@ -84,26 +84,32 @@ extern uintptr_t rt_trap_table;
 uintptr_t
 sbi_snapshot()
 {
+  static bool is_first_time_snapshot = true;
   uintptr_t pc = kernel_va_to_pa(&boot_cloned_enclave);
   uintptr_t* trap_table = &rt_trap_table;
-  //uintptr_t resume_va = kernel_va_to_pa(&rtbreakpoint);
-  //if(resume_va);
   trap_table[RISCV_EXCP_STORE_FAULT] = (uintptr_t) handle_copy_on_write;
-  snapshot_trampoline(pc);
+
+  if (is_first_time_snapshot) {
+    snapshot_trampoline(pc);
+  } else {
+    // TODO we don't need to pass pc
+    SBI_CALL_1(SBI_EXT_EXPERIMENTAL_KEYSTONE_ENCLAVE, SBI_SM_SNAPSHOT, 0);
+  }
+
   register uintptr_t a0 __asm__ ("a0"); /* dram base */
   register uintptr_t a1 __asm__ ("a1"); /* dram size */
-  register uintptr_t a2 __asm__ ("a2"); /* next free page */
-  register uintptr_t a3 __asm__ ("a3"); /* utm base */
-  register uintptr_t a4 __asm__ ("a4"); /* utm size */
+  register uintptr_t a2 __asm__ ("a2"); /* utm base */
+  register uintptr_t a3 __asm__ ("a3"); /* utm size */
+  register uintptr_t a4 __asm__ ("a4"); /* next free page */
   register uintptr_t a5 __asm__ ("a5"); /* retval */
 
   uintptr_t dram_base, dram_size, next_free, utm_base, utm_size, retval;
 
   dram_base = a0;
   dram_size = a1;
-  next_free = a2;
-  utm_base = a3;
-  utm_size = a4;
+  utm_base = a2;
+  utm_size = a3;
+  next_free = a4;
   retval = a5;
 
   debug("returning from snapshot");
@@ -124,6 +130,13 @@ sbi_snapshot()
   load_pa_start = dram_base;
   load_pa_size = dram_size;
   kernel_offset = runtime_va_start - runtime_paddr;
+
+  if (!is_first_time_snapshot) {
+    map_untrusted_memory(utm_base, utm_size);
+    return retval;
+  }
+
+  is_first_time_snapshot = false;
 
   /* remap physical memory */
   remap_kernel_space(runtime_paddr, runtime_size);
