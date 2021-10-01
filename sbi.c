@@ -103,6 +103,11 @@ sbi_snapshot()
   register uintptr_t a4 __asm__ ("a4"); /* next free page */
   register uintptr_t a5 __asm__ ("a5"); /* retval */
 
+  // if we aren't going to do remap
+  if (a0 == 0) {
+    return 0;
+  }
+
   uintptr_t dram_base, dram_size, next_free, utm_base, utm_size, retval;
 
   dram_base = a0;
