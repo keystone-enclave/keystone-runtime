@@ -159,11 +159,12 @@ uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
     return ret; 
   }
 
+  print_strace("[runtime] addrlen, addr: %d, %d", addrlen, addr);
+
   copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t)); 
   copy_from_user(&args->addr, (void *) addr, args->addrlen);  
 
   print_strace("[runtime] after copying args before dispatching edgecall");
-  print_strace("[runtime] addrlen, addr: %d, %d", &args->addrlen, &args->addr);
 
   size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_getsockname);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
