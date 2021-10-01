@@ -154,12 +154,12 @@ uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
   edge_syscall->syscall_num = SYS_getsockname;
   args->sockfd = sockfd;
   print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
+  print_strace("[runtime] addrlen, addr: %d, %d", addrlen, addr);
 
   if(addrlen > sizeof(struct sockaddr_storage)) {
+    print_strace("[runtime] proxied getsockname: fd: %d, ret: %d\r\n", args->sockfd, ret);
     return ret; 
   }
-
-  print_strace("[runtime] addrlen, addr: %d, %d", addrlen, addr);
 
   copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t)); 
   copy_from_user(&args->addr, (void *) addr, args->addrlen);  
