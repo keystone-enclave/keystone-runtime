@@ -147,13 +147,13 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
 
 uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
                        uintptr_t addrlen){
-  print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
   uintptr_t ret = -1;
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_getsockname* args = (sargs_SYS_getsockname*) edge_syscall->data;
 
   edge_syscall->syscall_num = SYS_getsockname;
   args->sockfd = sockfd;
+  print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
 
   if(addrlen > sizeof(struct sockaddr_storage)) {
     return ret; 
