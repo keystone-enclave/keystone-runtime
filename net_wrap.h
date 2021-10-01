@@ -11,6 +11,7 @@ uintptr_t io_syscall_setsockopt(int socket, int level, int option_name, const vo
 uintptr_t io_syscall_bind (int sockfd, uintptr_t addr, socklen_t addrlen);
 uintptr_t io_syscall_listen(int sockfd, int backlog);
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr, uintptr_t addrlen);
+uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_getuid();
 
