@@ -123,7 +123,7 @@ uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen) {
 
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
                        uintptr_t addrlen){
-           uintptr_t ret = -1;
+  uintptr_t ret = -1;
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_getpeername* args = (sargs_SYS_getpeername*) edge_syscall->data;
 
@@ -147,7 +147,8 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
 
 uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
                        uintptr_t addrlen){
-           uintptr_t ret = -1;
+  print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
+  uintptr_t ret = -1;
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_getsockname* args = (sargs_SYS_getsockname*) edge_syscall->data;
 
