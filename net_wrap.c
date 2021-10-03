@@ -156,7 +156,7 @@ uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
   print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
   print_strace("[runtime] addrlen, addr: %d", addrlen);
 
-  if(addrlen > sizeof(struct sockaddr_storage)) {
+  if(addrlen > sizeof(struct sockaddr)) {
     print_strace("[runtime] proxied getsockname: fd: %d, ret: %d\r\n", args->sockfd, ret);
     return ret; 
   }
