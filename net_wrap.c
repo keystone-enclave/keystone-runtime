@@ -151,13 +151,9 @@ uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr,
 
   edge_syscall->syscall_num = SYS_getsockname;
   args->sockfd = sockfd;
-  print_strace("[runtime] in getsockname: fd: %d\r\n", args->sockfd);
-  print_strace("[runtime] addrlen, addr: %d", addrlen);
 
   copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t)); 
   copy_from_user(&args->addr, (void *) addr, args->addrlen);  
-
-  print_strace("[runtime] after copying args before dispatching edgecall");
 
   size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_getsockname);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
@@ -188,6 +184,8 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
 
   edge_syscall->syscall_num = SYS_pselect6;
   args->nfds = nfds;
+
+  print_strace("[runtime] pselect sigmask: %d\r\n", sigmask);
 
   copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
   copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
