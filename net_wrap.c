@@ -179,15 +179,15 @@ uintptr_t io_syscall_getuid() {
   return ret;
 }
 
-uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds,
-            uintptr_t exceptfds, uintptr_t timeout,
+uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
+            fd_set *exceptfds, uintptr_t timeout,
             uintptr_t sigmask) {
   uintptr_t ret = -1;
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_pselect* args = (sargs_SYS_pselect*) edge_syscall->data;
 
   edge_syscall->syscall_num = SYS_pselect6;
-  args->nfdfs = nfdfs;
+  args->nfds = nfds;
 
   copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
   copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
