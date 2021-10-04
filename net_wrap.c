@@ -130,10 +130,6 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
   edge_syscall->syscall_num = SYS_getpeername;
   args->sockfd = sockfd;
 
-  if(addrlen > sizeof(struct sockaddr_storage)) {
-    return ret; 
-  }
-
   copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t)); 
   copy_from_user(&args->addr, (void *) addr, args->addrlen);  
 
