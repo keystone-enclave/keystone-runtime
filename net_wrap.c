@@ -7,6 +7,8 @@
 #include "string.h"
 #include "edge_syscall.h"
 #include <sys/epoll.h>
+#include <sys/time.h>
+#include <sys/select.h>
 
 //Length of optional value for setsockopt 
 #define MAX_OPTION_LEN 256
@@ -174,6 +176,39 @@ uintptr_t io_syscall_getuid() {
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   print_strace("[runtime] proxied getuid, ret: %d\r\n", ret);
+  return ret;
+}
+
+uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds,
+            uintptr_t exceptfds, uintptr_t timeout,
+            uintptr_t sigmask) {
+  uintptr_t ret = -1;
+  struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+  sargs_SYS_pselect* args = (sargs_SYS_pselect*) edge_syscall->data;
+
+  edge_syscall->syscall_num = SYS_pselect;
+  args->readfds = readfds;
+  args->writefds = writefds;
+  args->exceptfds = exceptfds;
+  args->timeout = timeout;
+  args->sigmask = sigmask;
+
+  copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
+  copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
+  copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
+  copy_from_user(&args->timeout, (void *) timeout, sizeof(struct timespec));  
+  copy_from_user(&args->sigmask, (void *) sigmask, sizeof(sigset_t));  
+
+  size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_pselect);
+  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+  if (ret >= 0) {
+    copy_to_user(readfds, &args->readfds, sizeof(fd_set)); 
+    copy_to_user(writefds, &args->writefds, sizeof(fd_set)); 
+    copy_to_user(exceptfds, &args->exceptfds, sizeof(fd_set));
+  }
+
+  print_strace("[runtime] proxied pselect: nfds: %d, ret: %d\r\n", args->nfds, ret);
   return ret;
 }
 
