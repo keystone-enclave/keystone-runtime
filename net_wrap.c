@@ -184,9 +184,9 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
 
   edge_syscall->syscall_num = SYS_pselect6;
   args->nfds = nfds;
-  args->readfds = NULL; 
-  args->writefds = NULL; 
-  args->exceptfds = NULL; 
+  &args->readfds = NULL; 
+  &args->writefds = NULL; 
+  &args->exceptfds = NULL; 
 
   if (readfds != NULL) 
     copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
