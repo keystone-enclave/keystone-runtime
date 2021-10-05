@@ -191,10 +191,10 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
     copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
   if (exceptfds != (void *) 0)
     copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
-  if (timeout != (void *) 0) 
+  if (timeout != 0) 
     copy_from_user(&args->timeout, (void *) timeout, sizeof(struct timespec)); 
-  if (sigmask != (void *) 0) 
-    copy_from_user(&args->sigsmask, (void *) sigmask, sizeof(sigset_t));  
+  if (sigmask != 0) 
+    copy_from_user(&args->sigmask, (void *) sigmask, sizeof(sigset_t));  
 
   size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_pselect);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
