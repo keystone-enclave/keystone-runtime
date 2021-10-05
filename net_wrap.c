@@ -184,12 +184,16 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
 
   edge_syscall->syscall_num = SYS_pselect6;
   args->nfds = nfds;
+  args->readfds = NULL; 
+  args->writefds = NULL; 
+  args->exceptfds = NULL; 
 
-  print_strace("[runtime] pselect sigmask: %d\r\n", sigmask);
-
-  copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
-  copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
-  copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
+  if (readfds != NULL) 
+    copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
+  if (writefds != NULL) 
+    copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
+  if (exceptfds != NULL) 
+    copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
   copy_from_user(&args->timeout, (void *) timeout, sizeof(struct timespec));  
   copy_from_user(&args->sigmask, (void *) sigmask, sizeof(sigset_t));  
 
