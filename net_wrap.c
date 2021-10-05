@@ -200,11 +200,11 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   if (ret >= 0) {
-    if (&args->readfds != (void *) 0) 
+    if (readfds != (void *) 0) 
       copy_to_user(readfds, &args->readfds, sizeof(fd_set)); 
-    if (&args->writefds != (void *) 0)
+    if (writefds != (void *) 0)
       copy_to_user(writefds, &args->writefds, sizeof(fd_set)); 
-    if (&args->exceptfds != (void *) 0)
+    if (exceptfds != (void *) 0)
       copy_to_user(exceptfds, &args->exceptfds, sizeof(fd_set));
   }
 
