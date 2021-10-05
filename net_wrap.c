@@ -200,9 +200,12 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   if (ret >= 0) {
-    copy_to_user(readfds, &args->readfds, sizeof(fd_set)); 
-    copy_to_user(writefds, &args->writefds, sizeof(fd_set)); 
-    copy_to_user(exceptfds, &args->exceptfds, sizeof(fd_set));
+    if (&args->readfds != (void *) 0) 
+      copy_to_user(readfds, &args->readfds, sizeof(fd_set)); 
+    if (&args->writefds != (void *) 0)
+      copy_to_user(writefds, &args->writefds, sizeof(fd_set)); 
+    if (&args->exceptfds != (void *) 0)
+      copy_to_user(exceptfds, &args->exceptfds, sizeof(fd_set));
   }
 
   print_strace("[runtime] proxied pselect: nfds: %d, ret: %d\r\n", args->nfds, ret);
