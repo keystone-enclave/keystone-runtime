@@ -109,15 +109,15 @@ uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen) {
 
 	args->sockfd = sockfd; 
 
-	if(addrlen > sizeof(struct sockaddr_storage)) {
-		return ret; 
-	}
+  copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
+  copy_from_user(&args->addr, (void *) addr, args->addrlen);
 
-	copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
-	copy_from_user(&args->addr, (void *) addr, args->addrlen);
+  if(args->addrlen > sizeof(struct sockaddr_storage)) {
+    return ret; 
+  }
 
-	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_accept);
-	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+  size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_accept);
+  ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
 	print_strace("[runtime] proxied accept: %d \r\n", ret);
 	return ret; 
