@@ -136,9 +136,9 @@ uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
 	args->flags = flags; 
 
 	/* If src_addr is NULL, then addrlen is not used */
-	if (src_addr != (void *) 0) {
+	if (src_addr != 0) {
 		args->src_addr_is_null = 0; 
-		if(edge_call_check_ptr_valid((uintptr_t)&args->addrlen, sizeof(socklen_t))) != 0){
+		if(edge_call_check_ptr_valid((uintptr_t)&args->addrlen, sizeof(socklen_t)) != 0){
 			goto done;
 		}
 		copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
