@@ -160,6 +160,10 @@ uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
 	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_recvfrom);
 	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
+	if (ret > 0) {
+		copy_to_user(buf, &args->buf, ret);
+	}
+
 	done: 
 		print_strace("[runtime] proxied recvfrom: %d \r\n", ret);
 		return ret; 
