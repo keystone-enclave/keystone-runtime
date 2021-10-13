@@ -358,7 +358,7 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = io_syscall_getuid(); 
     break; 
   case(SYS_pselect6): 
-    ret = io_syscall_pselect((int) arg0, (fd_set*) arg1, (fd_set*) arg2, (fd_set*) arg3, (uintptr_t) arg4, (uintptr_t) arg5);
+    ret = io_syscall_pselect((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2, (uintptr_t) arg3, (uintptr_t) arg4, (uintptr_t) arg5);
     break;
 #endif /* NET_SYSCALL_WRAPPING */
 

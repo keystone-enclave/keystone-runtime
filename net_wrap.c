@@ -217,8 +217,8 @@ uintptr_t io_syscall_getuid() {
 	return ret;
 }
 
-uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
-						fd_set *exceptfds, uintptr_t timeout,
+uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds,
+						uintptr_t exceptfds, uintptr_t timeout,
 						uintptr_t sigmask) {
 	uintptr_t ret = -1;
 	struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
@@ -227,19 +227,19 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
 	edge_syscall->syscall_num = SYS_pselect6;
 	args->nfds = nfds; 
 
-	if (readfds != (void *) 0) {
+	if (readfds != 0) {
 		args->readfds_is_null = 0; 
 		copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
 	} else {
 		args->readfds_is_null = 1; 
 	} 
-	if (writefds != (void *) 0) {
+	if (writefds != 0) {
 		args->writefds_is_null = 0; 
 		copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
 	} else {
 		args->writefds_is_null = 1; 
 	} 
-	if (exceptfds != (void *) 0) {
+	if (exceptfds != 0) {
 		args->exceptfds_is_null = 0; 
 		copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
 	} else {
