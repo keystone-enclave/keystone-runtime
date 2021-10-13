@@ -161,7 +161,7 @@ uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
 	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
 	if (ret > 0) {
-		copy_to_user(buf, &args->buf, ret);
+		copy_to_user((void *) buf, &args->buf, ret);
 	}
 
 	done: 
