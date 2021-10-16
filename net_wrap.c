@@ -170,7 +170,7 @@ uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
 }
 
 uintptr_t io_syscall_sendto(int sockfd, uintptr_t buf, size_t len, int flags,
-                				uintptr_t dest_addr, uintptr_t addrlen) {
+                				uintptr_t dest_addr, int addrlen) {
 	uintptr_t ret = -1;
 	struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
 	edge_syscall->syscall_num = SYS_sendto;
@@ -184,10 +184,7 @@ uintptr_t io_syscall_sendto(int sockfd, uintptr_t buf, size_t len, int flags,
 	/* If dest_addr is NULL, then addrlen is not used */
 	if (dest_addr != 0) {
 		args->dest_addr_is_null = 0; 
-		if(edge_call_check_ptr_valid((uintptr_t)&args->addrlen, sizeof(socklen_t)) != 0){
-			goto done;
-		}
-		copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
+		args->addrlen = addrlen;
 		if(edge_call_check_ptr_valid((uintptr_t)&args->dest_addr, args->addrlen) != 0){
 			goto done;
 		}
