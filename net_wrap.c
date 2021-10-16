@@ -169,6 +169,51 @@ uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
 		return ret; 
 }
 
+uintptr_t io_syscall_sendto(int sockfd, uintptr_t buf, size_t len, int flags,
+                				uintptr_t dest_addr, uintptr_t addrlen) {
+	uintptr_t ret = -1;
+	struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+	edge_syscall->syscall_num = SYS_sendto;
+
+	sargs_SYS_sendto *args = (sargs_SYS_sendto *) edge_syscall->data;
+
+	args->sockfd = sockfd; 
+	args->len = len;
+	args->flags = flags; 
+
+	/* If dest_addr is NULL, then addrlen is not used */
+	if (dest_addr != 0) {
+		args->dest_addr_is_null = 0; 
+		if(edge_call_check_ptr_valid((uintptr_t)&args->addrlen, sizeof(socklen_t)) != 0){
+			goto done;
+		}
+		copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
+		if(edge_call_check_ptr_valid((uintptr_t)&args->dest_addr, args->addrlen) != 0){
+			goto done;
+		}
+		copy_from_user(&args->dest_addr, (void *) dest_addr, args->addrlen);
+
+		if(args->addrlen > sizeof(struct sockaddr)) {
+			goto done;
+		}
+	} else {
+		args->dest_addr_is_null = 1; 
+	}
+
+	/* Copy message in buf to untrusted memory */
+	if(edge_call_check_ptr_valid((uintptr_t)args->buf, len) != 0){
+    	goto done;
+  	}
+	copy_from_user(&args->buf, (void *) buf, ret);
+
+	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_sendto);
+	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+	done: 
+		print_strace("[runtime] proxied sendto: %d \r\n", ret);
+		return ret; 
+}
+
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
 											 uintptr_t addrlen){
 	uintptr_t ret = -1;
