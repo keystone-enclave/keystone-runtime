@@ -211,6 +211,39 @@ uintptr_t io_syscall_sendto(int sockfd, uintptr_t buf, size_t len, int flags,
 		return ret; 
 }
 
+uintptr_t io_syscall_sendfile(int out_fd, int in_fd, uintptr_t offset, int count) {
+	uintptr_t ret = -1;
+	struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+	edge_syscall->syscall_num = SYS_sendfile;
+
+	sargs_SYS_sendfile *args = (sargs_SYS_sendfile *) edge_syscall->data;
+
+	args->out_fd = out_fd; 
+	args->in_fd = in_fd; 
+	args->count = count; 
+
+	/* If offset is NULL, don't copy */
+	if (offset != 0) {
+		args->offset_is_null = 0; 
+		if(edge_call_check_ptr_valid((uintptr_t)&args->offset, sizeof(off_t)) != 0){
+			goto done;
+		}
+		copy_from_user(&args->offset, (void *) offset, sizeof(off_t));
+	} else {
+		args->offset_is_null = 1; 
+	}
+
+	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_sendfile);
+	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+	/* Offset value is updated to reflect new position */
+	copy_to_user((void *) offset, &args->offset, sizeof(off_t)); 
+
+	done: 
+		print_strace("[runtime] proxied sendfile: %d \r\n", ret);
+		return ret; 
+}
+
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
 											 uintptr_t addrlen){
 	uintptr_t ret = -1;
