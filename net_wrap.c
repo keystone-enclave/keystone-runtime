@@ -202,7 +202,7 @@ uintptr_t io_syscall_sendto(int sockfd, uintptr_t buf, size_t len, int flags,
     	goto done;
   	}	
 	copy_from_user(&args->buf, (void *) buf, len);
-	print_strace("[runtime] sendto buf: %s \r\n", buf);
+	print_strace("[runtime] sendto buf: %s \r\n", &args->buf);
 
 	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_sendto);
 	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
