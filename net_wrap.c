@@ -175,9 +175,9 @@ uintptr_t io_syscall_getuid() {
   return ret;
 }
 
-uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
-            fd_set *exceptfds, uintptr_t timeout,
-            uintptr_t sigmask) {
+uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds,
+                              uintptr_t exceptfds, uintptr_t timeout,
+                              uintptr_t sigmask) {
   uintptr_t ret = -1;
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_pselect* args = (sargs_SYS_pselect*) edge_syscall->data;
@@ -185,27 +185,47 @@ uintptr_t io_syscall_pselect(int nfds, fd_set *readfds, fd_set *writefds,
   edge_syscall->syscall_num = SYS_pselect6;
   args->nfds = nfds; 
 
-  if (readfds != (void *) 0) 
-    copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
-  if (writefds != (void *) 0)
-    copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
-  if (exceptfds != (void *) 0)
-    copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
-  if (timeout != 0) 
-    copy_from_user(&args->timeout, (void *) timeout, sizeof(struct timespec)); 
-  if (sigmask != 0) 
-    copy_from_user(&args->sigmask, (void *) sigmask, sizeof(sigset_t));  
+  if (readfds != 0) {
+      args->readfds_is_null = 0; 
+      copy_from_user(&args->readfds, (void *) readfds, sizeof(fd_set)); 
+  } else {
+      args->readfds_is_null = 1; 
+  } 
+  if (writefds != 0) {
+      args->writefds_is_null = 0; 
+      copy_from_user(&args->writefds, (void *) writefds, sizeof(fd_set)); 
+  } else {
+      args->writefds_is_null = 1; 
+  } 
+  if (exceptfds != 0) {
+      args->exceptfds_is_null = 0; 
+      copy_from_user(&args->exceptfds, (void *) exceptfds, sizeof(fd_set)); 
+  } else {
+      args->exceptfds_is_null = 1; 
+  } 
+  if (timeout != 0) {
+      args->timeout_is_null = 0; 
+      copy_from_user(&args->timeout, (void *) timeout, sizeof(struct timespec)); 
+  } else {
+      args->timeout_is_null = 1; 
+  } 
+  if (sigmask != 0) {
+      args->sigmask_is_null = 0; 
+      copy_from_user(&args->sigmask, (void *) sigmask, sizeof(sigset_t));  
+  } else {
+      args->sigmask_is_null = 1; 
+  } 
 
   size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_pselect);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   if (ret >= 0) {
-    if (readfds != (void *) 0) 
-      copy_to_user(readfds, &args->readfds, sizeof(fd_set)); 
-    if (writefds != (void *) 0)
-      copy_to_user(writefds, &args->writefds, sizeof(fd_set)); 
-    if (exceptfds != (void *) 0)
-      copy_to_user(exceptfds, &args->exceptfds, sizeof(fd_set));
+      if (readfds != 0) 
+          copy_to_user((void *) readfds, &args->readfds, sizeof(fd_set)); 
+      if (writefds != 0)
+          copy_to_user((void *) writefds, &args->writefds, sizeof(fd_set)); 
+      if (exceptfds != 0)
+          copy_to_user((void *) exceptfds, &args->exceptfds, sizeof(fd_set));
   }
 
   print_strace("[runtime] proxied pselect: nfds: %d, ret: %d\r\n", args->nfds, ret);

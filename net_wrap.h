@@ -15,7 +15,6 @@ uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_getsockname(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen);
 uintptr_t io_syscall_getuid();
-uintptr_t io_syscall_pselect(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, uintptr_t timeout, uintptr_t sigmask);
-
+uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds, uintptr_t exceptfds, uintptr_t timeout, uintptr_t sigmask);
 #endif /* _NET_WRAP_H_ */
 #endif /* NET_SYSCALL_WRAPPING */
