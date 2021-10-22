@@ -123,6 +123,52 @@ uintptr_t io_syscall_accept(int sockfd, uintptr_t addr, uintptr_t addrlen) {
   return ret; 
 }
 
+uintptr_t io_syscall_recvfrom(int sockfd, uintptr_t buf, size_t len, int flags,
+                				uintptr_t src_addr, uintptr_t addrlen) {
+	uintptr_t ret = -1;
+	struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
+	edge_syscall->syscall_num = SYS_recvfrom;
+
+	sargs_SYS_recvfrom *args = (sargs_SYS_recvfrom *) edge_syscall->data;
+
+	args->sockfd = sockfd; 
+	args->len = len;
+	args->flags = flags; 
+
+	/* If src_addr is NULL, then addrlen is not used */
+	if (src_addr != 0) {
+		args->src_addr_is_null = 0; 
+		if(edge_call_check_ptr_valid((uintptr_t)&args->addrlen, sizeof(socklen_t)) != 0){
+			goto done;
+		}
+		copy_from_user(&args->addrlen, (void *) addrlen, sizeof(socklen_t));
+		if(edge_call_check_ptr_valid((uintptr_t)&args->src_addr, args->addrlen) != 0){
+			goto done;
+		}
+		copy_from_user(&args->src_addr, (void *) src_addr, args->addrlen);
+
+		if(args->addrlen > sizeof(struct sockaddr)) {
+			goto done;
+		}
+	} else {
+		args->src_addr_is_null = 1; 
+	}
+
+	if(edge_call_check_ptr_valid((uintptr_t)args->buf, len) != 0){
+    	goto done;
+  	}
+	size_t totalsize = sizeof(struct edge_syscall) + sizeof(sargs_SYS_recvfrom);
+	ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
+
+	if (ret > 0) {
+		copy_to_user((void *) buf, &args->buf, ret);
+	}
+
+	done: 
+		print_strace("[runtime] proxied recvfrom: %d \r\n", ret);
+		return ret; 
+}
+
 uintptr_t io_syscall_getpeername(int sockfd, uintptr_t addr,
                        uintptr_t addrlen){
   uintptr_t ret = -1;
