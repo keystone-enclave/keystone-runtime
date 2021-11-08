@@ -105,7 +105,7 @@ sbi_snapshot()
 
   // if we aren't going to do remap
   if (a0 == 0) {
-    return 0;
+    return 1;
   }
 
   uintptr_t dram_base, dram_size, next_free, utm_base, utm_size, retval;
