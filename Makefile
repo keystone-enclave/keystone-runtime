@@ -30,7 +30,7 @@ OBJ_DIR_EXISTS = obj/.exists
 
 TMPLIB = uaccess.o
 
-.PHONY: all test copy clean
+.PHONY: all test clean
 
 all: $(RUNTIME) $(TEST_BIN)
 
@@ -39,14 +39,6 @@ $(TMPLIB):
 
 $(DISK_IMAGE):
 	echo "missing $(DISK_IMAGE)."
-
-copy: $(RUNTIME) $(DISK_IMAGE)
-	echo "Copying library $(RUNTIME)"
-	mkdir -p $(MOUNT_DIR)
-	sudo mount $(DISK_IMAGE) $(MOUNT_DIR)
-	sudo cp $(RUNTIME) $(MOUNT_DIR)/lib
-	sudo umount $(MOUNT_DIR)
-	rm -rf $(MOUNT_DIR)
 
 $(RUNTIME): $(ASM_OBJS) $(OBJS) $(SDK_EDGE_LIB) $(TMPLIB)
 	$(LINK) -o $@ $^ -T runtime.lds $(LDFLAGS)
