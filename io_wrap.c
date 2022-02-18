@@ -100,14 +100,13 @@ uintptr_t io_syscall_close(int fd){
 uintptr_t io_syscall_read(int fd, void* buf, size_t len){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_read* args = (sargs_SYS_read*)edge_syscall->data;
-  unsigned char args_buf[] = args->buf;
   uintptr_t ret = -1;
   edge_syscall->syscall_num = SYS_read;
   args->fd =fd;
   args->len = len;
 
   // Sanity check that the read buffer will fit in the shared memory
-  if(edge_call_check_ptr_valid((uintptr_t)args_buf, len) != 0){
+  if(edge_call_check_ptr_valid((uintptr_t)args->buf, len) != 0){
     goto done;
   }
 
@@ -122,7 +121,7 @@ uintptr_t io_syscall_read(int fd, void* buf, size_t len){
   }
 
   // Previously checked that this is staying in untrusted buffer range
-  copy_to_user(buf, args_buf, ret > len? len: ret);
+  copy_to_user(buf, args->buf, ret > len? len: ret);
 
  done:
   print_strace("[runtime] proxied read (size: %lu) = %li\r\n",len, ret);
@@ -142,7 +141,6 @@ uintptr_t io_syscall_write(int fd, void* buf, size_t len){
 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_write* args = (sargs_SYS_write*)edge_syscall->data;
-  unsigned char args_buf[] = args->buf;
   uintptr_t ret = -1;
 
   edge_syscall->syscall_num = SYS_write;
@@ -150,11 +148,11 @@ uintptr_t io_syscall_write(int fd, void* buf, size_t len){
   args->len = len;
 
   // Sanity check that the write buffer will fit in the shared memory
-  if(edge_call_check_ptr_valid((uintptr_t)args_buf, len) != 0){
+  if(edge_call_check_ptr_valid((uintptr_t)args->buf, len) != 0){
     goto done;
   }
 
-  copy_from_user(args_buf, buf, len);
+  copy_from_user(args->buf, buf, len);
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_write) +
@@ -171,7 +169,6 @@ uintptr_t io_syscall_openat(int dirfd, char* path,
                             int flags, mode_t mode){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_openat* args = (sargs_SYS_openat*)edge_syscall->data;
-  char args_path[] = args->path;
 
   edge_syscall->syscall_num = SYS_openat;
   args->dirfd = dirfd;
@@ -182,10 +179,10 @@ uintptr_t io_syscall_openat(int dirfd, char* path,
   size_t pathlen;
   ALLOW_USER_ACCESS(pathlen = _strlen(path)+1);
   // Sanity check that the buffer will fit in the shared memory
-  if(edge_call_check_ptr_valid((uintptr_t)args_path, pathlen) != 0){
+  if(edge_call_check_ptr_valid((uintptr_t)args->path, pathlen) != 0){
     goto done;
   }
-  copy_from_user(args_path, path, pathlen);
+  copy_from_user(args->path, path, pathlen);
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_openat) +
@@ -197,7 +194,7 @@ uintptr_t io_syscall_openat(int dirfd, char* path,
  done:
   // TODO path print here isn't necessarily correct or even copied!
   print_strace("[runtime] proxied openat(path: %.*s) = %li\r\n",
-               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args_path, ret);
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->path, ret);
 
   return ret;
 }
@@ -206,7 +203,6 @@ uintptr_t io_syscall_unlinkat(int dirfd, char* path,
                               int flags){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_unlinkat* args = (sargs_SYS_unlinkat*)edge_syscall->data;
-  char args_path[] = args->path;
   uintptr_t ret = -1;
 
   edge_syscall->syscall_num = SYS_unlinkat;
@@ -215,10 +211,10 @@ uintptr_t io_syscall_unlinkat(int dirfd, char* path,
   size_t pathlen;
   ALLOW_USER_ACCESS(pathlen = _strlen(path)+1);
   // Sanity check that the buffer will fit in the shared memory
-  if(edge_call_check_ptr_valid((uintptr_t)args_path, pathlen) != 0){
+  if(edge_call_check_ptr_valid((uintptr_t)args->path, pathlen) != 0){
     goto done;
   }
-  copy_from_user(args_path, path, pathlen);
+  copy_from_user(args->path, path, pathlen);
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_unlinkat) +
@@ -230,7 +226,7 @@ uintptr_t io_syscall_unlinkat(int dirfd, char* path,
  done:
   // TODO path print here isn't necessarily correct or even copied!
   print_strace("[runtime] proxied unlinkat(path: %.*s) = %li\r\n",
-               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args_path, ret);
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->path, ret);
   return ret;
 }
 
@@ -271,8 +267,6 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
                                 int flags){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_fstatat* args = (sargs_SYS_fstatat*)edge_syscall->data;
-  char args_pathname[] = args->pathname;
-  struct stat args_stats = args->stats;
   uintptr_t ret = -1;
 
   edge_syscall->syscall_num = SYS_fstatat;
@@ -282,10 +276,10 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
   size_t pathlen;
   ALLOW_USER_ACCESS(pathlen = _strlen(pathname)+1);
   // Sanity check that the buffer will fit in the shared memory
-  if(edge_call_check_ptr_valid((uintptr_t)args_pathname, pathlen) != 0){
+  if(edge_call_check_ptr_valid((uintptr_t)args->pathname, pathlen) != 0){
     goto done;
   }
-  copy_from_user(args_pathname, pathname, pathlen);
+  copy_from_user(args->pathname, pathname, pathlen);
 
   size_t totalsize = (sizeof(struct edge_syscall) +
                       sizeof(sargs_SYS_fstatat) +
@@ -294,12 +288,12 @@ uintptr_t io_syscall_fstatat(int dirfd, char *pathname, struct stat *statbuf,
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   if(ret == 0){
-    copy_to_user(statbuf, &args_stats, sizeof(struct stat));
+    copy_to_user(statbuf, &args->stats, sizeof(struct stat));
   }
 
  done:
   print_strace("[runtime] proxied fstatat (path %.*s) = %li\r\n",
-               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args_pathname, ret);
+               pathlen>MAX_STRACE_PRINT?MAX_STRACE_PRINT:pathlen,args->pathname, ret);
   return ret;
 
 }
@@ -365,7 +359,6 @@ uintptr_t io_syscall_epoll_ctl(int epfd, int op, int fd, uintptr_t event){
 uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg){ 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_fcntl* args = (sargs_SYS_fcntl*)edge_syscall->data;
-  unsigned long args_arg[] = args->arg;
   uintptr_t ret = -1;
 
   edge_syscall->syscall_num = SYS_fcntl;
@@ -375,7 +368,7 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg){
   size_t totalsize;
   if (cmd == F_SETLK || cmd == F_SETLKW || cmd == F_GETLK) {
     print_strace("F_SETLK, FSETLKW, or FGETLK");
-    if(edge_call_check_ptr_valid((uintptr_t)args_arg, sizeof(struct flock)) != 0){
+    if(edge_call_check_ptr_valid((uintptr_t)args->arg, sizeof(struct flock)) != 0){
       print_strace("Ptr not valid");
       goto done;
     }
@@ -404,7 +397,6 @@ uintptr_t io_syscall_fcntl(int fd, int cmd, uintptr_t arg){
 uintptr_t io_syscall_getcwd(char* buf, size_t size){ 
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_getcwd* args = (sargs_SYS_getcwd*)edge_syscall->data;
-  char args_buf[] = args->buf;
   // char* syscall_ret = NULL;
 
   edge_syscall->syscall_num = SYS_getcwd;
@@ -414,7 +406,7 @@ uintptr_t io_syscall_getcwd(char* buf, size_t size){
 
   dispatch_edgecall_syscall(edge_syscall, totalsize);
 
-  copy_to_user(buf, &args_buf, size);
+  copy_to_user(buf, &args->buf, size);
   print_strace("[runtime] proxied getcwd\r\n");
   return (uintptr_t) buf;
 }
@@ -430,12 +422,11 @@ uintptr_t io_syscall_chdir(char* path) {
   edge_syscall->syscall_num = SYS_chdir;
 
   copy_from_user(args->path, path, strlen(path) + 1);
-  char args_path[0] = args->path;
 
-  size_t totalsize = (sizeof(struct edge_syscall)) + strlen(args_path) + 1;
+  size_t totalsize = (sizeof(struct edge_syscall)) + strlen(args->path) + 1;
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
-  print_strace("[runtime] proxied chdir: %s\r\n", args_path);
+  print_strace("[runtime] proxied chdir: %s\r\n", args->path);
   return ret;
 }
 
@@ -452,13 +443,12 @@ uintptr_t io_syscall_epoll_pwait(int epfd, uintptr_t events, int maxevents, int 
   args->timeout = timeout; 
 
   copy_from_user(&args->events, (void *) events, sizeof(struct epoll_event));  
-  struct epoll_event args_events = args->events;
 
   size_t totalsize = (sizeof(struct edge_syscall)) + sizeof(sargs_SYS_epoll_pwait);
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
-  copy_to_user((void *) events, &args_events, sizeof(struct epoll_event));
-  print_strace("[runtime] proxied epoll_pwait: epfd: %d, ret: %d\r\n", epfd, ret);
+  copy_to_user((void *) events, &args->events, sizeof(struct epoll_event));
+  print_strace("[runtime] proxied epoll_pwait: epfd: %d, ret: %d\r\n", args->epfd, ret);
   return ret;
 }
 
@@ -501,7 +491,6 @@ uintptr_t io_syscall_umask(int mask){
 uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
   struct edge_syscall* edge_syscall = (struct edge_syscall*)edge_call_data_ptr();
   sargs_SYS_fstat* args = (sargs_SYS_fstat*)edge_syscall->data;
-  struct stat args_stats = args->stats;
   uintptr_t ret = -1;
 
   edge_syscall->syscall_num = SYS_fstat;
@@ -513,7 +502,7 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
   ret = dispatch_edgecall_syscall(edge_syscall, totalsize);
 
   if(ret == 0){
-    copy_to_user(statbuf, &args_stats, sizeof(struct stat));
+    copy_to_user(statbuf, &args->stats, sizeof(struct stat));
   }
 
   print_strace("[runtime] proxied fstat = %li\r\n", ret);
