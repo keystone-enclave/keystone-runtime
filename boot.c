@@ -10,6 +10,8 @@
 #include "mm.h"
 #include "env.h"
 #include "paging.h"
+#include "elf.h"
+#include "loader/loader.h"
 
 /* defined in vm.h */
 extern uintptr_t shared_buffer;
@@ -53,6 +55,24 @@ remap_kernel_space(uintptr_t runtime_base,
 
   map_with_reserved_page_table(runtime_base, runtime_size,
      runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);
+}
+
+int verify_and_load_elf_file(uintptr_t ptr, size_t file_size) {
+  int ret = 0;
+  // validate elf 
+  if (((void*) ptr == NULL) || (file_size <= 0)) {
+    return -1; 
+  }
+  
+  // create elf struct
+  elf_t elf_file;
+  ret = elf_newFile((void*) ptr, file_size, &elf_file);
+  if (ret < 0) {
+    return ret;
+  }
+
+  ret = loadElf(&elf_file);
+  return ret;
 }
 
 void
@@ -139,8 +159,8 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* switch to the new page table */
   csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
 
-  /* copy valid entries from the old page table */
-  copy_root_page_table();
+  /* load eapp elf */
+  verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr);
 
   /* initialize free memory */
   init_freemem();

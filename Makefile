@@ -9,6 +9,7 @@ endif
 
 CFLAGS = -Wall -Werror -fPIC -fno-builtin -std=c11 -g $(OPTIONS_FLAGS)
 SRCS = aes.c sha256.c boot.c interrupt.c printf.c syscall.c string.c linux_wrap.c io_wrap.c net_wrap.c rt_util.c mm.c env.c freemem.c paging.c sbi.c merkle.c page_swap.c vm.c
+SRCS += loader/loader.c loader/elf.c loader/elf32.c loader/elf64.c 
 ASM_SRCS = entry.S
 RUNTIME = eyrie-rt
 LINK = $(CROSS_COMPILE)ld
@@ -49,6 +50,7 @@ $(ASM_OBJS): $(ASM_SRCS) $(OBJ_DIR_EXISTS)
 
 $(OBJ_DIR_EXISTS):
 	mkdir -p obj
+	mkdir -p obj/loader
 	touch $(OBJ_DIR_EXISTS)
 
 obj/%.o: %.c  $(TMPLIB) $(OBJ_DIR_EXISTS)

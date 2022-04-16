@@ -1,4 +1,4 @@
-#include "elf.h"
+#include "auxvec.h"
 #include "tmplib/uaccess.h"
 #include "rt_util.h"
 #include "string.h"
