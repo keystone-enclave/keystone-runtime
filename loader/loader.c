@@ -24,8 +24,8 @@ int loadElf(elf_t* elf) {
     debug("Loading initialized segment for program header %d\n", i);
     /* first load all pages that do not include .bss segment */
     while (va + RISCV_PAGE_SIZE <= file_end) {
-      uintptr_t src_pa = __pa(src);
-      if (!map_page(vpn(va), ppn((uintptr_t) src_pa)))
+      uintptr_t src_pa = __pa((uintptr_t) src);
+      if (!map_page(vpn(va), ppn(src_pa)))
         //return Error::PageAllocationFailure;
         return -1; //TODO: error class later
       src += RISCV_PAGE_SIZE;
@@ -35,8 +35,8 @@ int loadElf(elf_t* elf) {
     /* next, load the page that has both initialized and uninitialized segments
      */
     if (va < file_end) {
-      uintptr_t src_pa = __pa(src);
-      if (!map_page(vpn(va), ppn((uintptr_t) src_pa)))
+      uintptr_t src_pa = __pa((uintptr_t) src);
+      if (!map_page(vpn(va), ppn(src_pa)))
         //return Error::PageAllocationFailure;
         return -1; //TODO: error class later
       va += RISCV_PAGE_SIZE;
