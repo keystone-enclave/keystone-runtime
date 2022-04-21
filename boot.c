@@ -152,13 +152,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   debug("FREE: 0x%lx-0x%lx (%u KB), va 0x%lx", free_paddr, dram_base + dram_size, freemem_size/1024, freemem_va_start);
 
-  /* remap kernel VA */
-  remap_kernel_space(runtime_paddr, user_paddr - runtime_paddr);
-  map_physical_memory(dram_base, dram_size);
-
-  /* switch to the new page table */
-  csr_write(satp, satp_new(kernel_va_to_pa(root_page_table)));
-
   /* load eapp elf */
   verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr);
 
