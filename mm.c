@@ -77,7 +77,7 @@ map_page(uintptr_t vpn, uintptr_t ppn) {
     return -1;
   }
 
-  *pte = pte_create(ppn, PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
+  *pte = pte_create(ppn, PTE_U | PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V);
   return 1;
 }
 
