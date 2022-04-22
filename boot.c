@@ -152,11 +152,11 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   debug("FREE: 0x%lx-0x%lx (%u KB), va 0x%lx", free_paddr, dram_base + dram_size, freemem_size/1024, freemem_va_start);
 
-  /* load eapp elf */
-  verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr);
-
   /* initialize free memory */
   init_freemem();
+
+  /* load eapp elf */
+  verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr);
 
   //TODO: This should be set by walking the userspace vm and finding
   //highest used addr. Instead we start partway through the anon space
