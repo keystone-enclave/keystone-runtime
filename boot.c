@@ -146,6 +146,9 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
+
+  /* set trap vector */
+  csr_write(stvec, &encl_trap_handler);
 #ifdef USE_FREEMEM
   freemem_va_start = __va(free_paddr);
   freemem_size = dram_base + dram_size - free_paddr;
@@ -169,9 +172,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* initialize user stack */
   init_user_stack_and_env();
-
-  /* set trap vector */
-  csr_write(stvec, &encl_trap_handler);
 
   /* prepare edge & system calls */
   init_edge_internals();
