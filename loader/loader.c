@@ -45,10 +45,11 @@ int loadElf(elf_t* elf) {
     debug("Loading .bss segment for program header %d\n", i);
     /* finally, load the remaining .bss segments */
     while (va < memory_end) {
-      if (!alloc_page(vpn(va), PTE_R | PTE_W | PTE_U))
+      uintptr_t new_page = alloc_page(vpn(va), PTE_R | PTE_W | PTE_U);
+      if (!new_page)
         //return Error::PageAllocationFailure;
         return -1; //TODO: error class later
-      memset((void*) va, 0, RISCV_PAGE_SIZE);
+      memset((void*) new_page, 0, RISCV_PAGE_SIZE);
       va += RISCV_PAGE_SIZE;
     }
   }
