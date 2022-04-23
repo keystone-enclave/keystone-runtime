@@ -26,37 +26,6 @@ extern void* encl_trap_handler;
 
 #ifdef USE_FREEMEM
 
-
-/* map entire enclave physical memory so that
- * we can access the old page table and free memory */
-/* remap runtime kernel to a new root page table */
-void
-map_physical_memory(uintptr_t dram_base,
-                    uintptr_t dram_size)
-{
-  uintptr_t ptr = EYRIE_LOAD_START;
-  /* load address should not override kernel address */
-  assert(RISCV_GET_PT_INDEX(ptr, 1) != RISCV_GET_PT_INDEX(runtime_va_start, 1));
-  map_with_reserved_page_table(dram_base, dram_size,
-      ptr, load_l2_page_table, load_l3_page_table);
-}
-
-void
-remap_kernel_space(uintptr_t runtime_base,
-                   uintptr_t runtime_size)
-{
-  /* eyrie runtime is supposed to be smaller than a megapage */
-
-  #if __riscv_xlen == 64
-  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(2));
-  #elif __riscv_xlen == 32
-  assert(runtime_size <= RISCV_GET_LVL_PGSIZE(1));
-  #endif 
-
-  map_with_reserved_page_table(runtime_base, runtime_size,
-     runtime_va_start, kernel_l2_page_table, kernel_l3_page_table);
-}
-
 int verify_and_load_elf_file(uintptr_t ptr, size_t file_size) {
   int ret = 0;
   // validate elf 
@@ -73,22 +42,6 @@ int verify_and_load_elf_file(uintptr_t ptr, size_t file_size) {
 
   ret = loadElf(&elf_file);
   return ret;
-}
-
-void
-copy_root_page_table()
-{
-  /* the old table lives in the first page */
-  pte* old_root_page_table = (pte*) EYRIE_LOAD_START;
-  int i;
-
-  /* copy all valid entries of the old root page table */
-  for (i = 0; i < BIT(RISCV_PT_INDEX_BITS); i++) {
-    if (old_root_page_table[i] & PTE_V &&
-        !(root_page_table[i] & PTE_V)) {
-      root_page_table[i] = old_root_page_table[i];
-    }
-  }
 }
 
 /* initialize free memory with a simple page allocator*/
@@ -138,6 +91,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t utm_size)
 {
   /* set initial values */
+  root_page_table = (pte*) (csr_read(satp) << RISCV_PAGE_BITS);
   load_pa_start = dram_base;
   shared_buffer = utm_vaddr;
   shared_buffer_size = utm_size;
