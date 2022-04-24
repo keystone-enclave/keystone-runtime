@@ -91,7 +91,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t utm_size)
 {
   /* set initial values */
-  root_page_table = (pte*) (csr_read(satp) << RISCV_PAGE_BITS);
+  root_page_table = (pte*) __va(csr_read(satp) << RISCV_PAGE_BITS);
   load_pa_start = dram_base;
   shared_buffer = utm_vaddr;
   shared_buffer_size = utm_size;
