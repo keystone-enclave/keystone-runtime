@@ -91,12 +91,14 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t utm_size)
 {
   /* set initial values */
-  root_page_table = (pte*) __va(csr_read(satp) << RISCV_PAGE_BITS);
   load_pa_start = dram_base;
+  root_page_table = (pte*) __va(csr_read(satp) << RISCV_PAGE_BITS);
   shared_buffer = utm_vaddr;
   shared_buffer_size = utm_size;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
+
+
 
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
