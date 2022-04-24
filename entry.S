@@ -126,8 +126,7 @@
 .endm
 
 _start:
-  LOAD t0, (sp) 
-  csrw sepc, t0 // write user_entry to sepc
+  csrw sepc, s0 // write user_entry to sepc
 
   la sp, kernel_stack_end
 
