@@ -107,8 +107,6 @@ eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the 
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
 
-  setup_sepc(loader_sp_paddr);
-
   debug("ROOT PAGE TABLE: 0x%lx", root_page_table);
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
@@ -135,6 +133,9 @@ eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the 
   init_paging(user_paddr, free_paddr);
   #endif /* USE_PAGING */
 #endif /* USE_FREEMEM */
+
+  /* setup sepc to point to user entry */
+  setup_sepc(loader_sp_paddr);
 
   /* initialize user stack */
   init_user_stack_and_env();
