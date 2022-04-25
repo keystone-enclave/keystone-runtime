@@ -126,8 +126,10 @@
 .endm
 
 _start:
-  csrw sepc, s0 // write user_entry to sepc
+  /* Store previous stack pointer */
+  mv a0, sp
 
+  /* Set up runtime stack */ 
   la sp, kernel_stack_end
 
   /* set sscratch zero so that the trap handler can

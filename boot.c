@@ -80,15 +80,24 @@ init_user_stack_and_env()
   csr_write(sscratch, user_sp);
 }
 
+void 
+setup_sepc(uintptr_t loader_sp_paddr) {
+  uintptr_t loader_sp_vaddr = __va(loader_sp_paddr);
+
+  debug("USER ENTRY: 0x%lx", *((unsigned long*) loader_sp_vaddr));
+
+  csr_write(sepc, *((unsigned long*) loader_sp_vaddr));
+}
+
 void
-eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
+eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the SBI
            uintptr_t dram_base,
            uintptr_t dram_size,
            uintptr_t runtime_paddr,
            uintptr_t user_paddr,
            uintptr_t free_paddr,
            uintptr_t utm_vaddr,
-           uintptr_t utm_size)
+           uintptr_t utm_size) 
 {
   /* set initial values */
   load_pa_start = dram_base;
@@ -98,8 +107,9 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
 
+  setup_sepc(loader_sp_paddr);
 
-
+  debug("ROOT PAGE TABLE: 0x%lx", root_page_table);
   debug("UTM : 0x%lx-0x%lx (%u KB)", utm_vaddr, utm_vaddr+utm_size, utm_size/1024);
   debug("DRAM: 0x%lx-0x%lx (%u KB)", dram_base, dram_base + dram_size, dram_size/1024);
 
