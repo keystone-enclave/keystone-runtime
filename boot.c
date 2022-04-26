@@ -121,7 +121,7 @@ init_user_stack_and_env()
 }
 
 void
-eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the SBI
+eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
            uintptr_t dram_base,
            uintptr_t dram_size,
            uintptr_t runtime_paddr,

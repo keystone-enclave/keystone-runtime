@@ -126,9 +126,6 @@
 .endm
 
 _start:
-  /* Store previous stack pointer */
-  mv a0, sp
-
   /* Set up runtime stack */ 
   la sp, kernel_stack_end
 
