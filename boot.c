@@ -42,11 +42,11 @@ static int print_pgtable(int level, pte* tb, uintptr_t vaddr)
 
     if(level == 1 || (e & PTE_R) || (e & PTE_W) || (e & PTE_X))
     {
-      printf("[pgtable] level:%d, base: 0x%lx, i:%d (0x%lx -> 0x%lx), flags: 0x%lx\r\n", level, tb, i, ((vaddr << 9) | (i&0x1ff))<<12, phys_addr, e | PTE_FLAG_MASK);
+      printf("[pgtable] level:%d, base: 0x%lx, i:%d (0x%lx -> 0x%lx), flags: 0x%lx\r\n", level, tb, i, ((vaddr << 9) | (i&0x1ff))<<12, phys_addr, e & PTE_FLAG_MASK);
     }
     else
     {
-      printf("[pgtable] level:%d, base: 0x%lx, i:%d, pte: 0x%lx, flags: 0x%lx\r\n", level, tb, i, e, e | PTE_FLAG_MASK);
+      printf("[pgtable] level:%d, base: 0x%lx, i:%d, pte: 0x%lx, flags: 0x%lx\r\n", level, tb, i, e, e & PTE_FLAG_MASK);
     }
 
     if(level > 1 && !(e & PTE_R) && !(e & PTE_W) && !(e & PTE_X))
@@ -153,6 +153,8 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* initialize free memory */
   init_freemem();
+
+  print_pgtable(3, root_page_table, 0);
 
   /* load eapp elf */
   verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr, true);
