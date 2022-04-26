@@ -42,11 +42,11 @@ static int print_pgtable(int level, pte* tb, uintptr_t vaddr)
 
     if(level == 1 || (e & PTE_R) || (e & PTE_W) || (e & PTE_X))
     {
-      printf("[pgtable] level:%d, base: 0x%ln, i:%d (0x%lx -> 0x%lx)\r\n", level, tb, i, ((vaddr << 9) | (i&0x1ff))<<12, phys_addr);
+      printf("[pgtable] level:%d, base: 0x%lx, i:%d (0x%lx -> 0x%lx)\r\n", level, tb, i, ((vaddr << 9) | (i&0x1ff))<<12, phys_addr);
     }
     else
     {
-      printf("[pgtable] level:%d, base: 0x%ln, i:%d, pte: 0x%lx \r\n", level, tb, i, e);
+      printf("[pgtable] level:%d, base: 0x%lx, i:%d, pte: 0x%lx \r\n", level, tb, i, e);
     }
 
     if(level > 1 && !(e & PTE_R) && !(e & PTE_W) && !(e & PTE_X))
