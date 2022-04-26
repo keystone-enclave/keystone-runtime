@@ -26,7 +26,7 @@ extern void* encl_trap_handler;
 
 #ifdef USE_FREEMEM
 
-int verify_and_load_elf_file(uintptr_t ptr, size_t file_size) {
+int verify_and_load_elf_file(uintptr_t ptr, size_t file_size, bool is_eapp) {
   int ret = 0;
   // validate elf 
   if (((void*) ptr == NULL) || (file_size <= 0)) {
@@ -40,9 +40,16 @@ int verify_and_load_elf_file(uintptr_t ptr, size_t file_size) {
     return ret;
   }
 
+  // parse and load elf file
   ret = loadElf(&elf_file);
+
+  if (is_eapp) { // setup entry point
+    uintptr_t entry = elf_getEntryPoint(&elf_file);
+    csr_write(sepc, entry);
+  }
   return ret;
 }
+
 
 /* initialize free memory with a simple page allocator*/
 void
@@ -78,15 +85,6 @@ init_user_stack_and_env()
 
   // prepare user sp
   csr_write(sscratch, user_sp);
-}
-
-void 
-setup_sepc(uintptr_t loader_sp_paddr) {
-  uintptr_t loader_sp_vaddr = __va(loader_sp_paddr);
-
-  debug("USER ENTRY: 0x%lx", *((unsigned long*) loader_sp_vaddr));
-
-  csr_write(sepc, *((unsigned long*) loader_sp_vaddr));
 }
 
 void
