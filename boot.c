@@ -121,7 +121,7 @@ eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the 
   init_freemem();
 
   /* load eapp elf */
-  verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr);
+  verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr, true);
 
   //TODO: This should be set by walking the userspace vm and finding
   //highest used addr. Instead we start partway through the anon space
@@ -131,9 +131,6 @@ eyrie_boot(uintptr_t loader_sp_paddr, // $a0 contains the return value from the 
   init_paging(user_paddr, free_paddr);
   #endif /* USE_PAGING */
 #endif /* USE_FREEMEM */
-
-  /* setup sepc to point to user entry */
-  setup_sepc(loader_sp_paddr);
 
   /* initialize user stack */
   init_user_stack_and_env();
