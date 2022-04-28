@@ -137,6 +137,7 @@ _start:
 
   /* start running enclave */
   csrrw sp, sscratch, sp
+  sfence.vma
   sret
 
 .align 6
