@@ -159,8 +159,6 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* load eapp elf */
   verify_and_load_elf_file(__va(user_paddr), free_paddr-user_paddr, true);
 
-  print_pgtable(3, root_page_table, 0);
-
   //TODO: This should be set by walking the userspace vm and finding
   //highest used addr. Instead we start partway through the anon space
   set_program_break(EYRIE_ANON_REGION_START + (1024 * 1024 * 1024));
@@ -175,6 +173,8 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
 
   /* prepare edge & system calls */
   init_edge_internals();
+
+  print_pgtable(3, root_page_table, 0);
 
   /* set timer */
   init_timer();
