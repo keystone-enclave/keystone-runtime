@@ -133,11 +133,12 @@ _start:
    * notice that the trap is from S-mode */
   csrw sscratch, x0
 
+  sfence.vma
   jal eyrie_boot
+  sfence.vma
 
   /* start running enclave */
   csrrw sp, sscratch, sp
-  sfence.vma
   sret
 
 .align 6
