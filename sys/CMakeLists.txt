@@ -11,4 +11,7 @@ target_link_libraries(eyrie-rt
 target_link_options(eyrie-rt PRIVATE -static -nostdlib -T $<TARGET_OBJECTS:rt_linkscript>)
 add_dependencies(eyrie-rt rt_linkscript)
 
+add_custom_command(TARGET eyrie-rt POST_BUILD
+        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/eyrie-rt ${CMAKE_SOURCE_DIR}/eyrie-rt)
+
 # Todo: do we need the options log still?
