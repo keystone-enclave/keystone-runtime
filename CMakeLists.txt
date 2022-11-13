@@ -5,6 +5,9 @@ macro(rt_option name description value)
     option(${name} ${description} ${value})
     if(${name})
         add_compile_options(-DUSE_${name})
+        add_custom_target(${name}_options_log
+                            COMMAND echo -n "${name} " >> ${CMAKE_BINARY_DIR}/.options_log)
+        add_dependencies(options_log ${name}_options_log)
     endif()
 endmacro()
 
@@ -15,6 +18,9 @@ endmacro()
 if(NOT DEFINED ENV{KEYSTONE_SDK_DIR})
     message(FATAL_ERROR "Set KEYSTONE_SDK_DIR in environment")
 endif()
+
+add_custom_target(options_log
+        COMMAND touch ${CMAKE_BINARY_DIR}/.options_log)
 
 # Memory management options
 rt_option(FREEMEM "Use freemem allocator" OFF)
