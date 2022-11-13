@@ -18,4 +18,5 @@ add_custom_target(eyrie-rt
             ${CMAKE_CURRENT_BINARY_DIR}/eyrie-build)
 
 add_custom_command(TARGET eyrie-rt POST_BUILD
-        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/eyrie-build ${CMAKE_SOURCE_DIR}/eyrie-rt)
+        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/eyrie-build ${CMAKE_SOURCE_DIR}/eyrie-rt
+        COMMAND cp ${CMAKE_BINARY_DIR}/.options_log ${CMAKE_SOURCE_DIR}/.options_log)
