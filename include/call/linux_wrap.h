@@ -1,4 +1,4 @@
-#ifdef USE_LINUX_SYSCALL_WRAPPING
+#ifdef USE_LINUX_SYSCALL
 #ifndef _LINUX_WRAP_H_
 #define _LINUX_WRAP_H_
 
@@ -21,4 +21,4 @@ uintptr_t syscall_mmap(void *addr, size_t length, int prot, int flags,
                   int fd, __off_t offset);
 uintptr_t syscall_brk(void* addr);
 #endif /* _LINUX_WRAP_H_ */
-#endif /* USE_LINUX_SYSCALL_WRAPPING */
+#endif /* USE_LINUX_SYSCALL */

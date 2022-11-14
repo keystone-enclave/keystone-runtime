@@ -1,4 +1,4 @@
-#ifdef USE_IO_SYSCALL_WRAPPING
+#ifdef USE_IO_SYSCALL
 #ifndef _IO_WRAP_H_
 #define _IO_WRAP_H_
 
@@ -32,4 +32,4 @@ uintptr_t io_syscall_epoll_pwait(int epfd, uintptr_t events, int maxevents, int 
 uintptr_t io_syscall_renameat2(int olddirfd,  uintptr_t oldpath, int newdirfd, uintptr_t newpath, unsigned int flags);
 uintptr_t io_syscall_umask(int mask);
 #endif /* _IO_WRAP_H_ */
-#endif /* USE_IO_SYSCALL_WRAPPING */
+#endif /* USE_IO_SYSCALL */

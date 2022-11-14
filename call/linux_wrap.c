@@ -1,4 +1,4 @@
-#ifdef USE_LINUX_SYSCALL_WRAPPING
+#ifdef USE_LINUX_SYSCALL
 
 #define _GNU_SOURCE
 #include "call/linux_wrap.h"
@@ -205,4 +205,4 @@ uintptr_t syscall_brk(void* addr){
   return ret;
 
 }
-#endif /* USE_LINUX_SYSCALL_WRAPPING */
+#endif /* USE_LINUX_SYSCALL */

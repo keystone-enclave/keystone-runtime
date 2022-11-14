@@ -14,17 +14,17 @@
 
 #include "call/syscall_nums.h"
 
-#ifdef USE_IO_SYSCALL_WRAPPING
+#ifdef USE_IO_SYSCALL
 #include "call/io_wrap.h"
-#endif /* USE_IO_SYSCALL_WRAPPING */
+#endif /* USE_IO_SYSCALL */
 
-#ifdef USE_LINUX_SYSCALL_WRAPPING
+#ifdef USE_LINUX_SYSCALL
 #include "call/linux_wrap.h"
-#endif /* USE_LINUX_SYSCALL_WRAPPING */
+#endif /* USE_LINUX_SYSCALL */
 
-#ifdef USE_NET_SYSCALL_WRAPPING
+#ifdef USE_NET_SYSCALL
 #include "call/net_wrap.h"
-#endif /* USE_NET_SYSCALL_WRAPPING */
+#endif /* USE_NET_SYSCALL */
 
 extern void exit_enclave(uintptr_t arg0);
 
@@ -157,9 +157,9 @@ void handle_syscall(struct encl_ctx* ctx)
   uintptr_t arg4 = ctx->regs.a4;
 
   // We only use arg5 in these for now, keep warnings happy.
-#if defined(USE_LINUX_SYSCALL_WRAPPING) || defined(USE_IO_SYSCALL_WRAPPING)
+#if defined(USE_LINUX_SYSCALL) || defined(USE_IO_SYSCALL)
   uintptr_t arg5 = ctx->regs.a5;
-#endif /* IO_SYSCALL_WRAPPING */
+#endif /* IO_SYSCALL */
   uintptr_t ret = 0;
 
   ctx->regs.sepc += 4;
@@ -210,7 +210,7 @@ void handle_syscall(struct encl_ctx* ctx)
     break;
 
 
-#ifdef USE_LINUX_SYSCALL_WRAPPING
+#ifdef USE_LINUX_SYSCALL
   case(SYS_clock_gettime):
     ret = linux_clock_gettime((__clockid_t)arg0, (struct timespec*)arg1);
     break;
@@ -257,9 +257,9 @@ void handle_syscall(struct encl_ctx* ctx)
     print_strace("[runtime] exit or exit_group (%lu)\r\n",n);
     sbi_exit_enclave(arg0);
     break;
-#endif /* USE_LINUX_SYSCALL_WRAPPING */
+#endif /* USE_LINUX_SYSCALL */
 
-#ifdef USE_IO_SYSCALL_WRAPPING
+#ifdef USE_IO_SYSCALL
   case(SYS_read):
     ret = io_syscall_read((int)arg0, (void*)arg1, (size_t)arg2);
     break;
@@ -327,9 +327,9 @@ void handle_syscall(struct encl_ctx* ctx)
     ret = io_syscall_pipe((int*)arg0);
     break;
 
-#endif /* USE_IO_SYSCALL_WRAPPING */
+#endif /* USE_IO_SYSCALL */
 
-#ifdef USE_NET_SYSCALL_WRAPPING
+#ifdef USE_NET_SYSCALL
   case(SYS_socket):
     ret = io_syscall_socket((int) arg0, (int) arg1, (int) arg2); 
     break; 
@@ -366,7 +366,7 @@ void handle_syscall(struct encl_ctx* ctx)
   case(SYS_pselect6): 
     ret = io_syscall_pselect((int) arg0, (uintptr_t) arg1, (uintptr_t) arg2, (uintptr_t) arg3, (uintptr_t) arg4, (uintptr_t) arg5);
     break;
-#endif /* USE_NET_SYSCALL_WRAPPING */
+#endif /* USE_NET_SYSCALL */
 
 
   case(RUNTIME_SYSCALL_UNKNOWN):
