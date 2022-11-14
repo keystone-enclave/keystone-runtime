@@ -1,4 +1,4 @@
-#ifdef USE_NET_SYSCALL_WRAPPING
+#ifdef USE_NET_SYSCALL
 #include <stdint.h>
 #include "call/io_wrap.h"
 #include <alloca.h>
@@ -354,4 +354,4 @@ uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds,
   return ret;
 }
 
-#endif /* USE_NET_SYSCALL_WRAPPING */
+#endif /* USE_NET_SYSCALL */

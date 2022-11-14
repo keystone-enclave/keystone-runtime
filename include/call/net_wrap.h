@@ -1,4 +1,4 @@
-#ifdef USE_NET_SYSCALL_WRAPPING
+#ifdef USE_NET_SYSCALL
 #ifndef _NET_WRAP_H_
 #define _NET_WRAP_H_
 
@@ -22,4 +22,4 @@ uintptr_t io_syscall_sendfile(int out_fd, int in_fd, uintptr_t offset, int count
 uintptr_t io_syscall_getuid();
 uintptr_t io_syscall_pselect(int nfds, uintptr_t readfds, uintptr_t writefds, uintptr_t exceptfds, uintptr_t timeout, uintptr_t sigmask);
 #endif /* _NET_WRAP_H_ */
-#endif /* USE_NET_SYSCALL_WRAPPING */
+#endif /* USE_NET_SYSCALL */

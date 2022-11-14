@@ -1,4 +1,4 @@
-#ifdef USE_IO_SYSCALL_WRAPPING
+#ifdef USE_IO_SYSCALL
 #include <stdint.h>
 #include "call/io_wrap.h"
 #include <alloca.h>
@@ -509,4 +509,4 @@ uintptr_t io_syscall_fstat(int fd, struct stat *statbuf){
 
 }
 
-#endif /* USE_IO_SYSCALL_WRAPPING */
+#endif /* USE_IO_SYSCALL */

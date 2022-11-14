@@ -8,6 +8,8 @@ macro(rt_option name description value)
         add_custom_target(${name}_options_log
                             COMMAND echo -n "${name} " >> ${CMAKE_BINARY_DIR}/.options_log)
         add_dependencies(options_log ${name}_options_log)
+
+        message(STATUS "Enabling option ${name}")
     endif()
 endmacro()
 
@@ -29,9 +31,9 @@ rt_option(PAGE_CRYPTO "Enable page confidentiality" OFF)
 rt_option(PAGE_HASH "Enable page integrity" OFF)
 
 # Syscall options
-rt_option(LINUX_SYSCALL_WRAPPING "Wrap generic Linux syscalls" OFF)
-rt_option(IO_SYSCALL_WRAPPING "Wrap Linux IO syscalls" OFF)
-rt_option(NET_SYSCALL_WRAPPING "Wrap Linux net syscalls" OFF)
+rt_option(LINUX_SYSCALL "Wrap generic Linux syscalls" OFF)
+rt_option(IO_SYSCALL "Wrap Linux IO syscalls" OFF)
+rt_option(NET_SYSCALL "Wrap Linux net syscalls" OFF)
 
 # System options
 rt_option(ENV_SETUP "Set up stack environments like glibc expects" OFF)
