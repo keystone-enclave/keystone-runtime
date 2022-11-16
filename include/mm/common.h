@@ -28,7 +28,7 @@
     sbi_exit_enclave(-1); \
   }
 
-#ifdef DEBUG
+#ifdef USE_DEBUG
 #define debug(format, ...) \
   printf ("[debug] " format " (%s:%d)\r\n", ## __VA_ARGS__, __FILE__, __LINE__)
 #else
