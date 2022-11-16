@@ -23,9 +23,9 @@ uintptr_t dispatch_edgecall_syscall(struct edge_syscall* syscall_data_ptr,
                                     size_t data_len);
 
 // Define this to enable printing of a large amount of syscall information
-//#define INTERNAL_STRACE 1
+//#define USE_INTERNAL_STRACE 1
 
-#ifdef INTERNAL_STRACE
+#ifdef USE_INTERNAL_STRACE
 #define print_strace printf
 #else
 #define print_strace(...)
