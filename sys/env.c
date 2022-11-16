@@ -35,7 +35,7 @@ void* setup_start(void* _sp, ELF(Ehdr) *hdr) {
 
   void** sp = (void**)_sp;
 
-#ifdef ENV_SETUP
+#ifdef USE_ENV_SETUP
   int h;
   ELF(Phdr) *phdr;
   void* staging[SIZE_OF_SETUP];
@@ -108,7 +108,7 @@ void* setup_start(void* _sp, ELF(Ehdr) *hdr) {
   // Copy staging to userstack
   copy_to_user(sp, staging, SIZE_OF_SETUP*sizeof(void*));
 
-#endif /* ENV_SETUP */
+#endif /* USE_ENV_SETUP */
 
   // Fully setup, tell them to use this SP instead of the given one
   return sp;
