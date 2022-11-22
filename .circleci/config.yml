@@ -115,7 +115,7 @@ jobs:
       - build-runtime:
           build-name: "USE_PAGING"
           build-dir: build_paging
-          build-args: -DPAGING=on
+          build-args: -DFREEMEM=on -DPAGING=on
   use_package_crypto:
     executor: setup-rv64gc
     steps:
@@ -126,7 +126,7 @@ jobs:
       - build-runtime:
           build-name: "USE_PAGE_CRYPTO"
           build-dir: build_paging_crypto
-          build-args: -DPAGING=on -DPAGE_CRYPTO=on
+          build-args: -DFREEMEM=on -DPAGING=on -DPAGE_CRYPTO=on
   use_page_hash:
     executor: setup-rv64gc
     steps:
@@ -137,7 +137,7 @@ jobs:
       - build-runtime:
           build-name: "USE_PAGE_HASH"
           build-dir: build_paging_hash
-          build-args: -DPAGING=on -DPAGE_HASH=on
+          build-args: -DFREEMEM=on -DPAGING=on -DPAGE_HASH=on
   use_page_crypto_use_page_hash:
     executor: setup-rv64gc
     steps:
@@ -148,7 +148,7 @@ jobs:
       - build-runtime:
           build-name: "USE_PAGE_CRYPTO + USE_PAGE_HASH"
           build-dir: build_paging_crypto_hash
-          build-args: -DPAGING=on -DPAGE_CRYPTO=on -DPAGE_HASH=on
+          build-args: -DFREEMEM=on -DPAGING=on -DPAGE_CRYPTO=on -DPAGE_HASH=on
 
   test:
     executor: setup-rv64gc
