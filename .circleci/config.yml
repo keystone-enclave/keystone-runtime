@@ -57,6 +57,11 @@ commands:
           no-output-timeout: 120m
 
 jobs:
+  # The format job essentially runs clang-format against the Eyrie codebase. To
+  # do so, we first query which clang-format git prefers. Then, we run git with
+  # this clang-format. This ensures that the tool only checks files that have
+  # been modified. Finally, we check the output of the tool and return an error
+  # if some formatting changes are necessary.
   format:
     executor: setup-rv64gc
     steps:
