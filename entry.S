@@ -137,6 +137,10 @@ _start:
   jal eyrie_boot
   sfence.vma
 
+  /* set spp to user; hello-native needs this but hello-dynamic doesn't? */
+  addi t0, x0, 0x100
+  csrrc x0, sstatus, t0
+
   /* start running enclave */
   csrrw sp, sscratch, sp
   sret

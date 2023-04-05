@@ -133,7 +133,7 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* set initial values */
   load_pa_start = dram_base;
   root_page_table = (pte*) __va(csr_read(satp) << RISCV_PAGE_BITS);
-  shared_buffer = utm_vaddr;
+  shared_buffer = EYRIE_UNTRUSTED_START;
   shared_buffer_size = utm_size;
   runtime_va_start = (uintptr_t) &rt_base;
   kernel_offset = runtime_va_start - runtime_paddr;
