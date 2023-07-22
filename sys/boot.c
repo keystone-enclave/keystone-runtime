@@ -174,7 +174,9 @@ eyrie_boot(uintptr_t dummy, // $a0 contains the return value from the SBI
   /* prepare edge & system calls */
   init_edge_internals();
 
+#ifdef USE_FREEMEM
   print_pgtable(3, root_page_table, 0);
+#endif
 
   /* set timer */
   init_timer();
