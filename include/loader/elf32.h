@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "elf.h"
-#include "../string.h"
+#include "loader/elf.h"
+#include "string.h"
 #include <stdint.h>
 
 /* ELF header functions */

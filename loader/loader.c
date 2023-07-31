@@ -1,10 +1,10 @@
-#include "loader.h"
-#include "elf.h"
-#include "../string.h"
-#include "../mm.h"
-#include "../common.h"
-#include "../vm_defs.h"
-#include "../vm.h"
+#include "loader/loader.h"
+#include "loader/elf.h"
+#include "string.h"
+#include "mm/mm.h"
+#include "mm/common.h"
+#include "mm/vm_defs.h"
+#include "mm/vm.h"
 
 int loadElf(elf_t* elf) {
   debug("Loading elf\n");

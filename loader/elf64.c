@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "elf.h"
-#include "elf64.h"
+#include "loader/elf.h"
+#include "loader/elf64.h"
 #include "string.h"
 #include <inttypes.h>
 
